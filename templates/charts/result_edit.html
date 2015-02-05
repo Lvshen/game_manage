@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计汇总编辑</title>
+
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	<a href="/charts/result/list">报表汇总列表</a> -> 报表汇总编辑 <span class="buttons"> <a href="/charts/result/list">返回</a> </span>
+</div>
+
+<form action="/charts/result/save/{{model.id}}" method="post" onsubmit="return chkForm();">
+	<table class="form">
+
+		<tr>
+			<th>名称：</th>
+			<td>
+			<input type="text" value="{{model.name}}" name="name" />
+			</td>
+		</tr>
+
+		<tr>
+			<th>备注：</th>
+			<td>			<textarea name="remark">{{model.remark}}</textarea></td>
+		</tr>
+
+		<tr>
+			<th>可选报表项目：
+			</th>
+			<td>
+			{%for item in list_charts%}  
+				<input type="checkbox" name="chartsdefine_id" value="{{item.id}}"  {%ifequal item.is_show 1%} checked="checked"{%endifequal%} />
+			{{item.title}}  {%endfor%} </td>
+		</tr>
+
+		<tr>
+			<td>
+			<input type="submit" value="保存"   />
+			</td>
+		</tr>
+	</table>
+</form>
+{% endblock %}

@@ -1,0 +1,237 @@
+
+
+
+from socket import *
+from struct import *
+import string
+import sys,os
+from google.protobuf import text_format
+#import socketclient
+from socketclient import CTcpClient
+scriptpath = "/home/paul08colin/server/gmClient/protocol"
+sys.path.insert(0, scriptpath)
+import gm_pb2
+def SerializeQueryPlayerDataReq(playerid):
+		queryPlayer = gm_pb2.C2S_QueryPlayerDataReq()
+		queryPlayer.player_id = playerid;
+		str = "";
+		str = queryPlayer.SerializeToString()
+		str1 = pack("hhhhii",0x1AE5, 16 + len(str), 0, 0x4100,0, 0)
+		str1 += str
+		print "send the length ", len(str1)
+		return str1
+def ParseQueryPlayerDataRsp(str):
+		queryPlayerRsp = gm_pb2.S2C_QueryPlayerDataRsp()
+		queryPlayerRsp.ParseFromString(str)
+		recvStr = text_format.MessageToString(queryPlayerRsp)
+		rspjson = "{\"player_id\": \"%s\", \"player_status\": \"%s\", \"zone_id\": \"%s\", \"gamesrv_id\": \"%s\", \"room_number\": \"%s\", \"seat_number\": \"%s\"}"%(queryPlayerRsp.player_id,queryPlayerRsp.player_status, queryPlayerRsp.zone_id, queryPlayerRsp.gamesrv_id, queryPlayerRsp.room_number, queryPlayerRsp.seat_number)
+		print rspjson
+		return rspjson;
+		#print str
+def totalQueryPlayerData(playerid):
+	print playerid
+	tcpClient = CTcpClient()
+	tcpClient.Init("10.21.210.110", 10000)
+	sendBuff = SerializeQueryPlayerDataReq(playerid)
+	revBuff = tcpClient.SendAndRecv(sendBuff)
+	print "receive the length", len(revBuff)
+	mFormat = "hhhhii" + str(len(revBuff) - 16) + "s";	
+	header, hLen, a, hCmd, b, c, ansStr= unpack(mFormat, revBuff)
+	receive = ParseQueryPlayerDataRsp(ansStr)
+	tcpClient.Fini()
+	return receive;
+
+
+
+def SerializeBroadcastMailReq(message):
+	#	queryPlayer = gm_pb2.C2S_BroadcastMailReq()
+	#	queryPlayer.mail.receiver = 1048850
+		#str = "";
+	
+	print len(str(message))
+	str1 = pack("hhhhii",0x1AE5, 16 + len(str(message)), 0, 0x4108,0, 0)
+	str1 += str(message)
+	print "send the length ", len(str1)
+	return str1
+def ParseBroadcastMailRsp(str):
+	queryPlayerRsp = gm_pb2.S2C_BroadcastMailRsp()
+	queryPlayerRsp.ParseFromString(str)
+	str = text_format.MessageToString(queryPlayerRsp)
+	print str
+def totalBroadcastMail(receiver, ptickets, card_num = -1, card_probability = -1, context = "", template_id = -1, goldcoin = -1, marble = -1, energy = -1,  expire_time = -1):
+	tcpClient = CTcpClient()
+	tcpClient.Init("10.21.210.110", 10000)
+	queryPlayer = gm_pb2.C2S_BroadcastMailReq()
+	queryPlayer.mail.receiver = receiver
+	
+     
+	if(card_num != -1):
+		queryPlayer.mail.card_package.card_num = card_num
+        		 
+		
+	if(card_probability != -1):
+		queryPlayer.mail.card_package.card_probability = card_probability
+	if(expire_time != -1):
+		queryPlayer.mail.card_package.expire_time = expire_time
+	if(context != ""):
+		queryPlayer.mail.context = context
+	if(template_id != -1):
+		queryPlayer.mail.template_id = template_id
+	if(goldcoin != -1):
+		queryPlayer.mail.goldcoin = goldcoin
+	if(marble != -1):
+		queryPlayer.mail.marble = marble
+	if(energy != -1):
+		queryPlayer.mail.energy = energy
+	for i in xrange(len(ptickets)):
+		queryPlayer.mail.tickets.append(string.atoi(ptickets[i]))
+		#currentTicket = ptickets
+
+		
+    	
+	message = queryPlayer.SerializeToString()
+	allInfo = text_format.MessageToString(queryPlayer)
+	print allInfo
+	sendBuff = SerializeBroadcastMailReq(str(message))
+
+	revBuff = tcpClient.SendAndRecv(sendBuff)
+	print "receive the length", len(revBuff)
+	mFormat = "hhhhii" + str(len(revBuff) - 16) + "s";	
+	header, hLen, a, hCmd, b, c, ansStr= unpack(mFormat, revBuff)
+	ParseBroadcastMailRsp(ansStr)
+	tcpClient.Fini()
+
+
+
+def SerializeModifyPlayerDataReq(message):
+	print len(str(message))
+	str1 = pack("hhhhii",0x1AE5, 16 + len(str(message)), 0, 0x4104,0, 0)
+	str1 += str(message)
+	print "send the length ", len(str1)
+	return str1
+def ParseModifyPlayerDataRsp(str):
+		queryPlayerRsp = gm_pb2.S2C_ModifyPlayerDataRsp()
+		queryPlayerRsp.ParseFromString(str)
+		allInfo = text_format.MessageToString(queryPlayerRsp)
+		str = text_format.MessageToString(queryPlayerRsp)
+		print "parse message: %s"%str
+		rspjson = "{\"ret_code\": \"%s\"}"%(queryPlayerRsp.ret_code)
+		return rspjson
+def totalModifyPlayerData(player_id, flag, marbel_change, goldcoin_change, energy_change, ticket_type, ticket_count):
+	tcpClient = CTcpClient()
+	tcpClient.Init("10.21.210.110", 10000)
+	queryPlayer = gm_pb2.C2S_ModifyPlayerDataReq()
+	queryPlayer.player_id = player_id
+	queryPlayer.flag = flag
+	if(marbel_change != -1):
+		queryPlayer.marbel_change = marbel_change
+	if(goldcoin_change != -1):
+		queryPlayer.goldcoin_change = goldcoin_change
+	if(energy_change != -1):
+		queryPlayer.energy_change = energy_change
+	if(len(ticket_type) != len(ticket_count)):
+		print "number of ticket_type is not equal ticket_count"
+		return;
+	if(len(ticket_type) != 0):
+		for i in xrange(len(ticket_type)):
+			ticket_change = queryPlayer.ticket_change.add()
+			ticket_change.ticket_type = string.atoi(ticket_type[i])
+			ticket_change.ticket_count = string.atoi(ticket_count[i])
+	message = queryPlayer.SerializeToString()
+	allInfo = text_format.MessageToString(queryPlayer)
+	print allInfo
+	sendBuff = SerializeModifyPlayerDataReq(str(message))
+	revBuff = tcpClient.SendAndRecv(sendBuff)
+	print "receive the length", len(revBuff)
+	mFormat = "hhhhii" + str(len(revBuff) - 16) + "s";	
+	header, hLen, a, hCmd, b, c, ansStr= unpack(mFormat, revBuff)
+	tcpClient.Fini()
+	return ParseModifyPlayerDataRsp(ansStr)
+
+
+
+def SerializeServerStatisticsReq(message):
+		str1 = pack("hhhhii",0x1AE5, 16 + len(str(message)), 0, 0x4106,0, 0)
+		str1 += str(message)
+		print "send the length ", len(str1)
+		return str1
+def ParseServerStatisticsRsp(str):
+		statisticsRsp = gm_pb2.S2C_ServerStatisticsRsp()
+		statisticsRsp.ParseFromString(str)
+		str = text_format.MessageToString(statisticsRsp)
+		print str
+		return statisticsRsp
+def totalServerStatistics(statistics_type):
+	statisticsReq = gm_pb2.C2S_ServerStatisticsReq()
+	statisticsReq.statistics_type = statistics_type
+	message = statisticsReq.SerializeToString()
+	tcpClient = CTcpClient()
+	tcpClient.Init("10.21.210.110", 10000)
+	sendBuff = SerializeServerStatisticsReq(message)
+	revBuff = tcpClient.SendAndRecv(sendBuff)
+	print "receive the length", len(revBuff)
+	mFormat = "hhhhii" + str(len(revBuff) - 16) + "s";	
+	header, hLen, a, hCmd, b, c, ansStr= unpack(mFormat, revBuff)
+
+	statisticsRsp = ParseServerStatisticsRsp(ansStr)
+	rspjson = "{\"server_status\": \"%s\", \"statistics_type\": \"%s\"}"%(statisticsRsp.server_status,statisticsRsp.statistics)
+	#tcpClient.Fini()
+	print rspjson
+	return rspjson
+
+
+
+def SerializeRestServerStatusReq(message):
+	str1 = pack("hhhhii",0x1AE5, 16 + len(str(message)), 0, 0x4108,0, 0)
+	str1 += str(message)
+	print "send the length ", len(str1)
+	return str1
+def ParseRestServerStatusRsp(str):
+	queryPlayerRsp = gm_pb2.S2C_RestServerStatusRsp()
+	queryPlayerRsp.ParseFromString(str)
+	print rsjson
+	str = text_format.MessageToString(queryPlayerRsp)
+	print str
+	return queryPlayerRsp
+def totalRestServerStatus(type):
+	queryPlayer = gm_pb2.C2S_ResetServerStatusReq()
+	queryPlayer.type = type
+	message = queryPlayer.SerializeToString()
+	tcpClient = CTcpClient()
+	tcpClient.Init("10.21.210.110", 10000)
+	sendBuff = SerializeRestServerStatusReq(message)
+	revBuff = tcpClient.SendAndRecv(sendBuff)
+	print "receive the length", len(revBuff)
+	mFormat = "hhhhii" + str(len(revBuff) - 16) + "s"	
+	print mFormat
+	header, hLen, a, hCmd, b, c, ansStr= unpack(mFormat, revBuff)
+	queryPlayerRsp = ParseRestServerStatusRsp(ansStr)
+	rspjson = "{\"ret_code\": \"%s\"}"%(queryPlayerRsp.ret_code)
+
+	tcpClient.Fini()
+	return rspjson
+
+
+
+
+
+
+def main():
+  #  recvStr = totalQueryPlayerData()
+#	recvStr = "1001"
+#    return recvStr;
+	#totalBroadcastMail()
+	#totalModifyPlayerData()
+	#totalServerStatistics()
+	#totalRestServerStatus()
+
+	   
+
+        
+
+	str="function"
+	print(str);
+if __name__=="__main__":
+	main()
+	print("main")
+	

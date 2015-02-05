@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}卡号种类列表{% endblock %}
+{% block header %}
+<style type="text/css">
+	.abutton {
+		padding: 3px 15px;
+		font-size: 12px;
+		text-align: center;
+		text-shadow: #80AD10 0 1px 0;
+		border: 1px solid #80AD10;
+		border-radius: 2px;
+		background: -moz-linear-gradient(center top , #FFFFFF, #CCCCCC) repeat scroll 0 0 transparent;
+		background-image: -webkit-linear-gradient(top, #A5D62D, #9AC827);
+		color: #02C;
+		cursor: pointer;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$(".batch_box").click(function(){
+			$("#batch_box").html($(this).attr("title"));
+			$("#batch_box").dialog({ modal: true});			
+		});
+		
+		$("#export_card").attr("disabled", false);
+		$("#create_card").attr("disabled", false);
+		$(".checkbox_state").attr("disabled", false);
+		$("#create_card").click(function() {
+			if ($("#card_count").val() == '' || $("#card_count").val().match(/^\d+$/) == null) {
+				alert("卡号数量格式有误！");
+				return false;
+			}
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				alert("请选择礼包卡类！");
+				return false;
+			}
+			if ($(this).val() == '停止生成') {
+				$(this).attr("value", "生成礼包卡");
+				$("#export_card").attr("disabled", false);
+				$(".checkbox_state").attr("disabled", false);
+				$(".result_state").html("");
+				return false;
+			}
+			if (confirm("确定生成礼包卡?")) {
+				if ($(this).val() == '生成礼包卡') {
+					$(".result_state").html("");
+					$("#export_card").attr("disabled", true);
+					$(this).attr("value", "停止生成");
+					$(".checkbox_state").attr("disabled", true);
+				}
+				create_card(0);
+			} else {
+				return false;
+			}
+		});
+	});
+	function create_card(record) {
+		var batch_id = $("#card_data_area input[type='checkbox']:checked:first").val();
+		var param = '';
+		//GetPostParameter(post_form);
+
+		param = "batch_id=" + batch_id + '&card_count=' + $("#card_count").val() + '&record=' + record;
+		var url = '/card/create/';
+		var options = {
+			type : "get",
+			url : url,
+			dataType : "json",
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				// alert(parm);
+				//result = eval('(' + result + ')');
+				if (result.msg != '') {
+					alert(result.msg);
+					return false;
+				}
+				check_state(result);
+			},
+			cache : false,
+			timeout : 20000,
+			error : function(result) {
+				$("#result_" + batch_id).html("链接超时！请重试！");
+			}
+		}
+		window.setTimeout(function() {
+			$.ajax(options);
+		}, 500);
+		return false;
+	}
+
+	function check_state(result) {
+		if ($("#create_card").val() == '生成礼包卡') {
+			return false;
+		}
+		if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+			$("#create_card").attr("value", "生成礼包卡");
+			$(".result_state").html("");
+			$("#export_card").attr("disabled", false);
+			$(".checkbox_state").attr("disabled", false);
+			return false;
+		}
+		var batch_id = $("#card_data_area input[type='checkbox']:checked:first").val();
+		if (result.is_finish == 1) {
+			//alert(result.url);
+			$("#result_" + batch_id).html("<font color='green'>已经生成</font>");
+			$("#checkbox_" + batch_id).attr("checked", false);
+			$("#h_total_count_" + batch_id).attr("value",parseInt($("#total_count_" + batch_id).html()));
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				$("#create_card").attr("value", "生成礼包卡");
+				$(".result_state").html("");
+				$(".checkbox_state").attr("disabled", false);
+				$("#export_card").attr("disabled", false);
+				$("#card_data").attr("checked", false);
+				return false;
+			} else {
+				create_card(0);
+			}
+
+		} else {
+			$("#result_" + batch_id).html("正在生成...<b><font color='green'>" + result.record + "</font></b>条");
+			$("#total_count_" + batch_id).html(parseInt($("#h_total_count_" + batch_id).val()) + parseInt(result.record));
+			create_card(result.record);
+		}
+	}
+</script>
+<script>
+	$(document).ready(function() {
+		$("#export_card").attr("disabled", false);
+		$(".checkbox_state").attr("disabled", false);
+		$("#export_card").click(function() {
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				alert("请选择卡类！");
+				return false;
+			}
+			var start_date = $("#start_date").val();
+			var end_date = $("#end_date").val();
+			if ((start_date != '' && end_date == '') || (start_date == '' && end_date !='')) {
+				alert("日期不能为空！");
+				return false;
+			}
+							
+			if ($(this).val() == '停止导出') {
+				$(this).attr("value", "导出礼包卡");
+				$("#export_card").attr("disabled", false);
+				$(".checkbox_state").attr("disabled", false);
+				return false;
+			}
+			if (confirm("确定导出礼包卡?")) {
+				if ($(this).val() == '导出礼包卡') {
+					$("#create_card").attr("disabled", true);
+					$(this).attr("value", "停止导出");
+					$(".checkbox_state").attr("disabled", true);
+				}
+				export_card(0);
+			} else {
+				return false;
+			}
+		});
+		var the_url = document.location.href;
+		$('.choose_batch a').each(function(){
+			if(the_url.indexOf($(this).attr('href'))!=-1){
+				$(this).css({"color":"black","font-weight":"bolder"});
+				return;
+			}
+		});
+	});
+	function export_card(page_num, record) {
+		if (page_num == 1) {
+			page_num = 1;
+		}
+		var clear = 0;
+		if ($("#clear_export_old_file:checked").length == 1)
+			clear = 1;
+		var batch_id = $("#card_data_area input[type='checkbox']:checked:first").val();
+
+		var param = '';
+		//GetPostParameter(post_form);
+		var start_date = $("#start_date").val();
+		var end_date = $("#end_date").val();
+		param = "batch_id=" + batch_id + '&page_num=' + page_num + "&export=" +$("#exprot_format").val()+ "&clear_export_old_file=1" + '&card_status='+$("#card_status").val()+"&start_date="+start_date+"&end_date="+end_date;
+		var url = '/card/export';
+		var options = {
+			type : "get",
+			url : url,
+			dataType : "json",
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				check_export_state(result);
+			},
+			cache : false,
+			timeout : 20000,
+			error : function(result) {
+				$("#result_" + batch_id).html("链接超时！请重试！");
+			}
+		}
+		//window.setTimeout(function() {
+		$.ajax(options);
+		//}, 500);
+		return false;
+	}
+
+	function check_export_state(result) {
+		if ($("#export_card").val() == '导出礼包卡') {
+			return false;
+		}
+		if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+			$("#export_card").attr("value", "导出礼包卡");
+			$("#create_card").attr("disabled", false);
+			$(".checkbox_state").attr("disabled", false);
+			return false;
+		}
+		var batch_id = $("#card_data_area input[type='checkbox']:checked:first").val();
+		if (result.is_finish == true) {
+			//alert(result.url);
+			var download_url = '<a href="' + result.url + '" style="color:blue;" target="_bank">下载</a>&nbsp;&nbsp;&nbsp;提示：可右键另存下载';
+			$("#result_" + batch_id).html(download_url);
+			$("#checkbox_" + batch_id).attr("checked", false);
+
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				$("#export_card").attr("value", "导出礼包卡");
+				$(".checkbox_state").attr("disabled", false);
+				$("#create_card").attr("disabled", false);
+				$("#card_data").attr("checked", false);
+				return false;
+			} else {
+				export_card(1);
+			}
+
+		} else {
+			var bar_html = get_progress_bar(result.page_num, result.total_page);
+			$("#result_" + batch_id).html(bar_html);
+			//<b><font color='green'>" + result.page_num + "</font>页" + bar_html);
+			export_card(result.page_num);
+		}
+	}
+
+	function toDecimal(x) {
+		var f = parseFloat(x);
+		if (isNaN(f)) {
+			return 0;
+		}
+		f = Math.round(x * 100) / 100;
+		return f;
+	}
+
+	function get_progress_bar(page_num, total_page) {
+		var str = '<div style="background-color:#E5E5E5;" >';
+		var width = page_num / total_page * 100;
+		str += '<div style="height:24px;background-color:blue; width:' + width + '%;" ><b style="color:#0F0;width:40px;">' + toDecimal(width) + '%</b></div>';
+		str += '</div>';
+		return str;
+	}
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#group").change(select_server);
+	function select_server() {
+		var group = $('#group').val();
+		$.ajax({
+			type: "POST", 
+			url: "/card/batch/group/ajax/", 
+			data: "group="+group, 
+			dataType: 'text',
+			success: function(result){
+				$("#server_id option[text!='0']").remove();
+				$("#server_id").append(result);
+				return false;	
+			}
+		}); 		
+		 
+	}	
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	礼包卡管理
+	<span class="buttons"> <a href="/card/batch/edit">添加</a></span>
+</div>
+<div class="choose_batch" style="margin-left:40px;">
+	<a href="/card/batch/?status=1" class="abutton">有效卡列表</a>
+	<a href="/card/batch/?status=0" class="abutton">失效卡列表</a>
+	<a href="/card/log/list/" class="abutton">礼包卡查询</a>
+</div>
+<div class="sub-menu-1">
+	<span> 追加礼包卡数量：
+		<input type="text" name="card_count" id="card_count" />
+		<input type="button" name="create_card" id="create_card" value="生成礼包卡"/>
+	</span>
+	<span style="float:right;">
+		开始日期:<input type="text" name="start_date" id="start_date" class="Wdate1" value="{{sdate}}" style="width:80px;"/>
+		结束日期:<input type="text" name="end_date" id="end_date" class="Wdate1" value="{{edate}}" style="width:80px;"/>		
+		<select name="card_status" id="card_status">
+			<option value="3">全部状态</option>
+			<option value="0">未使用</option>
+			<!-- <option value="1">已领取</option> -->
+			<option value="2">已使用</option>
+		</select>	
+		<select name="exprot_format" id="exprot_format">
+			<option value="2">csv</option>
+			<option value="3">txt</option>
+			<option value="1">excel</option>
+		</select>
+<!-- 		<input type="checkbox" checked="checked" id="clear_export_old_file" class="checkbox_state"/>
+		清除旧文件 -->
+		<input type="button" name="export_card" id="export_card" value="导出礼包卡" />
+	</span>
+</div>
+<div class="sub-menu-1">
+	<form method="get" action="/card/batch/">
+		<input type="hidden" name="status" id="status" value="{{status}}"/>
+		查询:
+		<select name="search_card" id="search_card">
+			<option value='1' {% ifequal search_card 1 %}selected="selected"{%endifequal%}>礼包卡标识</option>
+			<option value='2' {% ifequal search_card 2 %}selected="selected"{%endifequal%}>礼包卡名</option>
+		</select>
+		<input type="text" name="search_card_val" id="search_card_val" value="{{search_card_val}}" />
+		<select name="group" id="group">
+			<option value="0">服分区</option>
+			{% for item in list_group %}
+			<option value="{{item.id}}" {% ifequal item.id group %}selected="selected"{% endifequal %}>{{item.name}}</option>
+			{% endfor %}
+		</select>		
+		<select name="server_id" id="server_id" style="width:140px;">
+			<option value="0">服务器</option>
+			{% for item in list_server %}
+			<option value="{{item.id}}" {% ifequal item.id server_id %}selected="selected"{% endifequal %}>{{item.name}}</option>
+			{% endfor %}
+		</select>
+
+		<input type="submit" value="查询" />		
+	</form>
+</div>
+<div style="text-align: right;margin-right:40px;">
+	
+		{% if status == 0 %}
+		<a href="javascript:void(0);" class="batch_recoverall" >一键恢复</a>
+		{% else %}
+		<a href="javascript:void(0);" class="batch_delall" >一键删除</a>
+		{% endif %}
+</div>
+{% if batch %}
+<table border="0" cellpadding="0" cellspacing="0"  class="list" >
+	<thead>
+		<tr>
+			<th width="50">
+			<input type="checkbox" id="card_data" onchange="selectAll(this.id)" class="checkbox_state"/>
+			全选 </th>
+			<th>编号</th><th>名称</th><th>标识</th><th>可用次数</th><th>已使用数/卡号总数</th><th>有效时间</th><th>奖励内容</th><th>应用服务器</th><th>应用渠道</th><th>备注</th><th style="width:200px;">操作状态</th><th>操作</th>
+		</tr>
+	</thead>
+	<tbody id="card_data_area">
+		{% for item in batch %}
+		<tr>
+			<td>
+			<input type="checkbox" name="id" id="checkbox_{{item.id}}" value="{{item.id}}" class="checkbox_state"/>
+			</td>
+			<td>{{item.id}}</td>
+			<td><a href="/card/list/?batch_id={{item.id}}">{{item.name}}</a></td>
+			<td>{{item.key}}</td>
+			<td>{{item.limit_count}}</td>
+			<td>{{item.used_count}}/
+				<input type="hidden" name="h_total_count_{{item.id}}" id="h_total_count_{{item.id}}" value="{{item.total_count}}"/>
+				<span id="total_count_{{item.id}}">{% ifequal item.used_count item.total_count %}<font color="red">{{item.total_count}}</font>{% else %}{{item.total_count}}{% endifequal %}</span>
+			</td>			
+			<td style="color:{% if item.status == 0 or item.expire == 1%}red{% else %}green{% endif %};">{{item.start_time|date:"Y-m-d H:i:s"}}--{{item.end_time|date:"Y-m-d H:i:s"}}</td>
+			<td><a title="{{item.prize_content}}" class="batch_box" href="javascript:void(0);">详细</a></td>
+			<td>{% if item.server %}<a title="{{item.server_content}}" class="batch_box" href="javascript:void(0);">详细</a>{% else %}所有服务器{% endif %}</td>
+			<td>{% if item.channels %}<a title="{{item.channel_content}}" class="batch_box" href="javascript:void(0);">详细</a>{% else %}所有渠道{% endif %}</td>
+			<td>{% if item.remark %}<a href="javascript:void(0);" title="{{item.remark}}" class="batch_box">备注</a>{% else %}无{% endif %}</td>
+			<td id="result_{{item.id}}" class="result_state"></td>
+			<td>
+				<a href="/card/batch/edit?id={{item.id}}">编辑</a> |
+				<a href="/card/list/?batch_id={{item.id}}">卡号列表</a>
+				<!-- <a href="/card/batch/del/{{item.id}}/?status={%if item.status == 0 %}1{%else%}0{% endif %}" class="batch_status"><font color="gray">{%if item.status == 0 %}启用{%else%}禁用{% endif %}</font></a> | -->
+				<!-- <a href="/card/batch/del/{{item.id}}/?status=2" class="del_use_card"><font color="gray">清除已用卡号</font></a>  -->
+				{% if item.expire == 0 %}|
+				{%if item.status == 0 %}
+				<a href="/card/batch/recover/?ids={{item.id}}" class="recover_card" style="color:gray;">恢复</a>
+				{%else%}
+				<a href="/card/batch/del/?ids={{item.id}}" class="del_card" style="color:gray;">删除</a>
+				{% endif %}
+				
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% include "pager.html" %}
+<div id="batch_box" style="margin:0 auto;display:none;height:300px;width:500px;overflow:scroll;" title="提示框" >
+</div>
+{% else %}
+<div class="sub-menu-1">没有符合条件的结果！</div>
+{% endif %}
+<script>
+	$(document).ready(function() {
+		$(".recover_card").click(function() {
+			if (confirm('确定恢复？')) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		$(".batch_recoverall").click(function() {
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				alert("请选择礼包卡类！");
+				return false;
+			}		
+			var ids = [];	
+			if (confirm('确定恢复？')) {
+				$("#card_data_area input[type='checkbox']:checked").each(function(){
+					ids.push($(this).val());
+				});
+				var url = '/card/batch/recover/?ids=' + ids;
+				window.location.href = url;
+				return true;
+			} else {
+				return false;
+			}
+		});		
+		$(".del_card").click(function() {
+			if (confirm("被删除的礼包卡将被移入废卡列表，不可再用，您确删除吗？")) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		$(".batch_delall").click(function() {
+			if ($("#card_data_area input[type='checkbox']:checked").length == 0) {
+				alert("请选择礼包卡类！");
+				return false;
+			}			
+			var ids = [];
+			if (confirm("被删除的礼包卡将被移入废卡列表，不可再用，您确删除吗？")) {
+				$("#card_data_area input[type='checkbox']:checked").each(function(){
+					ids.push($(this).val());
+				});
+				var url = '/card/batch/del/?ids=' + ids;
+				window.location.href = url;
+				return true;
+			} else {
+				return false;
+			}
+		});
+	})
+</script>
+{% endblock %}
+

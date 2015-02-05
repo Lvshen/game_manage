@@ -1,0 +1,51 @@
+<div class="data_list_content">
+	<ul>
+		<li>
+			总服务器: {{=it.server_count}}
+		</li>
+		<li>
+			有活动：{{=it.runing_count}}
+		</li>
+		<li>
+			待开始活动：{{=it.ready_count}} 
+		</li>
+		<li>
+			已重置：{{=it.reset_count}}
+		</li>
+		<li>
+			已过期：{{=it.over_count}}
+		</li>
+		<li>
+			异常: {{=it.except_count}}
+		</li>
+		<li>
+			忽略: {{=it.pass_count}}<br/>
+			{{=it.err_list}}
+		</li>
+	</ul>
+	{{ for(var status_key in it.data_dict){ }}
+	<div>
+		{{=it.data_dict[status_key].name}}
+	</div>
+	<table class="list">
+		<tr>
+			<th style='width:100px;' >
+				活动ID
+			</th>
+			<th>
+				服务器列表
+			</th>
+		</tr>
+		{{ for(var activity_key in it.data_dict[status_key].activity_dict ) { }}
+		<tr>
+			<td>
+				{{=activity_key}}
+			</td>
+			<td>
+				{{=it.data_dict[status_key].activity_dict[activity_key].server_list}}
+			</td>
+		</tr>
+		{{ } }}
+	</table>
+	{{ } }}
+</div>

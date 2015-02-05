@@ -1,0 +1,41 @@
+
+<select id="select_server" style="display:none;">
+		{%for item in serverOptionList%}
+		{%ifequal server_id item.id%}
+			<option selected=selected value='{{item.id}}'>{{item.name}}</option>
+		{%else%}
+			<option value='{{item.id}}'>{{item.name}}</option>
+		{%endifequal%}
+		{%endfor%}
+		<span id="span_SelectServer" style="background-color:#00ff00;width:100px;height:22px;padding:0px 0px 0px 0px;display:-moz-inline-box;display:inline-block;"> -- </span>
+</select>
+
+<script type="text/javascript">
+	$(document).ready(
+	function()
+	{
+		$("#select_server").change(
+			function()
+			{
+				changeServer();
+			}
+		);
+	}
+);
+
+function changeServer()
+{
+	selectServerId=$("#select_server").val();	
+	$.get('/channel/selectServer',{"serverId":selectServerId},function(data){
+			//alert("data load:"+data);
+			var refLink=document.location.href;
+			if(refLink.indexOf('?')==-1)
+				refLink += "?"+(new Date().getTime());
+			else
+				refLink += "&"+(new Date().getTime());
+				document.location=refLink;
+			//setTimeout(function(){document.location=refLink;},1000);
+		})
+}
+</script>
+

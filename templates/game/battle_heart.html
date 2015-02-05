@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>战魂信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.list{width:100%;margin:0}
+.form th{width:30%}
+.input_text {width: 65px;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu.html" %}
+
+<form method="post" action="/game/battle/post?player_id={{player_id}}">
+	（注： "追加值"）
+	<table class="form">
+		<tr>
+			<th width="160px" >魂石</th>
+			<td style="width:120px;">
+				数量:
+				{{hunshi}}
+			</td>
+			<td>
+				追加值:
+				<input class="input_text" type="text" name="append_hunshi" />
+			</td>
+		</tr>
+		{% for item in zhanhun_list %}
+		<tr>
+			<th width="160px" >{{ forloop.counter }}级战魂</th>
+			<td style="width:120px;">
+				数量:
+				{{item}}
+			</td>
+			<td>
+				追加值:
+				<input class="input_text" type="text" name="append_zhanhun_{{forloop.counter}}" />
+			</td>
+		</tr>
+		{% endfor %}
+		
+		<tr>
+			<th>&nbsp;</th>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="保存修改" />
+				or  <a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+			</td>
+		</tr>
+	</table>
+</form>
+{% endblock %}

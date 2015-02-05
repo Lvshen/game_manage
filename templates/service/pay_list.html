@@ -1,0 +1,3 @@
+[{%for item in list_record%}
+{"order_id":"{{item.query_id}}","server_id":"{{item.server_id}}","user_id":"{{item.pay_user}}","pay_amount":{{item.pay_amount|floatformat:"2" }},"pay_gold":{{item.pay_gold}},"post_time":{{item.post_time_int}},"pay_type_name":"{{item.pay_type_name}}"}{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}
+{%endfor%}]

@@ -1,0 +1,179 @@
+package DBCACHE;
+
+message PlayerBaseInfo
+{
+	required uint32 role_id				= 1;				// 玩家id
+	required bytes nick_name			= 2;		// 昵称
+	required int32 head_icon			= 3;		// 头像
+	required int32 rank					= 4;					// 排名
+	required uint32 lvl					= 5;						// 等级
+	required uint64 points				= 6;				//积分
+	required uint64 experience 			= 9;				//经验
+	required uint64 goldCoin 			= 10;				//金币
+	required uint64 marble				= 11;				//砖石
+	required uint32 energy				= 12;			//三页草
+	required int32 current_die_id		= 13;			//当前使用的骰子ID
+	required int32 equipmentCardid		= 14;			//装备卡牌标识
+	optional bytes under_write			= 15;
+	optional string custom_head			= 16;					//自定义头像
+	optional uint32 present_points		= 19;				//赠送积分
+	
+}
+
+message PlayerGameRecord
+{
+	required uint32 record_type			= 1;
+	required uint32 win_game_count		= 2;
+	required uint32 lose_game_count		= 3;
+	required uint32 play_game_count		= 4;
+	optional uint32 highest_points		= 5;
+	optional uint32 game_highest_points	= 6;
+	optional uint32 points				= 8;
+	
+	optional uint64 record_time			= 7;
+	
+}
+
+message PlayerExtraInfo
+{
+	optional uint32 last_login_addr		= 1;				// 玩家上次登陆IP
+	optional uint64 last_login_time		= 2;				// 玩家上次登陆时间
+	optional uint32 total_login_times	= 3;				//玩家总登陆次数
+	
+	optional uint32 clover_change_time 	= 4;			//玩家上次变更时间
+	optional uint64 last_daily_signin_time	= 5;				//玩家最后签到时间
+	optional uint32 daily_signin_times	= 6;				//玩家连续签到天数
+
+	optional uint32 max_card_id			= 8;
+
+	optional uint64 ban_date			= 13;				//BAN日期，日期在当前日期之间则代表账户被封
+	optional uint64 auto_unban_date		= 14;				//自动解封日期，当为0时代表永久封禁，除非重新设置解封日期
+	optional uint32 ban_reason			= 15;				//BAN原因
+	
+	optional uint64 register_time		= 16;
+	optional uint64 career_mission_data	= 17;				//生涯记录，详情见richmandef.h的CAREER_MISSION_ID
+}
+
+message PlayerCard
+{
+	required int32 id					= 1;
+	required int32 uuid					= 2;
+	required int32 experience			= 3;
+	required int32 getTime				= 4;
+}
+
+message PlayerDie
+{
+	required int32 die_id				= 1;
+}
+
+message PlayerTicket
+{
+	//required uint32 id = 1;
+	required uint32 type				= 1;
+	required uint32 amount				= 2;
+}
+
+message PlayerInGameProp
+{
+	required uint32 type				= 1;
+	optional uint32 subtype				= 2;
+	required uint32 amount				= 3;
+}
+
+/**
+* @brief:  登录信息
+*/
+message LoginInfo
+{
+    optional uint32 login_bus_id		= 1 [default = 0];
+    optional uint64 last_login_time		= 2 [default = 0];
+    optional uint64 last_logout_time	= 3 [default = 0];
+    optional uint32 last_login_bus_id	= 4 [default = 0];
+    optional uint64 last_update_time	= 5 [default = 0];
+}
+
+message JoinGameInfo
+{
+    optional uint32 login_bus_id		= 1 [default = 0];
+    optional uint64 last_login_time		= 2 [default = 0];
+    optional uint64 last_logout_time	= 3 [default = 0];
+    optional uint32 last_login_bus_id	= 4 [default = 0];
+    optional uint64 last_update_time	= 5 [default = 0];
+	optional uint32 room_number			= 6 [default = 0];
+	optional uint32 seat_number			= 7 [default = 0];
+}
+
+
+message Player
+{
+	required int32 role_id				= 1;							// 玩家ID
+	optional PlayerBaseInfo base_info	= 2;				// 玩家基本资料
+	optional PlayerExtraInfo extra_info = 3;			// 玩家扩展信息
+	repeated PlayerCard hero_card		= 4;					// 人物卡牌
+	repeated PlayerDie player_dies		= 5;					// 人物骰子
+
+	repeated PlayerTicket player_tickets = 7;			// 入场券
+	repeated PlayerInGameProp player_ingame_props = 8;
+	
+	repeated PlayerGameRecord game_record = 9;
+	
+	
+	//登录相关信息，数据服内部修改，外部只读
+	optional LoginInfo login_info		=  10;
+	//游戏相关信息，,只能同步协议修改，不能用update协议
+	optional JoinGameInfo join_game_info=  11;
+}
+
+//登录时，从cache拉取数据 请求
+message Login_Load_Req
+{
+    required int32 role_id				= 1;							// 玩家ID
+}
+
+//登录时，从cache拉取数据 响应
+message Login_Load_Rsp
+{
+    required int32 role_id				= 1;							// 玩家
+    optional int32 ret					= 2;							//
+    optional Player playerData			= 3;
+}
+
+//登出时数据服汇报
+message Logout_Load_Req
+{
+    required uint32 uin					= 1;
+    optional uint32 repeated_login_bus_id = 2;
+}
+
+message Logout_Load_Rsp
+{
+    required uint32 uin					= 1;
+    optional int32 ret					= 2;
+    optional uint32 repeated_login_bus_id = 3;
+}
+
+//从数据服拉取玩家数据
+message LoadPlayerInfoReq
+{
+    required int32 role_id				= 1;							// 玩家ID
+}
+
+
+message Sync_Player_Data
+{
+	required uint64 flag				= 1;
+	required uint64 create_time			= 2;
+	
+	optional Player player_data			= 3;
+	
+}
+
+message Prop
+{
+	required uint32 prop_id				= 1;
+	required uint32 prop_amount			= 2;
+	optional uint64 prop_param			= 3;
+	optional uint64 prop_param2			= 4;
+}
+

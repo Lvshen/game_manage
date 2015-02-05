@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>查询列表</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+{%ifnotequal log_type 0%}
+<a href="/log/list">日志类型列表-></a>
+{%endifnotequal%}
+查询列表
+<span class="buttons">
+	<a href="/query/clear/cache">清除缓存</a>
+	<a href="/query/edit/0/{{log_type}}">添加</a>
+	<a href="/log/list">返回</a>
+ </span>
+</div>
+
+<div class="sub-menu">
+<a href="/query/list/0" >全部</a>
+{%for item in logDefine_list%}
+<a href="/query/list/{{item.id}}"{%ifequal item.id log_type%} class="active"{%endifequal%}>{{item.name}}</a>
+{%endfor%}
+</div>
+
+<div class="sub-menu-1">
+	<form id="search_form" action="/query/list?type=">
+		<select name="log_type">
+			<option value="0">全部</option>
+			{%for item in list_log%}
+			<option value="{{item.id}}"{%ifequal item.id log_type%} selected="selected"{%endifequal%}>{{item.name}}
+			{%endfor%}
+		</select>
+		<input type="button" value="切换" onclick="change_type();" />
+	</form>
+	<script type="text/javascript">
+		function change_type(){
+			var type = $("#log_type").val();
+			$("#search_form").attr("action", "/query/list?log_type=" + type);
+			$("#search_form").submit();
+		}
+	</script>
+</div>
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="200">名称</th>
+<th width="50">类型</th>
+<th>查询字段</th>
+<th width="30">sql</th>
+<th width="120">排序</th>
+<th width="150">创建时间</th>
+<th width="70">操作</th>
+</tr>
+{%for item in list_model%}
+<tr>
+<td>{{item.id}}</td>
+<td><a href="/query/view?id={{item.id}}">{{item.name}}</a></td>
+<td>{{item.log_typeName}}</td>
+<td>{{item.select}}</td>
+{%if item.sql%}
+<td style="color:red;">true</td>
+{%else%}
+<td></td>
+{%endif%}
+<td>{{item.order}}
+{%ifequal item.order_type 0%}
+升序
+{%else%}
+降序
+{%endifequal%}
+</td>
+<td>{{item.create_time|date:"Y-m-d H:i:s"}}</td>
+<td>
+<a href="/query/remove?query_id={{item.id}}" class='del'>删除</a>
+
+<a href="/query/edit?query_id={{item.id}}&log_type={{item.log_type}}">编辑</a>
+
+</td>
+</tr>
+{%endfor%}
+</table>
+{% endblock %}

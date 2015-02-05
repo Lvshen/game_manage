@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, maximum-scale=1.0, user-scalable=no" />
+<title>帮助</title>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="/static/js/jquery.jscrollpane.min.js"></script>
+<link href="/static/skin/jquery.jscrollpane.css" rel="stylesheet" type="text/css" />
+<link href="/static/skin/help.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+body{margin:0;padding:0;border:none;}
+#left{width:220px;height:400px;}
+iframe{height:400px}
+span{display:block;}
+</style>
+</head>
+
+<body>
+  <table width="100%" height="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="220" valign="top"><div id="left">
+      <ul>
+        	{% for item in data_list %}
+       	  <li>
+          <span><b>+</b>
+              {{ item.name }}
+              </span>
+                
+          		<dl>
+          		{% for help in item.helps %}
+                	<dd>
+                	<a href="{{help.filename}}.html" target="right">{{help.title}}</a>
+                    </dd>
+                {% endfor %}
+            	</dl>
+            </li>
+            {% endfor %}
+            </ul>
+      </div></td>
+      <td valign="top"><iframe id="right" src="blank.html"  name="right" scrolling="auto" frameborder="0" height="100%" width="100%"></iframe></td>
+    </tr>
+  </table>
+  <script type="text/javascript">
+$(document).ready(function(){
+	var the_height = $(window).height();
+
+	if(the_height>400)
+	{
+		$('iframe').css("height", the_height + "px");
+		$('#left').css("height", the_height + "px");
+	}
+	
+	
+	//处理2级菜单
+	$('ul span').mousedown(function(){
+		$(this).next().toggle();
+		var icon = $(this).find("b").text();
+		icon = (icon == '+' ? '-' : '+');
+		$(this).find("b").text(icon);
+		$('#left').jScrollPane();
+		return false;
+	});
+	//处理高亮
+	$('ul a').mousedown(function(){
+		var p = $(this).parent();
+		if(p.hasClass('focused')){
+			return false;
+		}
+		$('ul').find(".focused").removeClass();
+		p.addClass('focused');
+		$('#right').attr('src', $(this).attr('href'));
+		return false;
+	});
+	//处理URL指定默认页比如 index.html?help2 将会在页面载入时，右边直接显示help2.html
+	var url = window.location.href.toString();
+    if (url.indexOf("?") > 0) {
+        var arrParams = url.split("?");
+		if(arrParams[1]!=''){
+	        var url = arrParams[1];
+			$('#right').attr('src', url + '.html');
+			var f = $('#left').find("a[href='" + url + ".html']");
+			if(f){
+				f = f.parent();
+				
+				f.addClass('focused');
+				if(f.is('dd')){
+					var title = f.parent().parent().find("b");
+					var icon = title.text();
+					icon = (icon == '+' ? '-' : '+');
+					title.text(icon);
+					f.parent().show();
+					
+					$('#left').scrollTop(parseInt(f.parent().parent().offset().top));
+					$('#left').jScrollPane();
+				}
+			}
+		}
+    }else{
+    	$('#left li:first span').trigger("mousedown");
+		$('#left').jScrollPane();
+	}	
+});
+</script>
+</body>
+</html>

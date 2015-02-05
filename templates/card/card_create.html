@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}生成新手卡号{% endblock %}
+{% block header %}
+<style type="text/css">
+	ul li {
+		list-style-type: none;
+		padding: 1px 0;
+		display: inline;
+		width: 150px;
+		float: left;
+	}
+	.clear {
+		clear: both;
+		margin-top: 3px;
+	}
+	.card p {
+		width:800px;
+	}
+	.card p label {
+		display: inline-block;
+		width: 90px;
+		padding-right: 6px;
+		text-align: right;
+		color: #36588a;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<div id="bar">
+<a href="#">礼包卡管理 </a> -> 生成新手卡号
+<span class="buttons">
+ <a href="/card/list">返回</a>
+</span>
+</div>
+<div class="sub-menu-1">
+		{{card}}{{class_id}}
+<form method="post" action="/card/create/" class="form" onsubmit="return chkform();">
+	<label><input id="select_server" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>服务器全选</label>
+	<div id="select_server_area">
+		<ul>
+		{% for g in server %}
+			<li><input type="checkbox" name="id" value="{{g.id}}" checked='checked' />{{g.name}}</li>
+		{% endfor %}
+		</ul>
+	</div>
+	<div class="clear">&nbsp;</div>
+	<div align="center"><font color="red">{{msg}}</font></div>
+	<div class="card">
+		<p><label>批次名称：</label><input type="text" name="batch_name" id="batch_name" size="11" value="{{batch_name}}"/>*</p>
+		<p><label>卡号长度：</label><input type="text" name="clen" id="clen" size="11" value="{{clen}}"/>*</p>
+		<p><label>生成密码：</label><input type="checkbox" name="is_pwd" id="is_pwd" value="0"/>
+		<span id="show_pwd" style="display: none;">
+			长度：<input type="text" name="pwd_len" id="pwd_len" size="11"/>*
+		</span>
+		</p>
+		<p><label>组数：</label><input type="text" name="count" id="count" size="11" value="{{count}}"/>*</p>
+		<p><label>备注：</label><textarea cols="10" name="remark" id="remark" rows="1">&nbsp;</textarea></p>	
+	</div>
+	<p align="center"><input type="submit" value="提交"></p>	
+</form>
+</div>
+<script>
+$(document).ready(function(){
+	$("#is_pwd").click(function(){
+		if ($(this).attr("checked") == true) {
+			$(this).attr("value","1");
+			$("#show_pwd").show();
+		}
+		else {
+			$(this).attr("value","0");
+			$("#show_pwd").hide();
+		}
+	});
+});
+function chkform() {
+	var clen = document.getElementById('clen');
+	var pwd_len = document.getElementById('pwd_len');
+	var is_pwd = document.getElementById('is_pwd');
+	var batch_name = document.getElementById('batch_name')
+	//alert(clen.value.match(/^\d+$/));
+	if (batch.value == '') {
+		alert("批次不能为空！");
+		batch.focus();
+		return false;
+	}
+	if (clen.value.match(/^\d+$/) == null || clen.value > 32) {
+		alert('长度(0，32]');
+		clen.focus();
+		return false;
+	}
+	if ((pwd_len.value.match(/^\d+$/) == null || pwd_len.value > 32) && is_pwd.value == '1') {
+		alert('长度(0，32]');
+		pwd_len.focus();
+		return false;
+	}
+}
+
+</script>
+{% endblock %}

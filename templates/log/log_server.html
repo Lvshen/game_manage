@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>日志类型管理</title>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".checkbox_state").attr("disabled",false);
+	$("#del_log_data").click(function(){
+		if ($("#start_date").val() == '' || $("#end_date").val() == '') {
+			alert("日期不能为空！");
+			return false;
+		}		
+		if ($("#log_data_area input[type='checkbox']:checked").length == 0) {
+			alert("请选择服务器！");
+			return false;
+		}		
+		if ($(this).val() == '停止清除') {
+			$(this).attr("value","清除数据");
+			$(".checkbox_state").attr("disabled",false);
+			$(".result_state").html("");
+			return false;
+		}		
+		if (confirm("确定删除?")) {
+			if ($(this).val() == '清除数据') {
+				$(this).attr("value","停止清除");
+				$(".checkbox_state").attr("disabled",true);
+			}			
+
+
+			del_log();
+		}
+		else {
+			return false;	
+		}
+	});
+});
+
+	function del_log(){
+		del_log_data();
+		return false;
+	}
+	function del_log_data(){
+		
+		var server_id = $("#log_data_area input[type='checkbox']:checked:first").val();
+		var param = '';//GetPostParameter(post_form);	
+		param = "sdate="+$("#start_date").val()+"&edate="+$("#end_date").val()+'&';
+		
+		param += "server_id="+server_id;
+		var url = '/log/data/delete/{{log_def.id}}/';
+
+		var options = {
+			type : "get",
+			url : url,
+			dataType:"json",
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				// alert(parm);
+				//result = eval('(' + result + ')');
+				if (result.msg != '') {
+					alert(result.msg);
+					return false;	
+				}
+				check_state(result);
+			},
+			cache : false,
+			timeout : 20000,
+			error : function(result) {
+				$("#result_"+server_id).html("链接超时！请重试！");	
+			}
+		}
+		window.setTimeout(function(){
+			$.ajax(options);	
+		},1000);
+		return false;
+	}
+	
+	function check_state(result){
+		if ($("#del_log_data").val() == '清除数据') {
+			return false;
+		}
+		if ($("#log_data_area input[type='checkbox']:checked").length == 0) {
+			$("#del_log_data").attr("value","清除数据");
+			$(".result_state").html("");
+			$(".checkbox_state").attr("disabled",false);	
+			alert("全部清除完成！");		
+			return false;
+		}			
+		var server_id = $("#log_data_area input[type='checkbox']:checked:first").val();	
+		if (result.is_finish == 0){
+			//alert(result.url);
+			$("#file_box").html("");		
+			$("#result_"+server_id).html("<font color='red'>已删除</font>");
+			$("#checkbox_"+server_id).attr("checked",false);
+			
+			if ($("#log_data_area input[type='checkbox']:checked").length == 0) {
+				$("#del_log_data").attr("value","清除数据");
+				$(".result_state").html("");	
+				$(".checkbox_state").attr("disabled",false);
+				$("#log_data").attr("checked",false);
+				return false;
+			}	
+			else{
+				del_log_data();	
+			}
+					
+		}else{
+			$("#result_"+server_id).html("正在删除...剩余<b><font color='green'>" + result.record + "</font></b>条");
+			del_log_data();
+		}
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	<a href="/log/list">日志类型列表</a> -> {{log_def.name}}数据管理
+
+	<span class="buttons"> <a href="/log/list">返回</a> </span>
+</div>
+<div class="sub-menu-1">
+	<form method="post" id="search_form">
+		<span id="show_time">
+		开始日期:<input type="text" name="start_date" id="start_date" class="Wdate" value="{{sdate}}" />
+		结束日期:<input type="text" name="end_date" id="end_date" class="Wdate" value="{{edate}}" />
+		</span>
+		<input type="button" name="del_log_data" id="del_log_data" value="清除数据"/>	
+	</form>
+</div>
+
+<table class="list">
+	<thead>
+	<tr>
+		<th width="50">
+		<input type="checkbox" id="log_data" onchange="selectAll(this.id)" class="checkbox_state"/>
+		全选</th>
+		<th width="40">编号</th>
+		<th>名称</th>
+		<th width="150">操作状态</th>
+		<th width="170">操作</th>
+	</tr>
+	</thead>
+	<tbody id="log_data_area">
+	{%for item in list_server%}
+	<tr>
+		<td>
+		<input type="checkbox" name="id" id="checkbox_{{item.id}}" value="{{item.id}}" class="checkbox_state"/>
+		</td>
+		<td> {{item.id}} </td>
+		<td> {{item.name}} </td>
+		<td id="result_{{item.id}}" class="result_state"></td>
+		<td><a href="/log/clear/{{item.id}}/{{log_def.id}}/0" class="del">清数据</a><a href="/log/clear/{{item.id}}/{{log_def.id}}/1" class="del">删除表</a><a href="/log/updatechannel?server_id={{item.id}}&log_def_id={{log_def.id}}" >更新渠道</a></td>
+	</tr>
+	{%endfor%}
+	</tbody>
+</table>
+{% endblock %}

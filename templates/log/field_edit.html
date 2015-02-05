@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>日志字段编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/field/list?log_type={{model.log_type}}">日志字段列表</a> -> 日志类型编辑
+<span class="buttons">
+ <a href="/field/list?log_type={{model.log_type}}">返回</a>
+ </span>
+</div>
+
+<form action="/field/save?id={{model.id}}" method="post">
+<input type="hidden" name="log_type" value="{{model.log_type}}" />
+<table class="form">
+<tr>
+<th>属性名称：</th><td><input type="text" name="name" value="{{model.name}}" /> 可输入：汉字，字母，数字，下划线</td>
+</tr>
+
+<tr>
+<th>绑定字段：</th><td>
+<select name="field_name">
+{%for field in fields%}
+<option value="{{field}}" {%ifequal field model.field_name%}selected="selected"{%endifequal%}>{{field}}</option>
+{%endfor%}
+</select>
+</td>
+</tr>
+
+<tr>
+<th>字段类型：</th><td>
+<select name="field_type">
+{%for item in field_types%}
+<option value="{{item}}" {%ifequal item model.field_type%}selected="selected"{%endifequal%}>{{item}}</option>
+{%endfor%}
+</select>
+</td>
+</tr>
+<tr>
+	<th>创建索引:</th>
+	<td><input type="checkbox" name="create_index" value="1" {% if model.create_index == 1 %} checked="checked" {% endif %} /></td>
+</tr>
+<tr>
+<th>字段格式(正则)：</th><td><input type="text" name="field_format" value="{{model.field_format}}" /></td>
+</tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+{% csrf_token %}
+</form>
+{% endblock %}

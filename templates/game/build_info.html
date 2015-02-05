@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.list{width:100%;margin:0}
+.form th{width:30%}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu.html" %}
+
+<form method="post" action="#">
+<table class="form">
+{%for item in list_infos%}
+<tr>
+<th width="160px">{{item.name}}:</th>
+<td>
+{%if item.is_modify%}
+<input type="text" name="{{item.key}}" value="{{item.value}}" /> 级
+{%else%}
+{{item.value}} 级
+{%endif%}
+</td>
+</tr>
+{%endfor%}
+
+<tr>
+<th></th>
+<td>
+<a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+</td>
+</tr>
+</table>
+</form>
+{% endblock %}

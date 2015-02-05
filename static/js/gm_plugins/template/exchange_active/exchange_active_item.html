@@ -1,0 +1,17 @@
+<div class="item">
+	充值金币数:<input name="gold" type="text" value="{{=it.gold}}" /> 
+	奖励类型
+	<select name="goods_type" >
+		<option value="1" {{? it.goods_type == 1 }} selected="selected" {{?}} >武将</option>
+		<option value="2" {{? it.goods_type == 2 }} selected="selected" {{?}}  >装备</option>
+		<option value="3" {{? it.goods_type == 3 }} selected="selected" {{?}}  >银币</option>
+		<option value="4" {{? it.goods_type == 4 }} selected="selected" {{?}}  >金币</option>
+		<option value="5" {{? it.goods_type == 5 }} selected="selected" {{?}}  >军功</option>
+		<option value="6" {{? it.goods_type == 6 }} selected="selected" {{?}}  >军令</option>
+		<option value="7" {{? it.goods_type == 7 }} selected="selected" {{?}}  >威望</option>
+		<option value="8" {{? it.goods_type == 8 }} selected="selected" {{?}}  >魂石</option>
+		<option value="9" {{? it.goods_type == 9 }} selected="selected" {{?}}  >战魂</option>
+	</select>
+	奖励ID
+	<input name="id" type="text" value="{{=it.id}}" />
+</div>

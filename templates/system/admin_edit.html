@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户资料编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/admin_user/list">用户管理</a> -> 用户资料编辑
+<span class="buttons">
+ <a href="/admin_user/list">返回</a>
+ </span>
+</div>
+
+<form action="/admin_user/save?admin_id={{model.id}}" method="post">
+<table class="form">
+
+<tr>
+<th>所属角色：</th><td>
+<select name="role_id">
+{%for item in roles%}
+<option value="{{item.id}}"{%ifequal item.id model.role.id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+{%endfor%}
+</select>
+<a href="/role/list">角色管理</a>
+</td>
+</tr>
+
+<tr>
+<th>登录名：</th><td><input type="text" name="username" value="{{model.username}}" /></td>
+</tr>
+<tr>
+<th>密码：</th><td><input type="password" name="password" value="{{model.password}}" /></td>
+</tr>
+{%if model.role%}
+<tr>
+	<th>
+		<a href="/server/list">可管理服务器</a>：<br/>
+		<label><input type="checkbox" id="select_server" onchange="selectAll(this.id)" />全选</label>
+	</th>
+	<td id="select_server_area">
+	{%for item in list_server%}
+	<label><input type="checkbox" name="server_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+	{%endfor%}
+	</td>
+</tr>
+<tr>
+	<th>
+		可管理渠道：<br/>
+		<label><input type="checkbox" id="select_channel" onchange="selectAll(this.id)"  />全选</label>
+	</th>
+	<td id="select_channel_area">
+		{% for item in list_channel %}
+		<label>
+			<input type="checkbox" name="channel_id" value="{{item.id}}" {%ifequal item.is_show 1%} checked="checked" {%endifequal%} />{{item.name}}
+		</label>
+		{% endfor %}
+	</td>
+</tr>
+{%endif%}
+<!-- 
+<tr>
+<th>管理渠道:<br/><label><input type="checkbox" id="select_channel" onchange="selectAll(this.id)" />全选</label></th>
+<td id="select_channel_area">
+	{%for item in channel_list%}
+	<label><input type="checkbox" name="channel_id" value="{{item.id}}"{%ifequal item.is_checked 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+	{%endfor%}
+</td>
+</tr>
+ -->
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+</form>
+{% endblock %}

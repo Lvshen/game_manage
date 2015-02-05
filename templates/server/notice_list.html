@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>公告管理</title>
+<script type="text/javascript" >
+	function filterList(){
+		var server_id = $("#server_id").val();
+		document.location.href=""+server_id;
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+公告管理
+<span class="buttons">
+ <a href="/push/list">管理推送消息</a>
+ <a href="/push/create" class="ask">生成推送消息</a>
+ <a href="/notice/edit">添加</a>
+ </span>
+</div>
+<div class="sub-menu">
+	<a href="/notice/list"{%ifequal server_id 0%} class="active"{%endifequal%}>全部</a>
+	{%for item in server_list%}
+	<a href="/notice/list?server_id={{item.id}}"{%ifequal item.id server_id%} class="active"{%endifequal%}>{{item.name}}</a>
+	{%endfor%}
+</div>
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="90">类型</th>
+<th width="40">状态</th>
+<th>公告内容</th>
+<th width="120">服务器</th>
+<th width="80">开始时间</th>
+<th width="80">结束时间</th>
+<th width="100">操作</th>
+</tr>
+{%for item in list_record%}
+
+<tr>
+<td>{{item.id}}</td>
+<td>{{item.get_notice_type_display}}</td>
+<td>{{item.get_status_display}}</td>
+<td>{{item.title}}</td>
+<td>
+	{% if usm.current_userRole_is_root %}
+		{%for item_server in item.server.all%}
+		<a title="{{item_server.name}}" href="/static/notice/scroll/{{item_server.id}}.json">{{item_server.id}}</a>
+		{%endfor%}
+	{% endif %}
+</td>
+<td>{{item.begin_time_str}}</td>
+<td>{{item.end_time_str}}</td>
+<td>
+	<a href="/notice/remove?notice_id={{item.id}}" class="del">删除</a> 
+	<a href="/notice/edit?notice_id={{item.id}}">编辑</a>
+	
+	<a href="javascript:sendRequest({{item.id}})">生成</a>
+	
+</td>
+</tr>
+
+{%endfor%}
+</table>
+<script type="text/javascript">
+	function sendRequest(noticeId)
+	{
+		var url="/notice/create?notice_id="+noticeId;
+		$.post(url,{},function(data)
+		{
+			alert(data);
+		});
+	}
+
+</script>
+{% endblock %}

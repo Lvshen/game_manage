@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>功能列表</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<span class="buttons">
+ <a href="/menu/edit">添加</a>
+ </span>
+</div>
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th>名称</th>
+<th>路径</th>
+<th>排序</th>
+<th>是否显示</th>
+<th>记录日志</th>
+<th width="100">操作</th>
+</tr>
+{%for menu in list_record%}
+{%ifequal menu.parent_id 0%}
+<tr>
+<td>{{menu.id}}</td>
+<td>
+{%if menu.icon%}<img src="{{menu.icon}}" />{%endif%}
+<span style="{{menu.css}}">{{menu.name}}</span>
+</td>
+<td>{{menu.url}}</td>
+<td>{{menu.order}}</td>
+<td>{{menu.is_show}}</td>
+<td>{{item.is_log}}</td>
+<td><a href="/menu/remove/{{menu.id}}" class="del">删除</a> <a href="/menu/edit/{{menu.id}}">编辑</a></td>
+</tr>
+	{%for item in list_record%}
+	{%ifequal item.parent_id menu.id%}
+	<tr>
+	<td>{{item.id}}</td>
+	<td>
+	　　└{%if item.icon%}<img src="{{item.icon}}" />{%endif%}
+	<span style="{{item.css}}">{{item.name}}</span>
+	</td>
+	<td>{{item.url}}</td>
+	<td>{{item.order}}</td>
+	<td>{{item.is_show}}</td>
+	<td>{{item.is_log}}</td>
+	<td><a href="/menu/remove/{{item.id}}" class="del">删除</a> <a href="/menu/edit?menu_id={{item.id}}">编辑</a></td>
+	</tr>
+	{%endifequal%}
+	{%endfor%}
+{%endifequal%}
+{%endfor%}
+</table>
+{% endblock %}

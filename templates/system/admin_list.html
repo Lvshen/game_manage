@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<span class="buttons">
+ {% if not is_remove_list %}
+ <a href="/admin_user/list?status=del">删除列表</a>
+ {% endif %}
+ {% if is_remove_list %}
+ <a href="/admin_user/list">返回</a>
+ {% endif %}
+ <a href="/admin_user/edit">添加</a>
+ </span>
+</div>
+
+<table class="list">
+<tr>
+<th>登录名</th>
+<th>所属角色</th>
+<th>客服管理的服务器</th>
+<th width="180">操作</th>
+</tr>
+{%for user in list_record%}
+
+<tr>
+<td>{{user.username}}
+</td>
+<td>{{user.role.name}}</td>
+<td>
+	{%for serverItem in user.server.all%}
+		{{serverItem.name}},
+	{%endfor%}
+</td>
+<td>
+	{% if is_remove_list %}
+	<a href="/admin_user/remove/{{user.id}}?recover=true">恢复</a>
+	{% endif %}
+	{% if not is_remove_list %}
+	<a href="/admin_user/remove/{{user.id}}" onclick="return confirm('确认提交');">删除</a> <a href="/admin_user/edit?admin_id={{user.id}}">编辑</a>
+	{% endif %}
+</td>
+</tr>
+
+{%endfor%}
+</table>
+{% endblock %}

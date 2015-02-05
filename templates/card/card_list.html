@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}卡号列表{% endblock %}
+{% block header %}
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+{% endblock %}
+
+{% block content %}
+<script>
+	$(document).ready(function() {
+		$(".batch_box").click(function(){
+			$("#batch_box").html($(this).attr("title"));
+			$("#batch_box").dialog({ modal: true});			
+		});
+	});
+</script>
+<div id="bar">
+	<a href="/card/batch/?status=1">礼包卡管理 </a> -> {{card_batch.name}}[{{card_batch.key}}]卡号列表 <span class="buttons"> <a href="/card/batch/?status={{card_batch.status}}">返回</a> </span>
+</div>
+<div class="sub-menu-1">
+	<form method="get" action="/card/list/">
+		<input type="hidden" name="batch_id" id="batch_id" value="{{batch_id}}"/>
+		<!-- 开始日期:<input type="text" name="start_date" id="start_date" class="Wdate1" value="{{sdate}}" style="width:80px;"/>
+		结束日期:<input type="text" name="end_date" id="end_date" class="Wdate1" value="{{edate}}" style="width:80px;"/>		 -->
+		<select name="search_type" id="search_type">
+			<option value='1' {% ifequal search_type 1 %}selected="selected"{%endifequal%}>卡号</option>
+			<option value='2' {% ifequal search_type 2 %}selected="selected"{%endifequal%}>角色ID</option>
+		</select>
+		<input type="text" name="search_val" id="search_val" value="{{search_val}}" />
+		服务器：<select name="server_id">
+			<option value="0">全部</option>
+			{% for item in list_server %}
+			<option value="{{item.id}}" {% ifequal item.id server_id %}selected="selected"{% endifequal %}>{{item.name}}</option>
+			{% endfor %}
+		</select>
+		<select name="status">
+			<option value="">状态</option>
+			<option value="0" {% ifequal status 0 %}selected="selected"{% endifequal %}>未使用</option>
+			<option value="2" {% ifequal status 2 %}selected="selected"{% endifequal %}>已使用</option>
+			<option value="-1" {% ifequal status -1 %}selected="selected"{% endifequal %}>已删除</option>
+		</select>
+		<input type="submit" value="查询" />		
+	</form>
+</div>
+<div style="margin-left:50px;font-size: 12px;">
+	<p><b>卡号名称：</b>{{card_batch.name}}，<b>可用次数：</b>{{card_batch.limit_count}}，<b>奖励内容：</b>{{card_batch.get_prize_content}}</p>
+	<p><b>有效时间：</b>{{card_batch.start_time|date:"Y-m-d H:i:s"}}--{{card_batch.end_time|date:"Y-m-d H:i:s"}}</p>
+	<p><b>应用服务器：</b><a href="javascript:void(0);" title="{{card_batch.get_server_content}}" class="batch_box" >详细</a>
+		<b>应用渠道：</b><a href="javascript:void(0);" title="{{card_batch.get_channel_content}}" class="batch_box" >详细</a></p>
+	<p><b>备注：</b>{% if card_batch.remark %}{{card_batch.remark}}{% else %}无{% endif %}</p>
+<!-- 	应用渠道：{{card_batch.get_channel_content}}，应用服务器：{{card_batch.get_server_content}} -->
+</div>
+{% if list_data %}
+<table border="0" cellpadding="0" cellspacing="0"  class="list" >
+	<thead>
+		<tr>
+		    <th>卡号</th><th>状态</th><th>使用时间</th><th>角色ID</th><th>服务器</th><th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for c in list_data %}
+		<tr {% if c.status %}style="color:red"{% endif %}>
+		    <td>{{c.number}}</td>
+		    <td>{{c.get_status_name}}</td>
+		    <td>{% if c.use_time %}{{c.use_time|date:"Y-m-d H:i:s"}}{% else %}{% endif %}</td>
+		    <td>{% if c.player_id %}{{c.player_id}}{% endif %}</td>
+		    <td>{{c.server}}</td>
+			<td><a href="/card/del/?id={{c.id}}&batch_id={{c.batch.id}}" class="del">删除</a></td>
+		</tr>
+		{% endfor %}	
+	</tbody>
+</table>
+{% include "pager.html" %}
+{% else %}
+<div class="sub-menu-1">暂无记录！</div>
+{% endif %}
+<div id="batch_box" style="margin:0 auto;display:none;height:300px;width:500px;overflow:scroll;" title="提示框" >
+</div>
+{% endblock %}
+

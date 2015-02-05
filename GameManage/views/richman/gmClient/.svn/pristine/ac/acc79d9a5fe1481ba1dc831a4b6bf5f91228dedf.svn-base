@@ -1,0 +1,296 @@
+
+#!/usr/bin/env python
+#coding=utf-8 
+import os, sys,string
+from socket import *
+import struct
+import zlib
+import web
+import string
+import sys
+sys.path.append("/home/xuefeng/chessprj/ddztool/py")
+from ddzclient import * 
+sys.path.append("/home/paul08colin/server/gmClient")
+from richmanclient import * 
+
+
+urls = (
+    '/ddzgm', 'ddzgm'
+)
+app = web.application(urls, globals())
+
+
+class LogHelp :
+    _logger = None
+
+    @staticmethod
+    def _initlog():
+        import logging
+
+        LogHelp._logger = logging.getLogger()
+        logfile = '/data/log/ddzgm.log'
+        hdlr = logging.FileHandler(logfile)
+        formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(lineno)d|%(funcName)s|%(message)s')
+        hdlr.setFormatter(formatter)
+        LogHelp._logger.addHandler(hdlr)
+        LogHelp._logger.setLevel(logging.NOTSET)
+
+        LogHelp._logger.info("\n\n\n")
+        LogHelp._logger.info("logger is inited!")
+
+    @staticmethod
+    def get_logger() :
+        if LogHelp._logger is None :
+            LogHelp._initlog()
+
+        return LogHelp._logger
+    
+    
+class ddzgm:
+    def POST(self):
+        
+        req = web.input()
+        LogHelp.get_logger().info("req|%s",dict(req))
+        rspjson =  self.process(req)
+        LogHelp.get_logger().info("rsp|%s",rspjson)
+        return rspjson
+
+    def process(self, req):
+        retmsg = {'code': 0, 'msg': 'OK'}
+        
+        if not req.has_key('req_type'):
+            retmsg['code'] = 1
+            retmsg['msg'] = "'no param 'req_type'"
+            return retmsg
+
+        req_type = req['req_type']
+
+        addr = '10.21.210.253'
+
+        if req.has_key('gmsvr_id') and 250 == string.atoi(req['gmsvr_id']):
+            addr = '10.21.210.250'
+
+        oDDz  = CDDZClient()
+        oDDz.Init(addr, 10000)
+        LogHelp.get_logger().info("process|host|%s|req_type=%s",addr, req_type)
+
+        if string.atoi(req_type) == 1001:
+                if not req.has_key('player_id') or not req.has_key('prop_list') :
+                    retmsg['code'] = 2
+                    retmsg['msg'] = "too few param|%s"%(dict(req))
+                    return retmsg
+
+                LogHelp.get_logger().info("addprop|req|%s",dict(req))
+                retmsg = oDDz.addprop('1000', '110',req['player_id'], req['prop_list'])
+                LogHelp.get_logger().info("addprop|rsp|%s",dict(retmsg))
+                rsp=retmsg
+                rspjson = "{\"code\": %s, \"content\": [{\"msg\": \"%s\"}]}"%(rsp['code'], rsp['msg'])
+                return rspjson
+        elif string.atoi(req_type) == 1002:
+            if not req.has_key('tag') or not req.has_key('endtime') or not req.has_key('player_list') :
+                retmsg['code'] = 2
+                retmsg['msg'] = "too few param|%s"%(dict(req))
+                return retmsg  
+            LogHelp.get_logger().info("forbidden|req|%s",dict(req))
+            retmsg = oDDz.forbidden('1000', '110', req['tag'], req['endtime'], req['player_list'])
+            LogHelp.get_logger().info("forbidden|rsp|%s",dict(retmsg))
+            rsp=retmsg
+            rspjson = "{\"code\": %s, \"content\": [{\"msg\": \"%s\"}]}"%(rsp['code'], rsp['msg'])
+            return rspjson
+        elif string.atoi(req_type) == 1003:   #user query req_type
+            if not req.has_key('player_id'):
+                rspjson = "{\"content\":[{}],\"code\":0}"
+                return rspjson
+            else:
+                from myqueryuser import myqueryuser
+                rspjson = myqueryuser(req['player_id'])
+                return rspjson
+        elif string.atoi(req_type) == 1004:
+            from log_count_dn import log_count_dn
+            rspjson=log_count_dn(req)
+            return rspjson
+        elif string.atoi(req_type) == 1005:
+            from log_count_dn import log_count_dn_day
+            rspjson=log_count_dn_day(req)
+            return rspjson
+        elif string.atoi(req_type) == 1006:
+            from log_count_dn import log_count_dn_10day
+            rspjson = log_count_dn_10day(req)
+            return rspjson
+        elif string.atoi(req_type) == 1007:
+            from log_count_dn import log_count_dn_10mon
+            rspjson = log_count_dn_10mon(req) 
+            return rspjson
+        elif string.atoi(req_type) == 1008:
+            from log_count_ddz import log_count_ddz
+            rspjson = log_count_ddz(req)
+            return rspjson
+        elif string.atoi(req_type) == 1009:
+            from log_count_ddz import log_count_ddz_day
+            rspjson=log_count_ddz_day(req)
+            return rspjson
+        elif string.atoi(req_type) == 1010:
+            from log_count_ddz import log_count_ddz_10day
+            rspjson=log_count_ddz_10day(req)
+            return rspjson
+        elif string.atoi(req_type) == 1011:
+            from log_count_ddz import log_count_ddz_10mon
+            rspjson=log_count_ddz_10mon(req)
+            return rspjson
+        elif string.atoi(req_type) == 9001:
+            print "hello world"
+            print req; 
+            print req["playerid"]
+            id =  string.atoi(req["playerid"])
+            recv = totalQueryPlayerData(id);
+            print "oh no"
+            print str(recv)
+            rspjson="{\"content\":[%s],\"code\":0}"%(recv)
+            #rspjson="{\"content\":[" + recv + "],\"code\":0}"
+            print rspjson
+            return rspjson
+        elif string.atoi(req_type) == 9002:
+            print "hello world"
+            print req
+            if(req.has_key('receiver')):
+                receiver = string.atoi(req["receiver"])
+            else:
+                receiver = -1
+            if(req.has_key("context")):
+                context = str(req["context"])
+            else:
+                context = ""
+            if(req.has_key("template_id")):
+                template_id = req["template_id"]
+            else:
+                template_id = -1
+            if(req.has_key("goldcoin")):
+                goldcoin = string.atoi(req["goldcoin"])
+            else:
+                goldcoin = -1
+            if(req.has_key("marble")):
+                marble = string.atoi(req["marble"])
+            else:
+                marble = -1
+            if(req.has_key("energy")):
+                energy = string.atoi(req["energy"])
+            else:
+                energy = -1
+            if(req.has_key("tickets")):
+                tickets = req["tickets"]
+                if(tickets.find (',') != -1):
+                    tickets = tickets.replace(" ", "")
+                    tickets = tickets.split(',')
+                else:
+                    tickets = tickets.split()
+            else:
+                tickets = -1
+            if(req.has_key("cardpacket")):
+                cardpacket = req["cardpacket"]
+                if(cardpacket.find(',') != -1):
+                    cardpacket = cardpacket.replace(" ", "")
+                    card_num, card_probability, expire_time = cardpacket.split(',')
+                else:
+                    cardpacket = cardpacket.split()
+                card_num = string.atoi(card_num)
+                card_probability = string.atoi(card_probability)
+                expire_time = string.atoi(expire_time)
+                
+            else:
+                cardpacket = ""
+                card_num = -1
+                card_probability = -1
+                expire_time = -1
+            if(req.has_key("cardpacket")):
+                cardpacket = req["cardpacket"]
+
+            recv = totalBroadcastMail(receiver, tickets, card_num, card_probability, context, template_id, goldcoin, marble, energy, expire_time)
+            rspjson="{\"content\":[{}],\"code\":0}"
+            return rspjson
+        elif string.atoi(req_type) == 9003:
+            print req
+            flag = 0
+            if(req.has_key("player_id")):
+                player_id = string.atoi(req["player_id"])
+            else:
+                return 
+            if(req.has_key("marbel_change")):
+                marbel_change = string.atoi(req["marbel_change"])
+                flag |= 0x00000001
+            else:
+                marbel_change = -1
+            if(req.has_key("goldcoin_change")):
+                goldcoin_change = string.atoi(req["goldcoin_change"])
+                flag |= 0x00000002
+            else:
+                goldcoin_change = -1
+            if(req.has_key("energy_change")):
+                energy_change = string.atoi(req["energy_change"])
+                flag |= 0x00000004
+            else:
+                energy_change = -1
+            if(req.has_key("ticket_type")):
+                ticket_type = req["ticket_type"]
+                if(ticket_type.find (',') != -1):
+                    ticket_type = ticket_type.replace(" ", "")
+                    ticket_type = ticket_type.split(',')
+                else:
+                    ticket_type = ticket_type.split()
+            if(req.has_key("ticket_count")):
+                ticket_count = req["ticket_count"]
+                if(ticket_count.find (',') != -1):
+                    ticket_count = ticket_count.replace(" ", "")
+                    ticket_count = ticket_count.split(',')
+                else:
+                    ticket_count = ticket_count.split()
+            if(len(ticket_count) == len(ticket_type)):
+                flag |= 0x00000010
+
+            if(flag == 0):
+                print "flag equal 0, return"
+                return 
+            recv = totalModifyPlayerData(player_id, flag, marbel_change, goldcoin_change, energy_change, ticket_count, ticket_type)
+            #recv = "{\"ret_code\":[{\"ret_code\": \"-1\"}]}"
+            rspjson="{\"content\":[%s],\"code\":0}"%(recv)
+            print rspjson
+            return rspjson
+        elif string.atoi(req_type) == 9004:
+            print req
+            if(req.has_key("statistics_type")):
+                statistics_type = string.atoi(req["statistics_type"])
+            else:
+                return 
+            recv = totalServerStatistics(statistics_type)
+            print "recv = %s"%(recv)
+            rspjson="{\"content\":[%s],\"code\":0}"%(recv)
+            print rspjson
+            return rspjson
+        elif string.atoi(req_type) == 9005:
+            print req
+            if(req.has_key("type")):
+                type = string.atoi(req["type"])
+            else:
+                return
+            recv = totalRestServerStatus(type)
+            print "recv = %s"%(recv)
+            rspjson="{\"content\":[%s],\"code\":0}"%(recv)
+            print rspjson
+            return rspjson
+            
+
+
+
+
+        else:
+            retmsg['code'] = 3
+            retmsg['msg'] = "'valid req_type=%s'"%(req_type)
+            rsp=retmsg
+            rspjson = "{\"code\": %s, \"content\": [{\"msg\": \"%s\"}]}"%(rsp['code'], rsp['msg'])
+            return rspjson
+
+
+
+
+      
+
+application = app.wsgifunc()

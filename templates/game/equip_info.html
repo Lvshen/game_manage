@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+
+.form th{width:30%}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu.html" %}
+
+<h4>赠送装备:</h4>
+<form method="post" action="/game/equip/add?player_id={{player_id}}">
+装备编号:<input type="text" name="equip_id" size="5" value="" /> 级别:<input type="text" name="equip_level" size="5" value="" />数量:<input type="text" name="equip_num" size="5" value="" /> <input type="submit" value="赠送" />
+</form>
+<h4>已有装备:</h4>
+<table class="list">
+<tr>
+{%for key,value in def_params.items%}
+<th>{{value}}</th>
+{%endfor%}
+<th>操作</th>
+</tr>
+
+{%for row in list_infos%}
+<tr>
+{%for cell in row%}
+<td>{{cell}}</td>
+{%endfor%}
+<td><a href="/game/equip/del?player_id={{player_id}}&equip_id={{row.5}}" class="ask">删除</a></td>
+</tr>
+{%endfor%}
+</table>
+
+{% endblock %}

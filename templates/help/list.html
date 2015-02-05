@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block header%}
+<script type="text/javascript">
+	function delFile(id, ele) {
+		if (confirm("确定删除？删除不可恢复！")) {
+			$.ajax({
+				type : "GET",
+				url : "/help/del?id=" + id,
+				datatype : "html",
+				data : {
+					id : id
+				},
+				cache : false,
+				success : function(data) {
+					$(ele).parent().parent().hide();
+				},
+				error : function(data) {
+					$(ele).html('删除失败');
+				}
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	function creatAllFile() {
+		if (confirm("确定生成？")) {
+			$.dialog('正在生成，请稍等...');
+			$.ajax({
+				type : "GET",
+				url : "/help/filecreate?id=0",
+				datatype : "html",
+				cache : false,
+				success : function(data) {
+					$.dialog('生成文件成功!');
+				},
+				error:function(data){
+					$.dialog('生成文件文件失败!');
+				}
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	function creatFile(id) {
+		if (confirm("确定生成？")) {
+			$.dialog('正在生成，请稍等...');
+			$.ajax({
+				type : "GET",
+				url : "/help/filecreate?id=" + id,
+				datatype : "html",
+				cache : false,
+				success : function(data) {
+					$.dialog('生成文件成功!');
+				},
+				error:function(data){
+					$.dialog('生成文件文件失败!');
+				}
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	function collectionFlie() {
+		if (confirm("确认导入静态文件？")) {
+			$.dialog('正在导入，请稍等...');
+			$.ajax({
+				type : "GET",
+				url : "/help/import",
+				datatype : "html",
+				cache : false,
+				success:function(data){
+					$.dialog('导入静态文件成功!');
+				},
+				error:function(data){
+					$.dialog('导入静态文件失败!');
+				}
+			});
+		}
+	}
+</script>
+
+{% endblock %}
+{% block content %}
+<div id="bar">
+	游戏帮助管理<span class="buttons"> <a href="/help/edit">添加帮助文件</a> <a href="/help/category/list">分类添加和管理</a> <a href="/help/view" target="_blank">帮助预览</a> </span>
+</div>
+<div class="sub-menu-1" >
+
+	<form action="/help/list" name="form" method="post">
+
+		<select name="parent_id">
+			<option value="0">请选择</option>
+			{% for item in cgname %}
+			<option value="{{item.id}}" {%if parent_id = item.id %} selected="selected" {%endif%} >{{item.name}}</option>
+			{% endfor %}
+		</select>
+		关键字：
+		<input type="text" name="title" value="{{ search_con }}" />
+
+		<input type="submit" name="submit" value="搜索" />
+
+	</form>
+</div>
+
+<table class="list" cellspacing="0">
+	<tr>
+		<td>排序</td>
+		<td>标题</td>
+		<td>所属类别</td>
+		<td>文件名</td>
+		<td>操作</td>
+	</tr>
+	{% for itme in res %}
+	<tr>
+		<td>{{ itme.order }}</td>
+		<td><a href="/help/view?filename={{itme.filename}}.html" target="_blank">{{ itme.title }}</a></td>
+		<td>{{ itme.get_parent_id_name}}</td>
+		<td>{{ itme.filename }}</td>
+		<td><a href="/help/edit?id={{ itme.id }}">修改</a>| <a href="/help/del?id={{ itme.id }}" onclick=" return delFile({{ itme.id }}, this);">删除</a>|<a href="#" onclick=" return creatFile({{ itme.id}})">静态生成</a></td>
+	</tr>
+	{% endfor %}
+</table>
+<div class="sub-menu-1">
+	<span class="buttons">
+		 <a href="/static/help/index.html" target="_blank">静态浏览</a>
+		<a href="#" class="creat" onclick=" return creatAllFile();">生成静态数据</a>
+		<a href="#" onclick=" return collectionFlie();">导入静态数据</a>
+	</span>
+</div>
+{% endblock %}

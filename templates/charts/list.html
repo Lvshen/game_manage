@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>图标配置列表</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	图表配置列表
+	<span class="buttons" > <a href="/charts/edit" >添加</a> </span>
+</div>
+
+<div class="sub-menu-1" > 
+	类别:
+	<a href="/charts/list">全部</a>
+	 {% for item in type_list %}
+	 <a href="/charts/list?type={{item}}" {%ifequal item charts_type %} class="active"{%endifequal%} >
+	 	{{item}}
+	 </a>
+	 {% endfor %} 
+</div>
+<table class="list">
+	<tr>
+		<th>ID</th>
+		<th width="120">标题</th>
+		<th>统计汇总</th>
+		<th>分类</th>
+		<th>图表类别</th>
+		<th>是否显示</th>
+		<th width="80" >操作</th>
+	</tr>
+	{% for item in list_data %}
+	<tr>
+		<td>
+			{{item.id}}
+		</td>
+		<td>
+			<a>{{item.title}}</a>
+		</td>
+		<td>
+			{{item.query_result_name}}
+		</td>
+		<td>
+			{{item.charts_type}}
+		</td>		
+		<td>
+			{{item.display_type_str}}
+		</td>
+		<td>
+			{{item.is_show}}
+		</td>
+		<td>
+			<a href="/charts/edit?id={{item.id}}" >配置</a>
+			<a class="ask" href="/charts/del?id={{item.id}}" >删除</a>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

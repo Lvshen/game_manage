@@ -1,0 +1,13 @@
+# coding=utf-8
+
+import hashlib
+
+def md5(s):
+    signStr=hashlib.md5() 
+    signStr.update(s.encode('utf-8'))
+    return signStr.hexdigest()
+
+def sha256(s):
+    sh = hashlib.sha256()
+    sh.update(s.encode('utf-8'))
+    return sh.hexdigest()

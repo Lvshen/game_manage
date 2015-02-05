@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="google-translate-customization" content="4c7f6cb0fee7f952-8842eaefdbe93112-g4297ba3489700b67-15"></meta>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/static/js/stran.js"></script>
+
+<link rel="stylesheet" href="/static/skin/style.css"type="text/css" />
+
+<script type="text/javascript" src="/static/js/dialog.js" ></script>
+<link rel="stylesheet" href="/static/skin/dialog.css" />
+ 
+<script type="text/javascript" src="/static/js/main.js"></script>
+
+<title>发送邮件</title>
+</head>
+<body>
+<div id="bar">
+发送邮件<span class="buttons"></span>
+</div>
+
+<form action="/richman/sendmailans/" method="post">
+	<table class="form">
+		<tr>
+			<th>服务器：</th>
+			<td>
+			<select id="Select2" name="serverip">
+				<option selected="selected" value="10.21.210.251">10.21.210.251</option>
+				<option value="10.21.210.110">10.21.210.110</option>
+				<option value="183.61.86.87">183.61.86.87</option>
+			</select></td>
+		</tr>
+		<tr>
+			<th>接收用户ID：</th>
+			<td>
+				<input id="Text1" type="text" name = "receiver"/>(-1为广播所有人，0为广播在线玩家，其他为正常)
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox12" type="checkbox" name="isContext" />内容：</th>
+			<td>
+				<input id="Text2" type="text" name = "context" />
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox11" type="checkbox" name="isTemplate_id"/>模版ID：</th>
+			<td>
+				<input id="Text3" type="text" name = "template_id" />
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox1" type="checkbox" name="PROP_TYPE_MARBLE"/> 砖石数量：</th>
+			<td>
+				<input id="Text5" type="text" name= "marble_num"/>
+			</td>
+		</tr>
+		<tr>
+			<th> <input id="Checkbox2" type="checkbox" name="PROP_TYPE_GOLDCOIN"/>金币数量：</th>
+			<td>
+				<input id="Text10" type="text" name="goldcoin_num"/>
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox3" type="checkbox" name="PROP_TYPE_ENERGY"/>体力值：</th>
+			<td>
+				<input id="Text12" type="text" name="energy_value"/>
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox9" type="checkbox" name="PROP_TYPE_CARD"/>卡牌：</th>
+			<td>
+				<input id="Text16" type="text" name="card_uuid"/>(卡牌id, 单张卡牌)
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox10" type="checkbox" name="PROP_TYPE_CARDHODLER"/> 卡牌包：</th>
+			<td>
+				<select id="Select3" name="cardHodlerType">
+					<option value=1>商店普通卡包10019</option>
+					<option value=2>商店普通卡包10020</option>
+					<option value=3>商店普通卡包10021</option>
+					<option value=4>商店普通卡包10022</option>
+					<option value=5>商店普通卡包10023</option>
+					<option value=6>商店普通卡包10024</option>
+				</select>
+				<!--&nbsp;&nbsp;数量：<input id="Text17" type="text" value = "1" name = "cardHodlerNum"/>-->
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox7" type="checkbox" name="PROP_TYPE_TICKET"/>门票类型：</th>
+			<td>
+				<select id="Select1" name="ticket_type">
+					<!--<option value=0>普通场</option>-->
+					<option value=1>精英场</option>
+					<option value=2>富豪场</option>
+				</select>
+				&nbsp;&nbsp;门票数量：<input id="Text15" type="text" value = "1" name="ticket_num"/>
+			</td>
+		</tr>
+
+		<tr>
+			<th>&nbsp;</th>
+			<td>
+			<input type="submit" value="提交" />
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

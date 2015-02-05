@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>账号转换</title>
+{% endblock %}
+
+{% block content %}
+已处理{{start_pos}}条 <a href="/user/convert/{{server_id}}?pos={{start_pos}}">手动继续</a>
+
+
+<script type="text/javascript">
+{%if is_reload%}
+var pos={{start_pos}};
+if(pos>=0)
+{
+	document.location.href = "/user/convert/{{server_id}}?pos="+pos;
+}
+{%endif%}
+</script>
+
+
+
+{% endblock %}

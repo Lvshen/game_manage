@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户提问</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a><font color=red>{{selectUser.username}}</font></a>&nbsp;&nbsp;的所有问题</a>
+</div>
+
+<table class="list" style="width:100%;margin:5px 5px 5px 5px">
+<tr>
+<th width="85">提问时间</th>
+<th width="80">服务器</th>
+<th width="70">用户名(用户Id)</th>
+<th width="120">问题</th>
+<th>回复</th>
+<th width="80">回复人</th>
+<th width="50">操作</th>
+</tr>
+{%for item in list%}
+<tr>
+<td>{{item.post_time_str}}</td>
+<td>{{item.serverName}}</td>
+<td>{{item.playerName}}({{item.post_user_id}})</td>
+<td>{{item.question}}</td>
+<td>{{item.answer}}</td>
+<td>{{item.reply_user}}@</br>{{item.reply_time_str}}</td>
+<td>
+ <a class="del" href="/channel/question/remove/{{item.id}}">删除</a>
+{%ifequal item.status 1%}
+ <a href="#" onclick="replyQuestion({{item.id}})">修改</a>
+{%else%}
+ <a href="#" onclick="replyQuestion({{item.id}})">回复</a>
+{%endifequal%}
+</td>
+</tr>
+{%endfor%}
+</table>
+<form class="msgbox hide" action="/channel/question/answer" method="post">
+<input type="hidden" name="question_id" value="0" />
+{% csrf_token %}
+<table>
+<tr>
+<th width="80px">回复内容:</th><td><textarea name="answer"></textarea></td>
+</tr>
+<tr>
+<td></td>
+<td><input type="submit" value="立即回复"/>  or <a href="javascript:void(0)" onclick="$('.msgbox').hide()">关闭</a></td>
+</tr>
+</table>
+</form>
+{% include "pager.html" %}
+{% endblock %}

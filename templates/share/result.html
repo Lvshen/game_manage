@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN" "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>微博分享</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=yes;" />
+<link rel="stylesheet" type="text/css" href="/static/skin/mobile.css" />
+
+</head>
+
+<body>
+
+<h4 class="header">分享结果</h4>
+<div class="body">
+{%ifequal task_id result%}
+成功发布了分享!
+{%else%}
+分享失败,请确认授权风云天下分享的权限...<a href="{{result}}">点击此处重新授权并分享</a>
+{%endifequal%}
+</div>
+<div class="footer">
+</div>
+		
+</body>
+</html>

@@ -1,0 +1,51 @@
+﻿<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="google-translate-customization" content="4c7f6cb0fee7f952-8842eaefdbe93112-g4297ba3489700b67-15"></meta>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/static/js/stran.js"></script>
+
+<link rel="stylesheet" href="/static/skin/style.css"type="text/css" />
+
+<script type="text/javascript" src="/static/js/dialog.js" ></script>
+<link rel="stylesheet" href="/static/skin/dialog.css" />
+ 
+<script type="text/javascript" src="/static/js/main.js"></script>
+
+<title>解除封号</title>
+</head>
+<body>
+<div id="bar">
+解除封号<span class="buttons"></span>
+</div>
+
+<form class="ajax" action="/richman/unbanplayerans/" method="post"  todo="editFinish" >
+	<input type="hidden" name="ajax" value="true" />
+	<table class="form">
+		<tr>
+			<th>服务器：</th>
+			<td>
+			<select name="serverip" id="Select2">
+				<option selected="selected" value="10.21.210.251">10.21.210.251</option>
+				<option value="10.21.210.110">10.21.210.110</option>
+				<option value="183.61.86.87">183.61.86.87</option>
+			</select></td>
+		</tr>
+		<tr>
+			<th>用户ID：</th>
+			<td>
+				<input type="text" name = "player_id" style="width:100px;" />
+			</td>
+		</tr>
+		<tr>
+			<th>&nbsp;</th>
+			<td>
+			<input type="submit" value="提交" />
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

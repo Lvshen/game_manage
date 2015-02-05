@@ -1,0 +1,124 @@
+import "db_cache.proto";
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!本文件应该修改文件名为大区专用的协议文件，而不是login
+
+//////////////////////////////////////登录///////////////////////////////////////////////////////
+
+message C2S_LoginReq
+{
+	required int32 user_type = 1;   //用户类型 
+	required string user_id = 2; //用户唯一标识 
+	required string sign = 3;      //signiture
+	required int32 timestamp = 4; //时间戳,精确到秒 
+	required string channel_key = 5; //渠道KEY,例:0000010000 
+	required string client_version = 6; //客户端版本   
+	required string terminate_id = 7; //终端唯一标识 
+}
+
+message S2C_LoginRsp
+{
+	required int32 ret = 1;      //0为成功,1失败,2补封号,3签名过期
+	required int32 role_id = 2;     // 玩家编号
+	optional bytes error_msg = 3; //附加消息为具体的失败原因 
+}
+
+message LoginTotalInfo
+{
+	required DBCACHE.Player playerInfo = 1;
+	optional bool playing_game = 2;
+}
+
+message S2C_RoleCardInfo	//8张角色卡片信息
+{
+	repeated int32 rolecardUuid = 1;
+}
+
+message C2S_Create_Role_Req	//客户端选择的卡牌索引号
+{
+	required int32 cardId = 1;//卡牌索引号
+	required bytes nickName = 2;//用户昵称
+}
+
+message S2C_Create_Role_Rsp
+{
+	required int32 ret_code = 1;
+}
+
+message C2S_LoginNotVerify//for robot test
+{
+	required int32 userid = 1;
+}
+
+message S2C_Player_Card_List_Rsp
+{
+	repeated DBCACHE.PlayerCard player_card = 1;
+}
+
+message S2C_Player_Die_List_Rsp
+{
+	repeated DBCACHE.PlayerDie player_die = 1;
+}
+
+message C2S_Modify_NickName_Req
+{
+	required bytes new_nickname =1;
+}
+
+message S2C_Modify_NickName_Rsp
+{
+	required int32 ret = 1;
+}
+
+message C2S_Modify_UnderWrite_Req
+{
+	required bytes new_underwrite =1;
+}
+
+message S2C_Modify_UnderWrite_Rsp
+{
+	required int32 ret = 1;
+}
+
+message S2C_Notify_Player_Level_Up
+{
+	required uint32 new_level			= 1;
+	required uint32 new_exp				= 2;
+	optional DBCACHE.Prop reward		= 3;
+}
+message C2S_Upload_Custom_Head_Req
+{
+	required string new_head = 1;
+}
+
+message S2C_Upload_Custom_Head_Rsp
+{
+	required int32 ret_code = 1;
+}
+
+message S2C_New_System_Message
+{
+	required uint32 message_type = 1;
+	required int32 message_id 	= 2;
+	optional bytes message_context = 3;
+}
+
+message S2C_Kick_Off_User
+{
+	enum KickReason
+	{
+		account_login_in_orther_place			= 1;	//账号在其他地方登陆
+		account_were_banned				= 2;	//账号被封
+		service_has_stop				= 3;	//服务器维护中
+		login_timeout					= 4;	//超时
+		server_is_full					= 5;	//满人
+	}
+	
+	required int32 reason = 1;
+}
+
+message S2C_Present_Points_Reward_Notify
+{
+	required uint32 amount				= 1;
+	required uint32 reason				= 2;
+}

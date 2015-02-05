@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		{% include "header.html" %}
+		<title>迪辉游戏管理后台 v1.0</title>
+		<script type="text/javascript">
+			var menu_list = [{%for item in list_menu%}{
+				"id" : "{{item.id}}",
+				"parent_id" : "{{item.parent_id}}",
+				"name" : "{{item.name}}",
+				"url" : "{{item.url}}",
+				"icon" : "{{item.icon}}",
+				"css" : "{{item.css}}"
+			},   {%endfor%}{}];
+		</script> 
+	</head>
+
+	<body>
+		<div id="header">
+			<div class="header">
+				<div id="serverList">
+					&nbsp;
+				</div>
+				<div id="userInfo">
+					{{the_channel.username}}你好,<a href="javascript:StranBody()" id="StranLink">繁体版</a><a href="/channel/logout">退出</a>
+
+				</div>
+				<div id="logo">
+					迪辉游戏管理后台 v1.0
+				</div>
+			</div>
+			
+			<div id="tabList">
+				&nbsp;
+			</div>
+		</div>
+
+		<div id="body">
+			<div id="menuList">
+
+			</div>
+			<div id="main">
+				<div id="switchMenu" onclick="switchMenuList()">
+					&nbsp;
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

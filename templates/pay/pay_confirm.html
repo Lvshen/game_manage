@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>审核为金币已发放</title>
+{% endblock %}
+
+{% block content %}
+<h2>操作已成功!</h2>
+<a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+<script type="text/javascript">
+parent.location.reload();
+</script>
+{% endblock %}

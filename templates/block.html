@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>禁止访问</title>
+{% endblock %}
+
+{% block content %}
+<style>body{background:black;}</style>
+<p style="color:red;font-size:30px;font-weight:bold;margin-top:100px;">
+	{% if msg %}
+		{{msg}}
+	{% else %}
+		警告：试图访问未授权的页面，已记录！
+	{% endif %}
+</p>
+
+{% endblock %}

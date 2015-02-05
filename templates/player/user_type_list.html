@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家类型管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	玩家管理
+
+	<span class="buttons"> <a href="/player/type/edit">添加</a> </span>
+</div>
+
+<table class="list">
+	<tr>
+		<th width="80">ID</th>
+		<th width="100">类型名称</th>
+		<th >玩家类型</th>
+		<th>登录方法</th>
+		<th>登录设置</th>
+		<th>登录方法版本</th>
+		<th width="80">操作</th>
+	</tr>
+	{%for item in data_list%}
+	<tr> 
+		<td>{{item.id}}</td>
+		<td>{{item.name}}</td>
+		<td>{{item.type_id}}</td>
+		<td>{{item.login_config}}</td>
+		<td>{{item.func_name}}</td>
+		<td>{{item.func_ver}}</td>
+		<td>
+			<a href="/player/type/edit?id={{item.id}}"   >编辑</a>
+			<!--<a href="/player/type/del?id={{item.id}}" class="del"  >删除</a>-->
+		</td>
+	</tr>
+	{%endfor%}
+</table>
+{% endblock %}

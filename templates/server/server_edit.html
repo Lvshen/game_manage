@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>服务器编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript" src="/static/js/ajaxForm.js" ></script>
+ <script type="text/javascript" >
+	$(document).ready(function(){
+		
+
+		var checked_list = $("input[name='channel_id']:checked");
+		
+		checked_list.parent().parent().prepend(checked_list.parent());
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	<a href="/server/list">服务器列表</a> -> 服务器编辑 <span class="buttons"> <a href="/server/list">返回</a> </span>
+</div>
+
+<form action="/server/save?server_id={{model.id}}" method="post" >
+	<input type="hidden" value="true" name='ajax' />
+	<table class="form">
+		<tr>
+			<th>服务器ID：</th><td>
+			<input type="text" name="new_server_id" value="{{model.id}}" style=" width:50px;" /><span style=" color:red; font-size:18px; font-weight:800;">(不能随便修改ID，会影响到服务分区)</span>
+			</td>
+		</tr>
+		<tr>
+			<th>服务器名称：</th><td>
+			<input type="text" name="name" value="{{model.name}}" />
+			</td>
+		</tr>
+		<tr>
+			<th>服务器状态：</th><td>
+			<select name="status">
+				{%for item in model.STATUS_CHOICES%}
+				<option value="{{item.0}}"{%ifequal model.status item.0%} selected="selected"{%endifequal%}>{{item.1}}</option>
+				{%endfor%}
+			</select></td>
+		</tr>
+		<tr>
+			<th>推荐标识：</th><td>
+			<select name="commend">
+				{%for item in model.COMMEND_CHOICES%}
+				<option value="{{item.0}}"{%ifequal model.commend item.0%} selected="selected"{%endifequal%}>{{item.1}}</option>
+				{%endfor%}
+			</select></td>
+		</tr>
+		<tr>
+			<th>针对客户端版本：</th><td>
+			<input type="text" name="client_ver" size="50" value="{{model.client_ver}}" />
+			输入数字部份即可,多个用逗号隔开</td>
+		</tr>
+
+		<tr>
+			<th>
+				<a href="/manage/channel/list">开通渠道</a>：
+				<br/>
+				<label>
+					<input type="checkbox" id="select_server" onchange="selectAll(this.id)" />
+					全选
+				</label>
+			</th>
+				<td id="select_server_area"> 
+					{%for item in list_channel%} 
+					<label>
+					<input type="checkbox" name="channel_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} />
+					{{item.name}}
+					</label> 
+					{%endfor%} 
+				</td>
+		</tr>
+
+		<tr>
+			<th>要求最低版本：</th><td>
+			<input type="text" name="require_ver" size="5" value="{{model.require_ver}}" />
+			输入数字部份即可</td>
+		</tr>
+
+		<tr>
+			<th>服务器IP及端口：</th><td>
+			<input type="text" name="game_addr" value="{{model.game_addr}}" />
+			:
+			<input type="text" name="game_port" size="4" value="{{model.game_port}}" />
+			默认2008</td>
+		</tr>
+		
+		<tr> 
+			<th>开服时间:</th>
+			<td>
+				<input type="text" name="create_time" class="Wdate" value="{{model.create_time_str}}" />
+			</td>	
+		</tr>
+
+		<tr>
+			<th>战报URL：</th><td>
+			<input type="text" name="report_url" size="50" value="{{model.report_url}}" />
+			默认为http://游戏接入IP</td>
+		</tr>
+
+		<tr>
+			<th>日志数据库配置：</th><td>			<textarea name="log_db_config">{{model.log_db_config}}</textarea></td>
+		</tr>
+
+		<tr>
+			<th>备注：</th><td>			<textarea name="remark">{{model.remark}}</textarea></td>
+		</tr>
+		<tr>
+			<th>附加JSON数据：</th><td>			<textarea name="json_data">{{model.json_data}}</textarea>JSON格式,不用加{}</td>
+		</tr>
+		<tr>
+			<th>排序：</th><td>
+			<input type="text" name="order" size="5" value="{{model.order}}" />
+			数字小的排前面</td>
+		</tr>
+
+		<tr>
+			<td>
+			<input type="submit" value="保存" />
+			</td>
+		</tr>
+	</table>
+	{% csrf_token %}
+</form>
+{% endblock %}

@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN" "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+<html>
+	<head>
+		{% include "header.html" %}
+		{% block header %} {% endblock %}
+	</head>
+	<body>
+
+		{% if err_msg %}
+		<div id="err_msg">
+			<p>
+				{{err_msg}}
+			</p>
+		</div>
+		{% endif %}
+
+		<div id="tip_box" title="提示框" >
+			
+		</div>
+
+		{% block content %}
+
+		{% endblock %}
+	</body>
+</html>

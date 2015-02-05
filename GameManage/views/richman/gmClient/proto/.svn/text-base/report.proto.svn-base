@@ -1,0 +1,19 @@
+package REPORT;
+
+message ReportSomething
+{
+	optional string type			= 1;
+	required int32 user_id 			= 2;
+	required int32 server_id 		= 3;
+	required int32 channel_id 		= 4;
+	optional int32 log_type 		= 5;
+	optional int32 log_data 		= 6;
+	optional int32 log_result 		= 7;
+	optional string param1 			= 8;
+	optional string param2 			= 9;
+	optional string param3 			= 10;
+	optional string param4 			= 11;
+	optional string param5 			= 12;
+	optional string param6 			= 13;
+}
+

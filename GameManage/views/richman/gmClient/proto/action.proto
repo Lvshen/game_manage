@@ -1,0 +1,93 @@
+////////////////////////////////////投骰子力度///////////////////////////////////////////////
+message C2S_DicingPower
+{
+	required int32 power = 1;		// 力量值
+	optional int32 dice_ctrl_type = 2; // 1:单 2:双
+}
+///////////////////////////////////////动作//////////////////////////////////////////////
+message C2S_Action
+{
+	required int32 opra_type = 1;		// 操作类型 0:放弃 1:建造 2:使用卡牌 3:破产 4:举办奥运会 5:收购 6:投硬币 7:无人岛 8:起始点升级建筑 9:随机事件请求 10:飞行 11:动作完成确认
+	optional BuildReq build = 2;		// 建设
+	optional BankruptReq bankrupt = 3; // 破产处理
+	optional CoinThrowReq coin = 4;		// 投币结果
+	optional HoldPeakReq peak = 5;		// 举办奥运会
+	optional EscIslandReq esc_island = 6; // 逃离无人岛
+	optional StartPointReq start = 7; // 起点升级建筑
+	optional RandEventReq rand_event_req = 8; // 随机事件请求
+	optional UseCard use_card = 9; // 使用防御卡
+	optional FlyPointReq fly = 10; // 飞行
+}
+message BuildReq
+{
+	required int32 type = 1; // 建设类型 0:城市 1:观光岛
+	repeated int32 lvl = 2;		// 建筑物级别
+}
+message BankruptReq
+{
+	required int32 deal_type = 1; // 处理方式 0:变卖 1:贷款 2:倒闭
+	repeated int32 sale_city_list = 2; // 变卖城市列表 0-31
+}
+message CoinThrowReq
+{
+	required int32 select = 1;		// 选择 0:正面 1:反面 2:退出
+	optional int32 curr_stake = 2; // 当前赌注
+}
+message HoldPeakReq
+{
+	required int32 grid_index = 1; // 格子索引 0-31
+}
+message EscIslandReq
+{
+	required int32 esc_type = 1; // 逃跑方式 0:掷骰子 1:出钱 2:使用黄金卡
+}
+message StartPointReq
+{
+	required int32 grid_index = 1; // 要升级的城市
+}
+message FlyPointReq
+{
+	required int32 grid_index = 1; // 飞行目的地
+}
+
+// 使用防御卡牌
+message UseCard
+{
+	required bool is_use = 1; // true:使用 false:不使用
+	required int32 card_type = 2; // 卡类型 17:逃出无人岛 18:盾牌 19:天使 20:优惠券
+}
+// 随机事件请求
+message RandEventReq
+{
+	// 命令卡牌
+	message CmdCardReq
+	{
+		optional int32 contribut_city = 1; // 捐献城市
+		optional int32 contribut_role = 2; // 捐献对象玩家ID
+		optional int32 hold_peak_city = 3; // 举办奥运城市
+	}
+	// 攻击型卡牌
+	message AttackReq
+	{
+		message ChangeCityReq
+		{
+			required int32 my_city_index = 1; // 我的城市
+			required int32 he_city_index = 2; // 其他城市
+		}
+		optional int32 city_grid = 1; // 要攻击城市的序号 
+		optional ChangeCityReq change_city = 2; // 更换城市
+	}
+	// 获得卡
+	message GetCardReq
+	{
+		required bool is_save = 1;	// true:保存 fale:不保存
+		optional int32 card_type = 2; // 卡类型 0:逃出无人岛 1:盾牌 2:天使 3:优惠券
+	}
+	required int32 card_type = 1; // 卡牌类型 0:命令卡牌 1:攻击卡牌 2:防御卡牌
+	required int32 event_id = 2; // 事件类型 0:双倍过路费 1:参观奥运会 2:移动到无人岛 3:征税 4:捐献城市 5:环游世界 6:举办奥运 7:参加投硬币游戏 
+																	//						8:移动到起始点 9:援助 10:地震 11:城市停电 12:沙尘暴 13:强制拍卖 14:传染病
+																	//						15:更换城市	16:外星人入侵	17:逃出无人岛	18:盾牌	19:天使	20:优惠券
+	optional CmdCardReq cmd_card_req = 3; // 命令卡牌操作
+	optional AttackReq attack_req = 4; // 攻击型卡牌
+	optional GetCardReq get_card_req = 5; // 保存防御卡牌
+}

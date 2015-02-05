@@ -1,0 +1,191 @@
+/**
+* @file:   rcm_error_code.proto
+* @author: Xuefeng Li  lixuefeng@gzyouai.com
+* @brief:  统一错误定义
+* 错误码需和svr_id保持一致
+*
+*
+*/
+
+
+package rcm;
+
+message RCM_RET
+{
+    enum ErrorCode
+    {
+        FAIL_INTERNAL_ERROR                     =     -1;
+        SUCCESS                                 =      0;
+
+        // 一些基础模块的错误定义
+        ERR_COMMON_BEGIN                        =   5000;
+        ERR_COMMON_ENCODE_FAILED                =   5001;
+        ERR_COMMON_DECODE_FAILED                =   5002;
+
+        ERR_COMMON_END                          =   9999;
+
+        // 大区服务器的错误定义
+        ERR_ZONE_BEGIN                          =  80000;
+        // 商城相关的错误吗
+        ERR_STORE_SYSTEM                        =  80001;  // 购买系统错误
+        ERR_STORE_PRICE                         =  80002;  // 价格ID错误
+        ERR_STORE_PAYTYPE                       =  80003;  // 支付类型错误
+        ERR_STORE_BALANCE                       =  80004;  // 账户余额不足
+        ERR_STORE_GOOD_NOT_EXIST                =  80005;  // 物品不存在
+        ERR_STORE_SEX                           =  80006;  // 购买性别错误
+        ERR_STORE_TOO_MUCH_GOODS                =  80007;  // 购买物品过多
+        ERR_STORE_PRESENT_RECEIVER_NOT_TNTER    =  80008;  // 赠送接受者非TNT玩家
+        ERR_STORE_PRESENT_SELF                  =  80009;  // 赠送接受者为自己
+        ERR_STORE_CREATE_BILL                   =  80010;  // 生成账单错误
+        ERR_STORE_PRESENT_GAME_CURRENCY         =  80011;  // 不支持游戏内货币(点券)赠送
+        ERR_STORE_PRESENT_RECEIVER_SEX          =  80012;  // 接受者性别与物品不符
+        ERR_STORE_CAN_NOT_RECHARGE              =  80013;  // 物品不可续费
+        // 支付portal的一些错误定义, 参照paysvr
+        ERR_PORTAL_PRICE                        =  80021;  // portal 批价错误
+        ERR_PORTAL_PROVIDE                      =  80022;  // portal 发货错误
+        ERR_PORTAL_NOT_EXIST                    =  80023;  // portal 帐户不存在
+        ERR_PORTAL_FREEZE                       =  80024;  // portal 帐户被冻结
+        ERR_PORTAL_LOSS                         =  80025;  // portal 帐户不存在
+        ERR_PORTAL_BALANCE                      =  80026;  // portal 帐户余额不足
+        ERR_PORTAL_PAYLIMIT                     =  80027;  // portal 单笔限制
+        ERR_PORTAL_DAYLIMIT                     =  80028;  // portal 单日限制
+        ERR_PORTAL_TOTAL_ENOUGH                 =  80029;  // portal QB或QD余额不足，但可以混合支付
+        ERR_PORTAL_NOT_FRIENDS_7DAY             =  80030;  // portal 7天好友限制
+        ERR_PORTAL_OTHER_ERROR                  =  80031;  // portal 其他错误
+
+        // 兑换相关的错误吗
+        ERR_EXCHANGE_ID_NOT_EXIST               =  80040;  // 兑换ID不存在
+        ERR_EXCHANGE_MODE_NOT_EXIST             =  80041;  // 兑换ID不存在
+        ERR_EXCHANGE_LEVEL_LIMIT                =  80042;  // 级别不够
+        ERR_EXCHANGE_NEED_GOODS_NOT_ENOUGH      =  80043;  // 兑换需要的物品不够
+        ERR_EXCHANGE_ADD_ITEM_FAILED            =  80044;  // 添加物品失败
+        ERR_EXCHANGE_GP_LIMIT                   =  80045;  // GP值限制
+
+        // 背包相关的错误
+        ERR_PACKAGE_IS_FULL                     =  80050;  // 背包满了
+        ERR_PACKAGE_ITEM_NOT_EXIST              =  80051;  // 背包没有该物品
+        ERR_PACKAGE_ITEM_NOT_ENOUGH             =  80052;  // 背包物品不够
+
+        //强化相关
+        ERR_TITAN_PARAMETER_ERROR               =  80070;  // 参数输入错误
+        ERR_TITAN_PACKAGE_ITEM_NOT_EXIST        =  80071;  // 背包泰坦芯片不存在
+        ERR_TITAN_PACKAGE_SAMALL_CRYSTAL_NOT_ENOUGH   =  80072;  // 背包泰坦小晶体数量不够
+        ERR_TITAN_PACKAGE_BIG_CRYSTAL_NOT_ENOUGH=  80073;  // 背包泰坦大晶体数量不够
+        ERR_TITAN_PACKAGE_CATALYST_NOT_ENOUGH   =  80074;  // 背包泰坦催化剂数量不够
+        ERR_TITAN_PACKAGE_SHIELD_NOT_ENOUGH     =  80075;  // 背包泰坦防护剂数量不够
+        ERR_TITAN_GOODS_TYPE_WRONG              =  80076;  // 不是泰坦芯片
+        ERR_TITAN_LEVEL_IS_MAX                  =  80077;  // 泰坦芯片已经是最高级别
+        ERR_TITAN_UPGRADE_FAILED                =  80078;  // 泰坦芯片升级失败, 到这只能是运气不好， 坑爹啊。。。
+        ERR_TITAN_INSERT_ALREADY                =  80079;  // 该武器已经镶嵌泰坦芯片
+        ERR_TITAN_REMOVE_NONE                   =  80080;  // 未镶嵌芯片，无法移除
+        ERR_TITAN_UPGRADE_FAILED_AND_DEGRADE    =  80081;  // 泰坦芯片升级失败且降级, 到这只能是运气不好， 坑爹啊。。。
+        ERR_TITAN_GOLD_NOT_ENOUGH               =  80082;  // 金币不足
+        ERR_TITAN_UPGRADE_CAN_NOT               =  80083;  // 芯片不允许升级
+
+
+        // 把登陆的错误也放过来
+        ERR_LOGIN_NOPLAYER                      =  80091;  // 玩家不存在 原错误码的1
+        ERR_LOGIN_CLOSE                         =  80092;  // 原错误码的2
+        ERR_LOGIN_SERVER_CLOSE                  =  80093;  // 原错误码的3
+        ERR_LOGIN_LOADPLAYERFAILED              =  80094;  // 玩家数据载入失败 原错误码的4
+        ERR_LOGIN_AREA_FULL                     =  80095;  // 小区已满 原错误码的5
+        ERR_LOGIN_SYSTEM_ERR                    =  80096;  // 系统错误 原错误码的6
+        ERR_LOGIN_NO_AREA                       =  80097;  // 原错误码的7
+        ERR_LOGIN_BAN                           =  80098;  // 玩家被限制登录 原错误码的8
+        ERR_LOGIN_AREA_AUTO_CHANGE              =  80099;  // 自动切换小区 原错误码的9
+        ERR_LOGIN_SERVER_STOPPED                =  80100;  // 停机 原错误码的10
+
+        //活动运营的错误定义
+        ERR_ACTIVITY_ID_NOT_EXIST               = 80151;  //活动不存在
+        ERR_ACTIVITY_OVERDUE                    = 80152;  //活动过期
+        ERR_ACTIVITY_NOT_ACCORD                 = 80153;  //不符合活动条件
+        ERR_ACTIVITY_FILL_LIMIT_ENTRY           = 80154;  //已达能够参加的活动次数
+        ERR_ACTIVITY_NOT_ENOUGH_GOODS           = 80155;  //物品不足以参加活动
+        ERR_ACTIVITY_DEDUCT_GOODS_FAILED        = 80156;  //消耗物品失败
+        ERR_ACTIVITY_ADD_GOODS_FAILED           = 80157;  //添加物品失败
+        ERR_ACTIVITY_HAD_PLANT                  = 80158;  //已经种植，不能多种
+        ERR_ACTIVITY_NO_SEED                    = 80159;  //配置里没有种子，可能是服务器配置出错
+        ERR_ACTIVITY_NO_HARVEST                 = 80160;  //未到收获时间
+        ERR_ACTIVITY_HARVEST_OVER_ENDTIME       = 80161;  //收获时间超过活动结束时间
+
+        //军需仓库的错误定义
+        ERR_WAREHOUSE_NO_REFRESH_ITEM           = 80201; //没有刷新道具
+        ERR_WAREHOUSE_ITEM_HAS_EXCHANGED        = 80202; //道具已经被兑换
+        ERR_WAREHOUSE_EXCHANGE_ID_ERR           = 80203; //军需仓库兑换id错误
+
+        ERR_QQ_FRIEND_INVITE_NUM_LIMIT          = 80301; //邀请太多不能再邀请
+        ERR_QQ_INVITE_AWARD_NUM_NOT_REACH       = 80302; //个数奖励个数未达到
+        ERR_QQ_INVITE_AWARD_ALREADY_RECEIVED    = 80303; //奖励已经领取
+        ERR_QQ_INVITE_AWARD_INVITEE_NOT_EXIST   = 80304; //受邀者不存在
+
+        ERR_ZONE_END                            =  89999;
+
+        // 天梯匹配服务器的错误定义
+        ERR_MATCH_BEGIN                         =  160000;
+        ERR_MATCH_START_LEVEL_LIMIT             =  160001;  // 等级限制，30级
+        ERR_MATCH_START_QUEUE_FULL              =  160002;  // 队列已满， 无法加入队列
+        ERR_MATCH_START_QUEUED                  =  160003;  // 已经在队列中
+        ERR_MATCH_CANCEL_MATCHED                =  160004;  // 已经匹配到，无法取消
+        ERR_MATCH_RESULT_TIMEOUT                =  160005;  // 匹配超时
+        ERR_MATCH_START_NOT_BEGIN               =  160006;  // 赛季未开始
+
+        ERR_MATCH_END                           =  169999;
+
+        // 公会相关的错误定义
+        ERR_GUILD_BEGIN                         =  190000;
+        ERR_GUILD_LEVEL_LIMIT                   =  190001;  // 等级限制，15级
+        ERR_GUILD_NO_MEDAL                      =  190002;  // 没有公会勋章
+        ERR_GUILD_NAME_EXIST                    =  190003;  // 公会名已经存在
+        ERR_GUILD_NONEXIST                      =  190004;  // 该公会不存在
+        ERR_GUILD_FULL                          =  190005;  // 公会人已经满了
+        ERR_GUILD_ALREADY_IN                    =  190006;  // 你已经在一个公会中，不能加入其他公会
+        ERR_GUILD_CANNOT_EXIT                   =  190007;  // 你是会长不能退出公会，必须先转让后方可退出
+        ERR_GUILD_NOT_IN                        =  190008;  // 该人不在公会中
+        ERR_GUILD_NO_SUCH_PLAYER                =  190009;  // 找不到玩家
+        ERR_GUILD_TITLE_LIMIT                   =  190010;  // 职位级别不够，不能对对方进行开除、升职、降职操作
+        ERR_GUILD_GET_NEW_ID_ERR                =  190011;  // 获取公会id错误
+        ERR_GUILD_NO_GUILD_ID                   =  190012;  // 请求没有id
+        ERR_GUILD_GET_INFO_ERR                  =  190013;  // 获取公会信息错误
+        ERR_GUILD_REJECT_TO_JOIN                =  190014;  // 公会拒绝加入
+        ERR_GUILD_SYSTEM_ERR                    =  190015;  // 协议错误
+        ERR_GUILD_TITLE_TYPE_ERR                =  190016;  // 职位类型错误
+        ERR_GUILD_ACCEPT_TYPE_ERR               =  190017;  // 设置允许加入类型错误
+        ERR_GUILD_HAS_BEEN_DISSOLVE             =  190018;  // 该公会已经被解散
+        ERR_GUILD_NO_NAME                       =  190019;  // 没有名字
+        ERR_GUILD_NAME_TOO_LONG                 =  190020;  // 名字长度超过限制
+        ERR_GUILD_DECLARATION_TOO_LONG          =  190021;  // 宣言长度超过限制
+        ERR_GUILD_INVITE_ALEADY_EXIST           =  190022;  // 邀请已经存在
+        ERR_GUILD_INVITE_TOO_MUCH               =  190023;  // 邀请太多不能再邀请
+        ERR_GUILD_NOT_PROCESSING_TRANSFER       =  190024;  // 不是转让中，不能取消
+        ERR_GUILD_NOT_PROCESSING_DISSOLVE       =  190025;  // 不是解散中，不能取消
+        ERR_GUILD_OPERATION_ON_CHAIRMAN         =  190026;  // 不能对会长操作
+        ERR_GUILD_ALEADY_IN_APPROVE_LIST        =  190027;  // 已经在审批列表里
+        ERR_GUILD_NOT_IN_INVITE_LIST            =  190028;  // 不在邀请列表
+        ERR_GUILD_VICE_IS_FULL                  =  190029;  // 副会长的人数已经达到上限
+        ERR_GUILD_ELDER_IS_FULL                 =  190030;  // 元老的人数已经达到上限
+        ERR_GUILD_HAS_BEEN_TRANSFER             =  190031;  // 公会已经被转
+        ERR_GUILD_CHAT_ILLEGAL                  =  190032;  // 公会聊天内容非法
+        ERR_GUILD_NAME_ILLEGAL                  =  190033;  // 公会名字非法
+        ERR_GUILD_DECLARATION_ILLEGAL           =  190034;  // 公会宣言非法
+        ERR_GUILD_ANNOUNCEMENT_ILLEGAL          =  190035;  // 公会公告非法
+        ERR_GUILD_NOT_IN_APPROVE_LIST           =  190038;  // 不在审批列表
+        ERR_GUILD_DATA_INLOAD                   =  190039;  // 正在从mysql取数据
+        ERR_GUILD_APPROVE_TOO_MUCH              =  190040;  // 审批列表过
+        ERR_GUILD_QUIT_IN_HALF_DAY              =  190041;  // 退出公会12小时后才能加入
+
+        ERR_GUILD_END                           =  199999;
+
+        ERR_GAME_BEGIN                          = 200000;
+        ERR_GAME_CANT_GET_CARD_SELFKILL         = 200001;
+        ERR_GAME_CANT_GET_CARD_TEAM_SELFKILL    = 200002;
+        ERR_GAME_NO_ENOUGH_NPC_GAME_TICK        = 200003;
+        ERR_GAME_CANT_GET_CARD_NO_MONEY                  = 200004;
+        ERR_GAME_CANT_GET_CARD_SYSTEM_ERR               = 200005;
+
+        ERR_GAME_END                            = 299999;
+
+    }
+
+
+}
+

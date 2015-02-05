@@ -1,0 +1,337 @@
+#!/usr/bin/env python
+#encoding=utf-8
+import sys
+import os
+import MySQLdb
+import time
+def log_count_dn(req):
+    '''查找所有用户或指定用户在指定时间内德游戏情况'''
+    conf_host='10.21.210.250'
+    db_port=3306
+    conf_user='root'
+    conf_passwd='2u3oijflas2398j9lkjssaf'
+    db_name='taige'
+    db_charset='utf8'
+    try:
+        conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+    except MySQLdb.Error,e:
+        print "sql=%s"%(sql)
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+    cur = conn.cursor(cursorclass = MySQLdb.cursors.DictCursor)
+    result = {}
+    start_time = req['start_time']
+    end_time = req['end_time']
+    player_id = req['player_id']
+    room_type = req['room_type']
+    sqlpart1 = 'Select '
+    sqlpart2 = ' from log_res_dn where log_data > 0'
+    if int(player_id) !=0:
+        sqlpart2 += ' and log_data = '+str(player_id)
+    if int(room_type) !=0:
+        sqlpart2 += ' and log_user = '+str(room_type)
+    if str(start_time) != '0':
+        sqlpart2 += ' and log_time >=\''+str(start_time)+'\''
+    if str(end_time) != '0':
+        sqlpart2 += ' and log_time <\''+str(end_time)+'\''
+    sqlall = sqlpart1+'count(distinct log_type) as countall,sum(log_result) as sumall'+sqlpart2
+    sqlzj = sqlpart1+'count(distinct log_type) as countzj,sum(log_result) as sumzj'+sqlpart2+' and log_channel = 1'
+    sqlzjwin = sqlpart1+'count(distinct log_type) as countzjwin,sum(log_result) as sumzjwin'+sqlpart2+' and log_channel = 1'+' and log_result > 0'
+
+    try:
+        cur.execute(sqlall)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)
+    try:
+        cur.execute(sqlzj)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)
+    try:
+        cur.execute(sqlzjwin)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)
+
+
+    if result != None:
+        for i in result:
+            if result[i] == None:
+                result[i] = 0
+        if result['countzj'] != 0:
+            result.update({'zjwinrate':round(float(result['countzjwin'])/float(result['countzj']),2)})
+        else:
+            result.update({'zjwinrate':None})
+        arg=('countall','sumall','countzj','sumzj','zjwinrate')
+        i=0
+        rspjson = "{\"content\": [{"
+        for eacharg in arg:
+            if i != 0:
+                rspjson += ','
+            rspjson += "\""+eacharg+"\":\""+str(result[eacharg])+"\""
+            i=i+1
+        rspjson += "}],\"code\": 0}"
+        conn.close()
+        return rspjson
+    else:
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+#---------------------------------------------------------------------------------------------------------------
+def log_count_dn_day(req):
+    '''查找所有用户或指定用户一天的游戏情况'''
+    conf_host='10.21.210.250'
+    db_port=3306
+    conf_user='root'
+    conf_passwd='2u3oijflas2398j9lkjssaf'
+    db_name='taige'
+    db_charset='utf8'
+    try:
+        conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+    except MySQLdb.Error,e:
+        print "sql=%s"%(sql)
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+    cur = conn.cursor(cursorclass = MySQLdb.cursors.DictCursor)
+    if req['start_time'] != '0':
+        start_time = req['start_time']
+        start_time = start_time.split(u' ')[0]
+        end_time = start_time+" 23:59:59"
+        start_time = start_time+" 00:00:00"
+    else:
+        start_time =  str(time.strftime("%Y-%m-%d 00:00:00",time.localtime(time.time())))
+        end_time = str(time.strftime("%Y-%m-%d 23:59:59",time.localtime(time.time())))
+    player_id = req['player_id']
+    room_type = req['room_type']
+    sqlpart1 = 'Select '
+    sqlpart2 = ' from log_res_dn where log_data > 0 and log_time >=\''+str(start_time)+'\' and log_time <=\''+str(end_time)+'\''
+    if int(player_id) !=0:
+        sqlpart2 += ' and log_data = '+str(player_id)
+    if int(room_type) !=0:
+        sqlpart2 += ' and log_user = '+str(room_type)
+    sqlall = sqlpart1+'count(distinct log_type) as countall,sum(log_result) as sumall'+sqlpart2
+    sqlzj = sqlpart1+'count(distinct log_type) as countzj,sum(log_result) as sumzj'+sqlpart2+' and log_channel = 1'
+    sqlzjwin = sqlpart1+'count(distinct log_type) as countzjwin,sum(log_result) as sumzjwin'+sqlpart2+' and log_channel = 1'+' and log_result > 0'
+    print sqlall
+    print sqlzj
+    print sqlzjwin
+    result = {}
+    try:
+        cur.execute(sqlall)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)
+    try:
+        cur.execute(sqlzj)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)
+    try:
+        cur.execute(sqlzjwin)
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+    tmp_result = cur.fetchone()
+    result.update(tmp_result)    
+    if result != None:
+        for i in result:
+            if result[i] == None:
+                result[i] = 0
+        if result['countzj'] != 0:
+            result.update({'zjwinrate':round(float(result['countzjwin'])/float(result['countzj']),2)})
+        else:
+            result.update({'zjwinrate':None})
+        arg=('countall','sumall','countzj','sumzj','countzjwin','sumzjwin','zjwinrate')
+        i=0
+        rspjson = "{\"content\": [{"
+        for eacharg in arg:
+            if i != 0:
+                rspjson += ','
+            rspjson += "\""+eacharg+"\":\""+str(result[eacharg])+"\""
+            i=i+1
+        rspjson += "}],\"code\": 0}"
+        conn.close()
+        return rspjson
+    else:
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+
+
+
+#---------------------------------------------------------------------------------------------------------------
+def log_count_dn_10day(req):
+    '''查找所有用户或指定用户一周的游戏情况'''
+    conf_host='10.21.210.250'
+    db_port=3306
+    conf_user='root'
+    conf_passwd='2u3oijflas2398j9lkjssaf'
+    db_name='taige'
+    db_charset='utf8'
+    try:
+        conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+    except MySQLdb.Error,e:
+        print "sql=%s"%(sql)
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+    cur = conn.cursor(cursorclass = MySQLdb.cursors.DictCursor)
+    if req['start_time'] != '0':
+        start_time = req['start_time']
+        start_time = start_time.split(u' ')[0]
+        end_time = start_time+" 23:59:59"
+        start_time = start_time+" 00:00:00"
+    else:
+        start_time =  str(time.strftime("%Y-%m-%d 00:00:00",time.localtime(time.time())))
+        end_time = str(time.strftime("%Y-%m-%d 23:59:59",time.localtime(time.time())))
+    player_id = req['player_id']
+    room_type = req['room_type']
+    result = {}
+    arg = []
+    for i in range(0,10):
+        sqlpart1 = 'Select'
+        sqlpart2 = ' from log_res_dn where log_data > 0 and log_time >=\''+str(start_time)+'\''+'-interval '+str(i)+' day'+' and log_time <=\''+str(end_time)+'\''+'-interval '+str(i)+' day'
+        if int(player_id) !=0:
+            sqlpart2 += ' and log_data = '+str(player_id)
+        if int(room_type) !=0:
+            sqlpart2 += ' and log_user = '+str(room_type)
+        sql = sqlpart1+' count(distinct log_type) as cday'+str(i)+',sum(log_result) as sday'+str(i)+sqlpart2
+        print sql
+        try:
+            cur.execute(sql)
+        except MySQLdb.Error,e:
+            print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+            rspjson = "{\"content\":[{}],\"code\":0}"
+            conn.close()
+            return rspjson
+        tmp_result = cur.fetchone()
+        result.update(tmp_result)
+        cday="cday"+str(i)
+        sday='sday'+str(i)
+        arg.append(cday)
+        arg.append(sday)
+
+    if result != None:
+        for i in result:
+            if result[i] == None:
+                result[i] = 0     
+        i=0
+        rspjson = "{\"content\": [{"
+        for eacharg in arg:
+            if i != 0:
+                rspjson += ','
+            rspjson += "\""+eacharg+"\":\""+str(result[eacharg])+"\""
+            i=i+1
+        rspjson += "}],\"code\": 0}"
+        print rspjson
+        conn.close()
+        return rspjson
+    else:
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+
+#---------------------------------------------------------------------------------------------------------------
+def log_count_dn_10mon(req):
+    '''查找所有用户或指定用户一周的游戏情况'''
+    conf_host='10.21.210.250'
+    db_port=3306
+    conf_user='root'
+    conf_passwd='2u3oijflas2398j9lkjssaf'
+    db_name='taige'
+    db_charset='utf8'
+    try:
+        conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+    except MySQLdb.Error,e:
+        print "sql=%s"%(sql)
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+    cur = conn.cursor(cursorclass = MySQLdb.cursors.DictCursor)
+    if req['start_time'] != '0':
+        tmp_time = req['start_time']
+        tmp_time = tmp_time.split(u' ')[0]
+        tmp_time = tmp_time.split(u'-')
+        tmp_time[2] = '01'
+        tmp_time = '-'.join(tmp_time)
+        start_time = tmp_time+" 00:00:00"
+        
+    else:
+        tmp_time = str(time.strftime("%Y-%m-%d 00:00:00",time.localtime(time.time())))
+        tmp_time = tmp_time.split(u' ')[0]
+        tmp_time = tmp_time.split(u'-')
+        tmp_time[2] = '01'
+        tmp_time = '-'.join(tmp_time)
+        start_time = tmp_time+" 00:00:00"
+    player_id = req['player_id']
+    room_type = req['room_type']
+    result = {}
+    arg = []
+    for i in range(0,10):
+        sqlpart1 = 'Select'
+        sqlpart2 = ' from log_res_dn where log_data > 0 and log_time >=\''+str(start_time)+'\''+'-interval '+str(i)+' month'+' and log_time <\''+str(start_time)+'\''+'-interval '+str(i-1)+' month'
+        if int(player_id) !=0:
+            sqlpart2 += ' and log_data = '+str(player_id)
+        if int(room_type) !=0:
+            sqlpart2 += ' and log_user = '+str(room_type)
+        sql = sqlpart1+' count(distinct log_type) as cday'+str(i)+',sum(log_result) as sday'+str(i)+sqlpart2
+        print sql
+        try:
+            cur.execute(sql)
+        except MySQLdb.Error,e:
+            print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+            rspjson = "{\"content\":[{}],\"code\":0}"
+            conn.close()
+            return rspjson
+        tmp_result = cur.fetchone()
+        result.update(tmp_result)
+        cday="cday"+str(i)
+        sday='sday'+str(i)
+        arg.append(cday)
+        arg.append(sday)
+
+    if result != None:
+        for i in result:
+            if result[i] == None:
+                result[i] = 0     
+        i=0
+        rspjson = "{\"content\": [{"
+        for eacharg in arg:
+            if i != 0:
+                rspjson += ','
+            rspjson += "\""+eacharg+"\":\""+str(result[eacharg])+"\""
+            i=i+1
+        rspjson += "}],\"code\": 0}"
+        conn.close()
+        return rspjson
+    else:
+        rspjson = "{\"content\":[{}],\"code\":0}"
+        conn.close()
+        return rspjson
+
+#------------------------------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    req={'start_time':'0','end_time':0,'player_id':0,'room_type':0}
+    rspjson=log_count_dn(req)
+    rspjson=log_count_dn_day(req)
+    rspjson=log_count_dn_10day(req)
+    rspjson=log_count_dn_10mon(req)
+    print rspjson
+

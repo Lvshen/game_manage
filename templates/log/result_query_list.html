@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计汇总管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+统计汇总管理
+<span class="buttons">
+ <a href="/result/query/edit/0">添加</a>
+ </span>
+</div>
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="200">统计名称</th>
+<th width="200">图表对比</th>
+<th>统计说明内容</th>
+<th width="100">操作</th>
+</tr>
+{%for item in list_model%}
+
+<tr>
+<td>{{item.id}}</td>
+<td><a href="/result/query/{{item.id}}">{{item.name}}</a></td>
+<td><a href="/result/analyse/{{item.id}}">详情</a></td>
+<td>{{item.remark}}</td>
+<td><a href="/result/query/remove?model_id={{item.id}}" class="del">删除</a> <a href="/result/query/edit?model_id={{item.id}}">编辑</a></td>
+</tr>
+
+{%endfor%}
+</table>
+{% endblock %}

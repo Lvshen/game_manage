@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+
+{% block header%}
+<title>GM工具</title>
+
+<script type="text/javascript">
+	var current_page = "gm_form"; 
+	var now_time_str = "{{now_time_str}}";
+	var system_timestamp = {{system_timestamp}};
+	
+	setInterval(function(){system_timestamp++;}, 1000);
+	
+	function field_focus(target){
+		var value = $(target).val();
+		var old_val = $(target).attr('old_value');
+		if (old_val == undefined || old_val == ''){
+			$(target).attr('old_value', value);
+		}
+		 
+	}
+	
+	function field_blur(target){
+		 
+		var value = $(target).val();
+		var old_val = $(target).attr('old_value');
+		
+		var field_key = $(target).attr('field_key');
+		var tip_class = 'tip_' + field_key;
+		var tip = $("."+tip_class);
+		if (value != old_val){
+			$(target).attr('name', field_key);
+			var _tip = $('<span class="'+tip_class+'" style="color:red;" >有修改</span>');
+			if(!tip.length){
+				$(target).after(_tip);
+			}
+		}else{
+			if(tip.length){
+				tip.remove();
+			}
+		}
+		 
+	}
+	
+	function select_all(flag){
+		var eles = [];
+		if (flag){
+			eles = $("input[name='batch_server_id'][flag='"+flag+"']");
+		}else{
+			eles = $("input[name='batch_server_id']");
+		}
+		
+		var len = eles.length;
+		if (0>= len)
+			return;
+		
+		var status = $(eles[0]).attr('checked');
+		if (status == 'checked' || status == true){
+			eles.attr('checked', false);
+		}else{
+			eles.attr('checked', true);
+		}
+	}
+	
+</script> 
+{% endblock %}
+
+{% block content %}
+
+<div id="bar">
+	{{title}}
+	<div class="buttons" >
+		<a href="/game/gm/list" >返回列表</a>
+	</div>
+</div>
+
+<div class="sub-menu-1">
+	{%for item in nemu_list%}
+	<a href="/game/gm/{{item.id}}?1=1{% for item in postback_param %}&{{item.key}}={{item.value}}{% endfor %}" >{{item.title}}</a>
+	{%endfor%}
+</div>
+{% if result.server_list_chkbox %}
+	全选：<input type="checkbox" onclick="select_all()" />
+	{% for key,value in result.group_server_dic.items %}
+		<div class="sub-menu-1">
+			{{key}}:
+			全选：<input type="checkbox" onclick="select_all('{{key}}')" />
+			{% for item in value %}
+				<label><input type="checkbox" flag="{{key}}" name='batch_server_id' value="{{item.id}}" {% ifequal item.id server_id %} checked="checked" {% endifequal %} />{{item.name}}</label>
+			{% endfor %}
+		</div>
+	{% endfor %}
+{% endif %}
+
+<form id="gm_form" action="{{result.form_action}}?form_type={{result.form_type}}&form_key={{result.form_key}}&from_id={{id}}{% for item in postback_param %}&{{item.key}}={{item.value}}{% endfor %}" method="post"  >
+	 
+	<table class="form">
+	{% autoescape off %}
+	
+	<script type="text/javascript">
+		var field_key_dic ={};
+	</script>
+	
+	{%for item in result.list_infos %}
+	<tr>
+		<th width="160px">{{item.name}}:</th>
+		<td data-target="{{item.key}}" >
+			{% ifequal item.attr_type 'auto_timestamp' %}
+				<input type="text" data-field-flag="auto_timestamp" field_key="{{item.key}}" value="{{item.get_value}}" old_value="" onfocus="field_focus(this);"  onblur="field_blur(this);"  style="width:325px;"  />
+			{% endifequal %}
+			
+			{% ifequal item.attr_type 'text' %}
+				{%if item.is_modify%}
+					<input type="text" field_key="{{item.key}}" value="{{item.get_value}}" old_value="" onfocus="field_focus(this);"  onblur="field_blur(this);"  style="width:325px;"  />
+				{%else%}
+					{{item.get_value}}
+				{%endif%}
+			{% endifequal %}
+			
+			{% if item.attr_type == 'number' or item.attr_type == 'int' %}
+				{%if item.is_modify%}
+					<input type="text" field_key="{{item.key}}" value="{{item.get_value}}" old_value="" onfocus="field_focus(this);"  onblur="field_blur(this);"  style="width:125px;"  />
+				{%else%}
+					{{item.get_value}}
+				{%endif%}
+			{% endif %}
+			 
+			{% ifequal item.attr_type 'textarea' %}
+				{% if item.is_modify %}
+					<textarea cols="20" rows="5" field_key="{{item.key}}" onfocus="field_focus(this);"  onblur="field_blur(this);"></textarea>
+				{%else%}
+					{{item.get_value}}
+				{% endif %}
+			
+			{% endifequal %}
+			
+			{% ifequal item.attr_type 'array' %}
+				{% if item.is_modify %}
+					<textarea cols="20" rows="5" field_key="{{item.key}}" onfocus="field_focus(this);"  onblur="field_blur(this);"></textarea>
+				{%else%}
+					{{item.get_value}}
+				{% endif %}
+			
+			{% endifequal %}
+			
+			
+			{% ifequal item.attr_type 'json' %}
+				{% if item.is_modify %}
+					<textarea cols="20" rows="5" field_key="{{item.key}}" old_value="" onfocus="field_focus(this);"  onblur="field_blur(this);">{{item.get_value_name}}</textarea>
+				{%else%}
+					{{item.get_value}}
+				{% endif %}
+			
+			{% endifequal %}
+			
+			{% ifequal item.attr_type 'timestamp' %}
+				{% if item.is_modify %}
+					<input class="Wdate" type="text" field_key="{{item.key}}" value="{{item.get_value}}" old_value="" onfocus="field_focus(this);"  onblur="field_blur(this);"   />
+				{% else %}
+					{{item.get_value}}
+				{% endif %}
+			{% endifequal %}
+			
+			<script type="text/javascript">
+				field_key_dic['{{item.key}}'] = '{{item.get_value}}';
+			</script>
+		</td>
+	</tr>
+	{%endfor%}
+	
+	<script type="text/javascript" >
+			
+			$(document).ready(function(){
+				for(key in field_key_dic){
+				var attr_value = field_key_dic[key]; 
+				var attr_item = $('[field_key="' + key + '"]'); 
+				console.log(attr_item);
+				if (0 != attr_item.length){
+					attr_item.attr('old_value',attr_value);
+					attr_item.val(attr_value);
+				}
+			}
+			
+			
+			var timestamp = Date.parse(new Date()) / 1000;
+			$('[data-field-flag="auto_timestamp"]').each(function(){
+				var field_key = $(this).attr("field_key");
+				var old_value = field_key_dic[field_key];
+				if(old_value){
+					if(old_value == '0' || old_value == 0 || old_value == ''){
+						$(this).val(timestamp);
+						$(this).attr('old_value',timestamp);
+						$(this).attr('name', field_key);
+					}
+				}
+			});
+			
+			
+		});
+	 
+	</script>
+	{% endautoescape %}
+	 <tr>
+	 	<td>
+	 		
+	 	</td>
+	 	<td>
+	 		<input id="btn_save" type="submit" value="保存" {% if result.server_list_chkbox %} onclick="return loopComit()" {% endif %} ><div class="msg_tip_div" >&nbsp;</div>
+	 	</td>
+	 </tr>
+	</table>
+</form> 
+<script type="text/javascript" > 
+		 
+		//需要提交的数量
+		var post_count = 0;
+		//已提交次数
+		var post_counter = 0;
+		var server_id_list = new Array();
+		var tip_div = $(".msg_tip_div");
+		var the_form = $("#gm_form");
+		
+		function initPostState() {
+			post_counter = 0;
+			server_id_list = new Array();
+			var _server_list = $("input[name='batch_server_id']:checked");
+			server_list_len = _server_list.length;
+			var tmp_dict = {};
+			for (var i = 0; i < server_list_len; i++){
+				var tmp_value = $(_server_list[i]).val();
+				if (1 == tmp_dict[tmp_value]){
+					continue;
+				}
+				tmp_dict[tmp_value] = 1;
+				server_id_list.push(tmp_value);
+			}
+			post_count = server_id_list.length;
+			tip_div.html("");
+			tip_div.hide();
+		}
+		
+		function loopComit() {
+			var server_list = $("[name='batch_server_id']");
+			if (0 >= server_list.length){ 
+				return true;
+			}
+			
+			initPostState();
+			if(server_id_list.length == 0){
+				tip_div.html('没选择服务器');
+				return false;
+			}
+			tip_div.html('保存中...');
+			tip_div.show();
+			postModify(server_id_list.pop());
+			return false; 
+		}
+		
+		function postModify(server_id){
+			
+			var url = the_form.attr('action');
+			if (-1 == url.indexOf('?')){
+				url += '?';
+			}else{
+				url += "&";
+			}
+			url += "ajax=1";
+			var param = GetJSON("#gm_form");
+			param['server_id'] = server_id;
+			var options = {
+				type : "post",
+				url : url,
+				contentType : "application/x-www-form-urlencoded; charset=utf-8",
+				data : param,
+				success : function(result) {
+					post_counter++;
+					tip_div.html(tip_div.html() + "<p>serverID:" + server_id +",结果:" + result + "</p>");
+					checkfinish();
+				},
+				cache : false,
+				timeout : 20000,
+				error : function(msg) {
+					post_counter++;
+					var error_msg = "<p>链接超时！保存服务器id为:" + server_id  + "时出错！</p>";
+					tip_div.html(tip_div.html() + error_msg);
+					checkfinish();
+				}
+			}
+			$.ajax(options);
+		}
+		var success_msg = '<p>操作完成</p>';
+		function checkfinish() {
+			if (post_count <= post_counter) {
+				tip_div.html(tip_div.html() + success_msg);
+				//tip_div.dialog({ modal: true });
+				tip_div.show();
+				return;
+			}
+			postModify(server_id_list.pop());
+		}
+		
+		function selectAll(ele){ 
+			$("[name='batch_server_id']").each(function(){
+				$(this).attr('checked', $(ele).attr('checked'));
+			});
+		}
+	
+</script> 
+
+{% include "game/gm_import.html" %}
+{% endblock %}

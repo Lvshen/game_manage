@@ -1,0 +1,1 @@
+[{%for item in list_record%}{"id":{{item.id}},"image":"{{item.icon}}","type":{{item.pay_type}},"linkid":"{{item.link_id}}","exchange":{{item.exchange_rate}},"name":"{{item.name}}","about":"{% autoescape off %}{{item.remark}}{% endautoescape %}"}{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}{%endfor%}]

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>渠道列表</title>
+<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+渠道列表
+<span class="buttons">
+ <a href="/manage/channel/edit/0">添加</a>
+ </span>
+</div>
+
+<script type="text/javascript">
+var channelSwitch = {init:function(){
+	var linkStr = '<a href="javascript:void(0)">全部</a>';
+	$("tr").each(function(){
+		if($(this).find('td').length>0){
+			var channelName = $($(this).find('td')[1]).text();
+			channelName = channelName.split('(')[0];
+			if(channelName.indexOf("_")!=-1){
+				channelName = channelName.split('_')[0];
+			}else if(channelName.indexOf(" ")!=-1){
+				channelName = channelName.split(' ')[0];
+			}else if(channelName.replace(/^[^\d]+\d+$/,'')==''){
+				channelName = channelName.replace(/\d+/,'');
+			}
+			if(linkStr.indexOf(channelName)==-1)
+				linkStr += '<a href="javascript:void(0)">'+channelName+'</a>';
+		}
+	});
+	$('.sub-menu').html(linkStr);
+	
+	$('.sub-menu a').click(function(){
+		var channelName = $(this).text();
+		if(channelName=='全部'){
+			channelName = null;
+		}
+		channelSwitch.select(channelName);
+	})
+},select:function(keyName){
+	$("tr").each(function(){
+		if($(this).find('td').length>0){
+			var channelName = $($(this).find('td')[1]).text();
+			channelName = channelName.split('(')[0];
+			if(keyName==null){
+				$(this).show();
+			}else{
+				if(channelName.indexOf(keyName)==-1){
+					$(this).hide();
+				}else{
+					$(this).show();
+				}
+			}
+		}
+	});
+}};
+
+
+$(document).ready(function(){
+	channelSwitch.init();
+});
+</script>
+
+
+<div class="sub-menu">
+
+</div>
+
+
+
+<h4>已开通的渠道</h4>
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th>名称</th>
+<th width="100">账号</th>
+<th width="100">密码</th>
+<th width="80">登录次数</th>
+<th width="150">上次登录</th>
+<th width="150">开通时间</th>
+<th width="100">操作</th>
+</tr>
+{%for item in list_record%}
+<tr>
+<td>{{item.id}}</td>
+<td><a href="/manage/channel/view?channel_id={{item.id}}">{{item.name}}</a>({{item.key}})</td>
+<td>{{item.username}}</td>
+<td>{{item.password}}</td>
+<td>{{item.logins}}</td>
+<td>{{item.last_time|date:"Y-m-d H:i:s"}}</td>
+<td>{{item.create_time|date:"Y-m-d H:i:s"}}</td>
+<td>
+<!--<a href="/manage/channel/remove/{{item.id}}" class="ajax" tip="确定删除？">删除</a>-->
+
+<a href="/manage/channel/edit?channel_id={{item.id}}">编辑</a>
+
+</td>
+</tr>
+{%endfor%}
+</table>
+
+{%if new_list%}
+<h4>待开通的渠道</h4>
+<table class="list">
+<tr>
+<th>名称</th>
+<th width="100">操作</th>
+</tr>
+{%for item in new_list%}
+<tr>
+<td>{{item.f4}}</td>
+<td>
+<a href="/manage/channel/edit/0?key={{item.f4}}">开通</a>
+</td>
+</tr>
+{%endfor%}
+</table>
+{%endif%}
+{% endblock %}

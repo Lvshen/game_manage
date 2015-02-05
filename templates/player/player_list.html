@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家管理</title>
+<script type="text/javascript" >
+	$(document).ready(function() {
+		$("#shutup_dialog").hide();
+		$(".shutup").unbind();
+		$(".shutup").each(function() {
+			$(this).bind('click', function() {
+				var player_id = $(this).attr('player');
+				
+				var action = '/game/player/shutup';
+				
+				$("#shutup_player_id").val(player_id);
+
+				$("#form_shutup").attr('action', action);
+ 
+				$("#shutup_dialog").dialog();
+				return false;
+			});
+		});
+		 
+	});
+	
+	 
+	function shutup_finish() {
+		$("input").attr('disabled', true);
+
+		var param = GetPostParameter($("#shutup_dialog"));
+		
+		var url = $("#form_shutup").attr("action");
+		 
+		var options = {
+			type : "get",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) { 
+				if (result != 0 || result != '0') {
+					$("#tip_box").html("未知错误!");
+					$("#tip_box").dialog();
+				} else {
+					$("#shutup_dialog").dialog('close');
+				}
+
+				$("input").attr('disabled', false);
+			},
+			cache : false,
+			timeout : 5000,
+			error : function() {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog();
+				$("input").attr('disabled', false);
+			}
+		}
+		$.ajax(options);
+		return false;
+	}
+ 
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	玩家管理
+	<span class="buttons"> <a href="/user/edit">添加</a> </span>
+</div>
+	{% if usm.current_userRole_is_root %}
+<div class="sub-menu-1">
+		<a href="?group_id=0" >全部 </a>
+		{% for item in list_group %}
+			<a href="?group_id={{item.id}}" >{{item.name}}</a>
+		{% endfor %}
+</div>
+{% endif %} 
+<div class="sub-menu-1">
+	<form action="/player/list" method="get">
+		服务器:
+		<select class="dbl_server_list" name="server_id" id="server_id">
+			{%for item in list_server%}
+			<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+			{%endfor%}
+		</select>
+		
+		<input type="text" class="s_server" style="width:50px;" onkeyup="javascript:search_dbl_list('dbl_server_list','s_server');" />
+			
+		查询:
+		<select name="key_type">
+			<option value='1'>角色名称</option>
+			<option value='0'>角色ID</option>
+			<option value='2'>关联账号</option>
+			<option value='3'>手机标识</option>
+		</select>
+		<input type="text" name="key" value="{{player_key}}" />
+		<input type="hidden" name="post_back" value="1" />
+		<input type="submit" value="查询" />
+
+		<a href="/game/server/info/{{server_id}}">服务器配置</a>
+		<a href="/game/server/shutup?server_id={{server_id}}">本服禁言名单</a>
+		<input type="hidden" name="block" value="{{is_block}}" />
+		{% if is_block != 1 %}
+		<a href="/player/list?server_id={{server_id}}&block=1">本服封号名单</a>
+		{% else %}
+		<a href="/player/list?server_id={{server_id}}">返回</a>
+		{% endif %}
+	</form>
+</div>
+
+<table class="list">
+	<tr>
+		<th width="80">角色ID</th>
+		<th width="100">角色名称</th>
+		<th width="80">所属渠道</th>
+		<th>玩家类型</th>
+		<th>关联账号</th>
+		<th>登录数</th>
+		<th width="220">手机标识</th>
+		<th>上次登录时间</th>
+		<th>创建时间</th>
+		<th width="200">操作</th>
+	</tr>
+	{%for item in player_list%}
+	<tr>
+		<td>
+			{% if usm.current_userRole_is_root %}
+				<a href="/game/player/info?player_id={{item.0}}" class="dialog">{{item.0}}</a>
+			{% else %} 
+				<a href="/game/player/view?player_id={{item.0}}" class="dialog">{{item.0}}</a>
+			{% endif %}
+		</td>
+		<td>{{item.1}}</td>
+		<td>{{item.2}}</td>
+		<td>{{item.3}}</td>
+		<td>{{item.4}}</td>
+		<td>{{item.5}}</td>
+		<td>{{item.6}}</td>
+		<td>{{item.7|date:"m-d H:i:s"}}</td>
+		<td>{{item.8|date:"m-d H:i:s"}}</td>
+		<td> {%ifequal item.9 0%} <a href="/player/block?server_id={{server_id}}&player_id={{item.0}}&is_lock=1" class="dialog" id="link_{{item.0}}">封号</a> {%else%}
+			 <a href="/player/block?server_id={{server_id}}&player_id={{item.0}}&is_lock=0" class="dialog" id="link_{{item.0}}">解封</a> {%endifequal%} 
+			 <a href="/game/send?server_id={{server_id}}&player_id={{item.0}}" class="dialog">消息</a>
+			 <a href="/game/player/down?player_id={{item.0}}" class="dialog ask">踢下线</a>
+			 <a href="/game/player/shutup?player_id={{item.0}}" player="{{item.0}}" class="ask shutup">禁言</a> 
+			 {% if usm.current_userRole_is_root %}
+			 	<a href="/game/player/info?player_id={{item.0}}" class="dialog" >更多</a>
+			 {% else %}
+			 	<a href="/game/player/view?player_id={{item.0}}" class="dialog"  >更多</a>
+			 {% endif %}
+			 <a href="/pay/add/zhichong?server_id={{server_id}}&player_id={{item.0}}" class="dialog" >直充</a>
+		</td>
+	</tr>
+	{%endfor%}
+</table>
+<script type="text/javascript"> 
+
+	function serverChanged() {
+		var refreshLink = document.location.href;
+		if (refreshLink.indexOf("?") == -1) {
+			refreshLink += "?newDate=" + new Date().getTime();
+		} else {
+			refreshLink += "&newDate=" + new Date().getTime();
+		}
+		document.location.href = refreshLink;
+		//		$.get(refreshLink,{"server_id":$("#server_id").val()},function(data)
+		//		{
+		//		});
+	}
+
+	function showPlayerInfo(playerId) {
+		var url = "/player/info/" + playerId;
+		$("#iframe_playerInfo").attr("src", url);
+		$("#dialog").dialog({
+			maxHeight : 500,
+			maxWidth : 800,
+			minHeight : 400,
+			minWidth : 780
+		});
+	}
+</script>
+
+<!-- 禁言dialog -->
+<div id="shutup_dialog">
+	<form id="form_shutup" method="post"  >
+		<input type="hidden" name="ajax" value="true" />
+		<input type="hidden" name="player_id" id="shutup_player_id" value="" />
+		<label>禁言时间:
+			<input type="text" name="time" value="1800" />
+			(秒)
+		</label>
+		<label>
+			理由:
+			<input type="text" name="desc" value="" />
+		</label>
+		<input type="submit" name="提交" value="提交" onclick="javascript:return shutup_finish();" />
+	</form>
+</div>
+
+{% include "pager.html" %}
+<div id="dialog">
+	<iframe id="iframe_playerInfo" height=550 width=740 frameborder=0 scrolling=auto></iframe>
+</div>
+{% endblock %}

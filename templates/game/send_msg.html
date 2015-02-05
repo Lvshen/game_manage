@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>消息发送</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.form{width:100%;margin:0}
+.form th{width:60px}
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="/game/send?server_id={{server_id}}&player_id={{player_id}}">
+<table class="form">
+{% if server_id == 0 %}
+	<tr>
+		<th >服务器:</th>
+		<td>
+			<select name="server_id">
+				{% for item in server_list %}
+					<option value="{{item.id}}" {%if item.id == server_id %} selected="selected" {%endif%}  >{{item.name}}</option>
+				{% endfor %}
+			</select>
+		</td>
+	</tr>
+{% endif %}
+{%ifequal player_id 0%}
+<tr>
+<th width="160px">接收分区:</th>
+<td>
+<select name="net_id">
+<option value="-10">新手区</option>
+<option value="-1">老手区</option>
+</select>
+</td>
+</tr>
+{%else%}
+<tr>
+<th width="160px">消息类型:</th>
+<td>
+<select name="msg_type">
+<option value="0">消息</option>
+<option value="1">邮件</option>
+</select>
+</td>
+</tr>
+{%endifequal%}
+<tr>
+<th>内容:</th>
+<td>
+<textarea name="content"></textarea>
+</td>
+</tr>
+<tr>
+<th>操作:</th>
+<td colspan="2">
+
+<input type="submit" value="发送" />
+or  <a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+</td>
+</tr>
+</table>
+</form>
+{% endblock %}

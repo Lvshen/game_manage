@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{item.title}}</title>
+<script type="text/javascript" src="/static/js/highcharts.js" ></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	var options = {
+		chart : {
+			backgroundColor:'#FFFFFF',
+			borderWidth:0,
+			borderRadius:5,
+			renderTo:'container',
+			defaultSeriesType:'{{charts_type}}',
+			shadow:0,
+			reflow:1,
+			zoomType:'x',
+			events:''
+		} ,
+		title : {
+			text:'',
+			align:'center',
+			verticalAlign:'',
+			margin:50,
+			floating:0,
+			style:{
+				color: '#3E576F',
+				fontSize: '16px'
+			}
+		} ,
+		subtitle : {
+			text:'',
+			align:'center'
+		} ,
+		xAxis : { 
+			type : 'datetime',
+			labels:{
+				formatter:function(){
+					return Highcharts.dateFormat('{% if chart_format == "%Y-%m-%d" %}%m-%d{% else %}{{chart_format}}{% endif %}',this.value);
+				}
+			},
+			tickInterval : {{time_slot}}
+		},
+		yAxis : {
+			min:0,
+			title:{
+				text:''
+			},
+			allowDecimals:0
+		} ,
+		series : [] ,
+		legend : {
+			layout:'horizontal',
+			align:'center',
+			backgroundColor:null,
+			borderColor:'#909090',
+			borderRadius:5,
+			enabled:1,
+			floating:0,
+			shadow:0,
+			style:'',borderWidth:1
+		} ,
+		credits : {
+			enabled:0
+		} ,
+		tooltip : { 
+			formatter :  function() {
+				var s = '<b>'+ Highcharts.dateFormat('{{chart_format}}',this.x) +'</b>';
+				$.each(this.points, function(i, point) {
+					s += '<br/>'+ '<b style="color:'+point.series.color+';">'+point.series.name +'</b>'+': '+point.y +'';
+				});
+				return s;
+			} , 
+			crosshairs : '1', 
+			shared : '1'
+		},
+		plotOptions : { 						
+			line: {
+				lineWidth: 2,
+				states: {
+					hover: {
+						lineWidth: 4
+					}
+				},
+				dataLabels : {
+					enabled : 0,
+					align:"right"
+				},
+				marker: {
+					enabled: false,
+					states: {
+						hover: {
+							enabled: true,
+							symbol: 'circle',
+							radius: 5,
+							lineWidth: 3
+						}
+					}
+				}
+			}					 
+		}
+	};
+	Highcharts.setOptions({ 
+		global: {
+			useUTC: 0 
+		} 
+	});   	    	
+	$.each({% autoescape off %}{{list_record_arr}}{% endautoescape %}, function(key, value) {
+		var series = {};
+		series.name = key;
+		series.data = value;
+		options.series.push(series); 
+	});
+	new Highcharts.Chart(options);
+});
+
+function showDay(val) {
+	if (val == 0) {
+		url = "/charts/result/view/analyse/{{query_id}}?server_id={{server_id}}&sdate="+$("#sdate").val()+"&edate="+$("#edate").val();		
+	}
+	else {
+		url = "/charts/result/view/analyse/{{query_id}}?server_id={{server_id}}&query_day="+val;		
+	}
+	window.location.href = url;
+	return false;
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="box">
+	<div class="title" >{{title}}<span style="padding-right:10px;float:right;">
+		<a href="javascript:;" onclick="showDay(1);">今天</a> | 
+		<a href="javascript:;" onclick="showDay(-1);">昨天</a> | 
+		<a href="javascript:;" onclick="showDay(-2);">前天</a> | 
+		<a href="javascript:;" onclick="showDay(7);">近7天</a> | 
+		<a href="javascript:;" onclick="showDay(30);">近30天</a> | 
+		自定义日期：
+		开始时间:<input type="text" name="sdate" id="sdate" class="Wdate1" value="{{sdate}}" />
+		结束时间:<input type="text" name="edate" id="edate" class="Wdate1" value="{{edate}}" />
+		<input type="button" name="submit" onclick="showDay(0);" value="查询" />		
+		</span>
+	</div>
+	<div id="container" style="width:98%;" >
+	
+	</div>
+</div>
+
+{% endblock %}

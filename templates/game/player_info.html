@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.list{width:100%;margin:0}
+.form th{width:30%}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu.html" %}
+
+<form method="post" action="/game/player/modify?player_id={{player_id}}">
+	（注：每次只能以"追加值"或"覆盖玩家信息"其中一种方式）
+<table class="form">
+{%for item in list_infos%}
+<tr>
+	<th width="160px">{{item.name}}:</th>
+	<td>
+		{%if item.is_modify%}
+			 {%if item.key  != 'gl'%}
+			 	<input type="text" name="{{item.key}}" value="{{item.value}}" style="width:65px;"  />
+			 	追加值:<input type="text" name="append_{{item.key}}" value="" style="width:65px;" />
+			 {%else%}
+			 	{{item.value}}追加值:<input type="text" name="append_{{item.key}}" value="" style="width:65px;" />
+			 {%endif%}
+		{%else%}
+		{{item.value}}
+		{%endif%}
+	</td>
+</tr>
+{%endfor%}
+
+<tr>
+	<th>操作:</th>
+	<td>
+		<input type="submit" value="保存修改" />
+		or  <a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+	</td>
+</tr>
+</table>
+</form>
+{% endblock %}

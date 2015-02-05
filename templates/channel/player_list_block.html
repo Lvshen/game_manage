@@ -1,0 +1,27 @@
+<div id="list_{{page_num}}" name="list_{{page_num}}" >
+<table class="list">
+<tr>
+	<td colspan="10" style=" background-color:#AAAAAA; font-size:20px;  color:#FBF9EE; text-align: center;" >{{page_num}}</td>
+</tr>
+{%for item in player_list%}
+<tr>
+<td>{{item.0}}</td>
+<td>{{item.1}}</td>
+<td>{{item.2}}</td>
+<td>{{item.3}}</td>
+<td>{{item.4}}</td>
+<td>{{item.5|date:"m-d H:i:s"}}</td>
+<td>{{item.6|date:"m-d H:i:s"}}</td>
+<td>
+{%ifequal item.7 0%}
+<a href="/channel/player/block/{{server_id}}/{{item.0}}?is_lock=1" class="dialog" id="link_{{item.0}}">封号</a>
+{%else%}
+<a href="/channel/player/block/{{server_id}}/{{item.0}}?is_lock=0" class="dialog" id="link_{{item.0}}">解封</a>
+{%endifequal%} 
+<a href="/channel/player/shutup/{{item.0}}"  player="{{item.0}}" class="ask shutup" tip="确定操作？" >禁言</a>
+</td>
+</tr>
+{%endfor%}
+</table>
+</div>
+{% include "pager.html" %} 

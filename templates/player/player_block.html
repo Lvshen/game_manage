@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家锁定</title>
+{% endblock %}
+
+{% block content %}
+<h4>操作成功!</h4>
+<script type="text/javascript">
+var the_url = parent.$("#link_{{player_id}}").attr("href");
+{%ifequal the_status 0%}
+parent.$("#link_{{player_id}}").attr("href",the_url.replace("is_lock=0","is_lock=1")).html("封号");
+{%else%}
+parent.$("#link_{{player_id}}").attr("href",the_url.replace("is_lock=1","is_lock=0")).html("解封");
+{%endifequal%}
+parent.$('#dialog').dialog('close');
+</script>
+{% endblock %}

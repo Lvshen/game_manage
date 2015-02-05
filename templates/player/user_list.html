@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+玩家管理
+
+<span class="buttons">
+ <a href="/user/edit">添加</a>
+ </span>
+</div>
+
+<div class="sub-menu-1">
+<form action="/user/list" method="get">
+查询:
+<select name="key_type">
+<option value='0'>账号ID</option>
+<option value='1'>登录名或第三方ID</option>
+<option value='2'>手机标识查询</option>
+</select>
+<input type="text" name="key" value="{{user_key}}" />
+<input type="submit" value="查询" />
+</form>
+</div>
+
+
+<table class="list">
+<tr>
+<th>账号ID</th>
+<th>登录名</th> 
+<th>登录次数</th>
+<th>上次登录IP</th>
+<th>上次登录时间</th>
+<th>创建时间</th>
+<th width="120">操作</th>
+</tr>
+{%for item in list_record%}
+<tr>
+<td>{{item.id}}</td>
+<td>{{item.username}}</td> 
+<td>{{item.login_num}}</td>
+<td>{{item.last_ip}}</td>
+<td>{{item.last_time_str}}</td>
+<td>{{item.create_time_str}}</td>
+<td>
+{%if item.is_lock %}
+<a href="/user/lock?user_id={{item.id}}&is_lock=0" class="ask">解封</a> 
+{%else%}
+<a href="/user/lock?user_id={{item.id}}&is_lock=1" class="ask">封号</a>
+{%endif%}
+{%ifequal item.user_type 0 %}
+<a href="/user/password?user_id={{item.id}}" class="dialog">改密码</a>
+<a href="/user/mibao/clear?user_id={{item.id}}" class="dialog" >清密保</a>
+{%endifequal%}
+</td>
+</tr>
+{%endfor%}
+</table>
+
+{% include "pager.html" %}
+{% endblock %}

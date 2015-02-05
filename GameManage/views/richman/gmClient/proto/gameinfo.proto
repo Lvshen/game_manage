@@ -1,0 +1,92 @@
+import "db_cache.proto";
+import "cardsystem.proto";
+import "diesystem.proto";
+import "game_desk.proto";
+
+package GAMEINFO;
+
+
+//////////////////游戏服与大区的心跳/////////////////////////////
+message G2Z_HeartbeatReq
+{
+	required uint32 gamesvr_busid		= 1;
+	required uint32 player_num			= 2;
+	optional uint32 ai_num				= 3;
+	optional uint32 room_num			= 4;
+}
+
+message Z2G_HeartbeatRsp
+{
+	optional uint32 reg_flag			= 1;	//0--不需要重新注册；1--需要重新注册(可能是大区重启了)
+}
+
+///////////////////游戏服在大区上注册/////////////////////////////
+message GamesvrEnterCondition
+{
+	required int32 type			= 1;		//0--入场券;  1--体力; 2--等级;
+	optional int32 lower		= 2;		//下限 -1--表示无下限
+	optional int32 upper		= 3;		//上限 -1---表示无下限
+	optional int32 need			= 4;		//需要扣除的，
+}
+message G2Z_GamesvrRegReq
+{
+	required uint32 gamesvr_busid					= 1;
+	required uint32 gamesvr_type					= 2;	//0--普通房; 1--精英房; 2--富豪房; 3--个人模式(NPC); 4--新手房
+	required uint32 max_player_num					= 3;
+	optional uint32 max_room_num					= 4;
+	repeated GamesvrEnterCondition     condition 	= 5;
+}
+
+message Z2G_GamesvrRegRsp
+{
+	required int32 ret					= 1;		//0--成功；其它失败
+}
+
+//////////////////////////////////////////////进入游戏/////////////////////////////////////////////
+message Z2G_Load_Player_Info_Rsp
+{
+	required int32 ret = 1;
+	optional DBCACHE.PlayerBaseInfo baseinfo = 2;	// 个人基本信息
+	optional CARDSYSTEM.PlayerCardInfo player_cards = 3; // 人物卡牌属性
+	optional DIESYSTEM.DieProperty player_dies = 4; // 人物骰子属性
+	repeated DBCACHE.PlayerInGameProp	ingame_props = 5;
+	optional int32  tickets = 6;
+	optional int32  channel_id = 7;
+}
+
+message PlayerGameResult
+{
+	required int32 player_id = 1;	// id
+	required int32 result = 2; 		// 0:赢 1:输 2:逃跑
+	required int32 gold_res = 3;	// 赠送的金币
+	required int32 exp_res = 4;	// 赢或输的经验
+	required int32 score_res = 5;	// 赢或输的积分
+	required int32 gamesvr_type = 6;   //游戏类型
+	optional int32 gamesvr_model = 7; //模式 比如 个人模式的难度
+	required int32 room_id = 8;		  //房间号
+	optional int32 seat_no = 9;		  //座位号
+	
+}
+
+message G2Z_Calculate_Game
+{
+	repeated PlayerGameResult game_res = 1;
+}
+
+message G2Z_PlayerInfoChange
+{
+	required int32 flag = 1;
+	optional int32 goldcoin_change = 2;					   //金币
+	optional int32 energy_change = 3;					  //三页草
+	optional int32 ticket_count_change = 4;				 // 入场券
+	optional int32 socre_change = 5;					// 积分
+	optional int32 goldcoin_change_reason = 6;	
+	optional int32 energy_change_reason = 7;
+	optional int32 ticket_count_change_reason = 8;
+	optional int32 socre_change_reason = 9;
+}
+
+message G2Z_PlayerGetChanceCard
+{
+	required int32 card_type = 1;			// 机会卡类型
+}

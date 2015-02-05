@@ -1,0 +1,88 @@
+package DIESYSTEM;
+
+message DieProperty
+{
+	required int32 id = 1;					//唯一标识
+	required int32 type = 2;						//类型
+	required int32 icon = 3;			// 头像
+	required bytes name = 4;		// 名称
+	required int32 level = 5;		// 名称
+	required int32 esc_island = 6;		// 成功逃出无人岛概率
+	required int32 exp_reward = 7;		// 经验奖励
+	required int32 cost_discount = 8; // 特殊费用折扣
+	required int32 gold_reward = 9;		// 金币奖励
+	required int32 get_goldcard = 10; 	// 黄金卡概率
+	required int32 win_reward = 11;		// 奖金游戏胜利
+	required int32 rank_reward = 12;		// 经验奖励
+	required int32 lucky_point = 13;		// 避开不利点数的几率
+	required int32 build_discount = 14;// 建设费用折扣
+	required int32 cash_discount = 15; // 承兑费用折扣
+	required int32 sindou_reward = 16; // 承兑费用折扣
+
+	optional int32 levelup_cost = 17;						//升级花费
+	optional int32 level_require = 18;						//等级要求
+
+	optional int32 buyin_marble_cost = 19;						//砖石购买价格
+	optional int32 buyin_gold_cost = 20;						   //金币购买价格
+	optional int32 buyin_require_level = 21;						   
+}
+
+message S2C_DieList_Rsp
+{
+	repeated DieProperty die = 1;
+}
+
+
+message C2S_BuyDie_Req
+{
+	required int32 die_id = 1;					//唯一标识
+}
+
+message S2C_BuyDie_Rsp
+{
+	enum ResultCode 
+	{
+		FAILED = -1;
+		SUCCESS = 0;
+		NOT_ENOUGH_GOLDCOIN = -3;
+		NOT_ENOUGH_MARBLE = -4;
+	}
+	required int32 result = 1;
+	optional int32 new_die_id = 2;					//唯一标识
+}
+
+message C2S_DieLevelUp_Req
+{
+	required int32 die_id = 1;					//唯一标识
+}
+
+message S2C_DieLevelUp_Rsp
+{
+	enum ResultCode 
+	{
+		FAILED = -1;
+		SUCCESS = 0;
+		NOT_ENOUGH_MONEY = -3;
+		NOT_ENOUGH_MARBLE = -4;
+	}
+	required int32 result = 1;
+	optional int32 die_id = 2;					//请求升级的骰子ID
+	optional int32 new_die_id = 3;					//升级后的骰子ID
+}
+
+message C2S_DieEquip_Req
+{
+	required int32 die_id = 1;					//唯一标识
+}
+
+message S2C_DieEquip_Rsp
+{
+	enum ResultCode 
+	{
+		SUCCESS = 0;
+		FAILED = 1;
+	}
+
+	required int32 result = 1;
+	optional int32 current_die_id = 2;					//装备后的骰子ID
+}

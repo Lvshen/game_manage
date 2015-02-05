@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>服务器参数配置</title>
+<style>
+	body {
+		overflow-x: hidden;
+		padding: 0;
+	}
+	table.list {
+		width: 100%;
+		margin: 0
+	}
+	.form th {
+		width: 30%
+	}
+	.tip_div{
+		text-align: center;
+	}
+</style>
+<script type="text/javascript">
+	//需要提交的数量
+	var post_count = 0;
+	//已提交次数
+	var post_counter = 0;
+	var error_id_list = [];
+	var success_id_list = [];
+	var server_id_list = new Array();
+	var tip_div;
+	var total_count = 0;
+	$(document).ready(function() {
+		tip_div = $(".tip_div");
+	});
+	
+	function initPostState() {
+		post_counter = 0;
+		error_id_list = [];
+		server_id_list = [];
+		success_id_list = [];
+		total_count = 0;
+		$("input[name='server_list']:checked").each(
+			function(){
+				var value = $(this).val();
+				server_id_list.push($(this).val());
+				total_count ++;
+		});
+		
+		post_count = server_id_list.length;
+		
+		tip_div.html('');
+		
+		tip_div.hide();
+	}
+
+	function loopComit() {
+		initPostState();
+		tip_div.html('保存中...');
+		tip_div.show();
+		if(server_id_list.length == 0){
+			return false;
+		}
+		postModify(server_id_list[0]);
+		return false; 
+	}
+
+	function postModify(server_id){
+		var task_setting = 0;
+		var trigger_time = '';
+		var recover_time = '';
+		if ($("[name='task_setting']:checked").length != 0){
+			task_setting = 1;
+			trigger_time = $("[name='trigger_time']").val();
+			recover_time = $("[name='recover_time']").val();
+		}
+		
+		var trask_param = "&task_setting=" + task_setting + "&trigger_time=" + trigger_time + "&recover_time=" + recover_time;
+		var url = "/game/server/modify?server_id=" + server_id + "&net_id=-1&config_type={{config_type}}&ajax=true" + trask_param;
+		var param = GetPostParameter("#serverInfo_modify_form");
+		var options = {
+			type : "post",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				result = eval('(' + result + ')');
+				post_counter++;
+				if (result.code == 0){
+					success_id_list.push(server_id);
+				}else{
+					error_id_list.push(server_id);
+				}
+				tip_div.html(tip_div.html() + "<p>serverID:" + server_id +",结果:" + result.msg + "</p>");
+				
+				checkfinish();
+			},
+			cache : false,
+			timeout : 20000,
+			error : function(msg) {
+				post_counter++;
+				var error_msg = "<p>链接超时！保存服务器id为:" + server_id  + "时出错！</p>";
+				error_id_list.push(server_id);
+				tip_div.html(tip_div.html() + error_msg);
+				checkfinish();
+			}
+		}
+		$.ajax(options);
+	}
+
+	function checkfinish() {
+		if (post_count <= post_counter) {
+			
+			var success_html_str = '<p>成功('+success_id_list.length+')：';
+			var error_html_str = '<p>失败或没有修改(' + error_id_list.length + ')：';
+			for(var i = 0 ; i < success_id_list.length; i ++){
+				success_html_str += success_id_list[i] + ',';
+			}
+			
+			for(var i = 0 ; i < error_id_list.length; i ++){
+				error_html_str += error_id_list[i] + ',';
+			}
+			success_html_str += "</p>";
+			error_html_str += "</p>";
+			
+			
+			var server_info = '';
+			server_info = '<p>服务器：' + total_count + "</p>";
+			 
+			tip_div.html(server_info+"<p>操作完成</p>" + success_html_str + error_html_str+ tip_div.html());
+			
+			//tip_div.dialog({ modal: true });
+			tip_div.show();
+			return;
+		}
+		postModify(server_id_list.pop());
+	}
+	
+	function selectAll(ele){ 
+		$("[name='server_list']").each(function(){
+			$(this).attr('checked', $(ele).attr('checked'));
+		});
+	}
+</script>
+{% endblock %}
+{% block content %}
+<div class="sub-menu-1" >
+	<div><input type="checkbox"  onclick="selectAll(this);" >全选</div>
+</div>
+{% for servers in group_server_list %}
+<div class="sub-menu-1" >
+{% for item in servers %}
+	<div style=" width:160px; float:left;">
+		<input  name="server_list" type="checkbox" name='{{item.name}}' value='{{item.id}}' {%ifequal item.id server_id%} checked='true' {%endifequal%} />
+	({{item.id}}){{item.name}}
+	</div>
+{% endfor %}
+</div>
+{% endfor %}
+
+
+<form id="serverInfo_modify_form" method="post" action="/game/server/modify?server_id={{server_id}}&net_id={{net_id}}&config_type={{config_type}}" >
+	<table class="form">
+		{%for item in list_infos%}
+		<tr>
+			<th width="260px">{{item.name}}:</th>
+			<td> {%if item.is_modify%}
+			<input type="text" name="{{item.key}}" value="{{item.value}}" />
+			{%else%}
+			{{item.value}}
+			{%endif%}
+			{{item.remark}} 
+			</td>
+		</tr>
+		{%endfor%}
+		<tr>
+			<th colspan="2" style="text-align: center;">
+				<input type="checkbox" name="task_setting" value="1" />定时设置
+				<input type="text" name="trigger_time" class="Wdate"  /> 
+				复原时间:<input type="text" name="recover_time" class="Wdate"  />
+			</th>
+		</tr>
+		<tr>
+			<th><a href="/server/list">返回</a></th>
+			<td>
+				<input type="submit" value="保存修改" onclick="javascript:return loopComit();" />
+				<br/>
+				
+			</td>
+		</tr>
+	</table>
+	<div class="tip_div" >&nbsp;</div>
+</form>
+{% endblock %}

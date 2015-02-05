@@ -1,0 +1,142 @@
+<script type="text/javascript">
+	//*******批量统计所用*******
+	var batch_execute_div;
+	var batch_execute_msg;
+	var current_batch_statistic_id = {{statistic.id}};
+	var selected_statistic_servers;
+	var execute_count = 0;
+	var execute_counter = 0;
+	var task_list = new Array();
+	 
+	
+	$(document).ready(function() {
+		
+		//*******批量统计所用*******
+		batch_execute_div = $("#batch_execute_div");
+		batch_execute_msg = $("#batch_execute_msg");
+
+		//*******批量统计  END *******
+		
+	});
+	//*******批量统计所用********
+	
+	function do_batch_execute() {
+		init_batch_dialog();
+		if (selected_statistic_servers.length > 0)
+			$("input").attr('disabled', true);
+		selected_statistic_servers.each(function() {
+			task_list.push(this);
+		});
+		//
+		if(task_list.length > 0 ){
+			//执行ajax提交，  要执行统计的服务器checkbox,  日期参数 ， tasklist 的索引 
+			current_task = task_list.pop();
+			ajax_post_execute(current_task, getExecData());
+		}
+	}
+	
+	function getExecData(){
+		var tmp_data ='';
+			var exec_data = $("#exec_data").val();
+			if(exec_data.length != 0 && exec_data != ''){
+				tmp_data = exec_data;
+			}
+		return tmp_data;
+	}
+
+	function init_batch_dialog() {
+		//清除执行状态
+		$(".execute_state").each(function() {
+			$(this).html('');
+		});
+		batch_execute_msg.html('');
+		selected_statistic_servers = $("[name='statistic_server_id']:checked");
+		execute_count = selected_statistic_servers.length;
+		execute_counter = 0;
+		task_list = new Array();
+	}
+
+	function check_execute_listener(server_id, msg) {
+		$('#execute_state_' + server_id).html(msg);
+		if (execute_count > execute_counter)
+			return;
+		batch_execute_msg.html("全部执行完成!");
+		$("input").attr('disabled', false);
+
+	}
+	//单个统计执行计数器
+	var tmp_post_count = 0;
+	function ajax_post_execute(ele, date) {
+
+		var current_server_ele = $(ele);
+
+		var server_id = current_server_ele.val();
+
+		var param = {};
+		var url = '/statistic/execute?statistic_id=' + current_batch_statistic_id + '&server_id=' + server_id + '&ajax_batch=true';
+		if (date != ''){
+			url +=	"&date=" + date;
+		}
+		var options = {
+			type : "get",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				result = eval('('+result+')');
+				
+				var is_reload = result.is_reload;
+				if(is_reload == 0 || is_reload == '0' || result.is_error){
+					tmp_post_count = 0;
+					execute_counter++;
+					
+					var ms = '执行成功';
+					if (result.is_error)
+						ms = '执行失败';
+					
+					check_execute_listener(server_id, '服务器ID:' + server_id + ',' + ms);
+					
+					if (task_list.length <= 0){
+						return;	
+					}
+					//执行下一个服务器的统计 
+					current_task = task_list.pop();
+					ajax_post_execute(current_task, getExecData());
+				}else{
+					tmp_post_count++;
+					check_execute_listener(server_id, '执行中, 执行第' + tmp_post_count);
+					ajax_post_execute(ele, result.date);
+				}
+			},
+			cache : false,
+			timeout : 10000,
+			error : function() {
+				execute_counter++;
+				check_execute_listener(server_id, '服务器ID:' + server_id + ',执行失败');
+				current_task = task_list.pop();
+				ajax_post_execute(current_task, getExecData());
+			}
+		}
+		$.ajax(options);
+		return false;
+	}
+	//*****************批量统计所用 END********
+	
+	function select_all(ele){  
+		$('[name="statistic_server_id"]').attr('checked', $(ele).attr('checked'));
+	}
+</script>
+
+	
+<div id="batch_execute_div" style="height:400px; overflow:auto;" >
+	日期：<input id="exec_data" type="text" name="exec_date" value="" />
+	<input type="checkbox" onclick="select_all(this)" />
+	{%for item in list_server%}
+	<div class="server_item">
+		<input type="checkbox" name="statistic_server_id" value="{{item.id}}">
+		{{item.name}} <span class="execute_state" id="execute_state_{{item.id}}">执行状态</span>
+	</div>
+	{%endfor%}
+	<div id="batch_execute_msg">&nbsp;</div>
+</div>
+<input type="button" value="执行" style="float:right;" onclick="do_batch_execute()" />

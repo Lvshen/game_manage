@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>服务器管理</title>
+<script type="text/javascript" src="/static/js/ajaxLoad.js"></script>
+<script type="text/javascript" >
+	function changeCheckBox(ele) {
+		$("input[name='serv_id']:checkbox").attr("checked", $(ele).attr("checked"));
+	}
+</script>
+<script type="text/javascript" src="/static/js/ajaxForm.js" ></script>
+<script type="text/javascript">
+	var box;
+	$(document).ready(function() {
+		box = $("#msg_box");
+		box.bind('click', function() {
+			box.hide();
+		});
+		box.hide();
+		
+		$("#sync_index_dialog").dialog('close');
+		$("#sync_index_dialog").hide();
+		
+		var btn_sync_table = $("#btn_sync_table");
+		btn_sync_table.bind('click', function(){
+			var server_list = $('input[name="serv_id"]:checked');
+			$('.msg_tip').remove();
+			for(var i = 0;i < server_list.length; i++){
+				var server_ele = server_list[i];
+				console.log(server_ele);
+				server_ele = $(server_ele);
+				var server_id = server_ele.val();
+				try{
+					do_syncdb(server_ele, server_id);
+			   }catch(ex){
+			   		server_ele.css("background", "red");
+			   }
+			}
+		});
+	});
+	
+	function do_syncdb(server_ele, server_id){
+		$.ajax({ url: "/log/syncdb?ajax=1&server_id=" + server_id, context: document.body, success: function(result){
+			result = eval('(' + result + ')');
+			if(result){
+				if(result.code == 0){
+					server_ele.after('<span class="msg_tip" style="color:green;" >ok</span>');
+					server_ele.removeAttr('checked');
+				}else{
+					server_ele.after('<span class="msg_tip">失败</span>');
+				}
+			}else{
+				server_ele.after('<span class="msg_tip">失败</span>');
+			}
+	      }
+	    });
+	}
+	
+	function finish(msg) { 
+		box.html(msg);
+		box.show();
+	}
+	
+	function updatelist_finish(msg){
+		alert(msg);
+	}
+	
+	function show_sync_index_dialog(server_id){
+		var url = "/log/syncdb/syindex?server_id=" + server_id;
+		$("#sync_index_dialog").dialog({type:'url',value: url,center:true});
+		return false;
+	}
+	
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	服务器管理
+	<span class="buttons"><a href="/game/server/updatelist" todo="updatelist_finish" class="ask">更新GM服务器列表</a> <a href="/server/make" class="ask">生成服务器列表</a> <a href="/server/edit">添加</a> </span>
+</div>
+
+<div class="sub-menu">
+	<a href="/server/list"{%ifequal group_id 0%} class="active"{%endifequal%}>全部</a>
+	{%for item in list_group%}
+	<a href="/server/list?group_id={{item.id}}"{%ifequal item.id group_id%} class="active"{%endifequal%}>{{item.name}}</a>
+	{%endfor%}
+</div>
+
+<form class="ajax" todo="finish" action="/server/edit/status" method="post" >
+	<table class="list">
+		<tr>
+			<th width="60">全选
+			<input type="checkbox" name='allserv' onclick="javascript:changeCheckBox(this);" >
+			</th>
+			<th width="40">编号</th>
+			<th>服务器名</th>
+			<th>排序</th>
+			<th width="160">IP,端口</th>
+			<th width="160">开服时间</th>
+			<th width="60">状态</th>
+			<th width="350">操作</th>
+		</tr>
+		{%for item in list_record%}
+
+		<tr>
+			<td>
+			<input type="checkbox"  value="{{item.id}}" name="serv_id">
+			</td>
+			<td>{{item.id}}</td>
+			<td>{{item.name}}</td>
+			<td>{{item.order}}</td>
+			<td>{{item.game_addr}}:{{item.game_port}}</td>
+			<td>{{item.create_time_str}}</td>
+			<td>{{item.get_status_display}}</td>
+			<td><!--<a href="/server/remove/{{item.id}}" class="ajax" tip="确定要删除?" >删除</a> -->
+			<a href="/server/edit?server_id={{item.id}}">编辑</a>
+			<a href="sync_index" onclick="return show_sync_index_dialog({{item.id}});" >同步索引</a>
+			<a href="/log/syncdb?server_id={{item.id}}">同步表</a>
+			<!-- <a href="/log/syncdb/data/{{item.id}}" id='sync_data_{{item.id}}'>同步角色渠道</a>
+			<a href="/log/syncdb/player/{{item.id}}" id='sync_data_{{item.id}}'>同步游戏角色</a>
+			<a href="/user/convert/{{item.id}}">角色转换</a>-->
+			<a href="/game/server/info?server_id={{item.id}}">参数设置</a>
+			<a href="/game/server/shutup?server_id={{item.id}}">已禁言列表</a>
+			<a href="/game/send?server_id={{item.id}}" class="dialog">广播</a>
+			</td>
+		</tr>
+
+		{%endfor%}
+	</table>
+	<div class="sub-menu-1">
+		选中操作：
+		状态
+		<select name="serv_status" >
+			{% for item in STATUS_CHOICES %}
+			<option title="{{item.1}}" value="{{item.0}}">{{item.1}}</option>
+			{% endfor %}
+		</select> 
+		<input type="submit" title="提交" value="提交操作" />
+		<input type="button" value="同步表" id="btn_sync_table" />
+		<div id="msg_box" style=" color:#CD0A0A;" >
+			 操作完成！ 
+		</div>
+	</div>
+</form>
+  
+<div id="sync_index_dialog" >
+	
+</div>
+  
+<div id="tip_box" title="提示框" >
+
+</div>
+{% endblock %}

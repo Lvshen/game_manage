@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.list{width:100%;margin:0}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu_read_only.html" %}
+  
+<table class="list">
+<tr>
+{%for key,value in def_params.items%}
+<th>{{value}}</th>
+{%endfor%}
+</tr>
+
+{%for row in list_infos%}
+<tr>
+{%for cell in row%}
+<td>{{cell}}</td>
+{%endfor%}
+</tr>
+{%endfor%}
+
+</table>
+
+{% endblock %}

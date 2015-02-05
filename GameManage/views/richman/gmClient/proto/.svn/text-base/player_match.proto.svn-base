@@ -1,0 +1,254 @@
+import "db_cache.proto";
+import "cardsystem.proto";
+
+
+message C2S_EnterGameReq
+{
+	required int32 gamesvr_type = 1;	// 房间类型,0为普通服务器，1为富豪，2为精英, 3为个人模式, 4为新手场
+}
+
+message S2C_EnterGameRsp
+{
+	required int32 ret = 1;						// 进入结果, 0:成功，RM_NO_ENOUGH_ENERGY,RM_NO_ENOUGH_COIN,RM_NO_MATCHED_TICKET,RM_NO_MATCHED_SERVER
+}
+
+message C2S_EnterRoomReq
+{
+	enum EnterWayType
+	{
+		MATCHROOM = 0;
+		CREATEROOM = 1;
+		INVITATION = 2;
+		NPC = 3;
+	}
+	
+	required int32 enter_way = 2;			// 进入方式 0:匹配房间，1:创建房间，2:受邀进入房间, 3:个人模式
+	required int32 game_model = 3;		// 游戏模式	0:组队模式，1:单人模式，当enter_way为2时，标示邀请者id; 当enter_way为3时，标示模式难度 1--小；2--一般；3--大
+}
+
+message S2C_EnterRoomRsp
+{
+	required int32 ret = 1;						// 进入结果, 0:成功 -1:没有匹配房间 -2:创建房间失败 -3:受邀进入房间失败
+	optional int32 room_id = 2;				// 房间ID
+	optional int32 seat_no = 3;				// 座位号
+	optional int32 host_no = 4;				// 房主座位号
+	repeated int32 lock_seat = 5;			// 加锁座位号
+	optional int32 enter_way = 6;			// 进入方式 0:匹配房间，1:创建房间，2:受邀进入房间
+	optional int32 game_model = 7;		// 游戏模式	0:组队模式，1:单人模式，当enter_way为2时，标示邀请者id
+	optional AllPlayerInfo player_info = 8;	// 房间玩家信息
+}
+
+message C2S_EnterSimpleModelReq
+{
+}
+
+message S2C_EnterSimpleModelRsp
+{
+	required int32 ret = 1; // 0:成功 -1：失败
+	optional PlayerInfo base_info = 2; // 个人信息
+}
+
+message C2S_StartSimpleModelReq
+{
+}
+
+message S2C_StartSimpleModelRsp
+{
+	required int32 ret = 1;					// 进入结果, 0:成功 -1:没有匹配房间 -2:创建房间失败 -3:受邀进入房间失败
+	optional int32 room_id = 2;				// 房间ID
+	optional int32 seat_no = 3;				// 座位号
+	optional AllPlayerInfo player_info = 8;	// 房间玩家信息
+}
+
+message S2C_StartGame
+{
+	optional int32 cost_energy = 1;			
+	optional int32 cost_ticket = 2;		
+}
+//////////////////////////////////房间所有玩家信息////////////////////////////////
+
+message GameInfo
+{
+	optional int32 gameCoin = 1;				//游戏币
+	optional int32 status = 2;				// 准备状态 0:准备 1：未准备
+	optional int32 seat_no = 3;				// 座位号
+	optional int32 color = 4;					// 颜色
+	optional int32 curr_posi = 5;			// 当前位置
+	optional int32 rand_card_id = 6;  // 防御卡ID
+	optional int32 equipment = 7;			// 固定资产
+	optional int32 flag = 8;				//0--正常； 1--破产
+}
+
+message PlayerInfo
+{
+	optional DBCACHE.PlayerBaseInfo baseinfo = 1;	// 个人基本信息
+	optional CARDSYSTEM.PlayerCardInfo  card_property = 2; // 人物卡牌属性
+	optional GameInfo gameinfo = 3;				// 游戏信息
+}
+
+message RoomInfo
+{
+	optional int32 room_id = 1;				// 房间ID
+	optional int32 seat_no = 2;				// 座位号
+	optional int32 host_no = 3;				// 房主座位号
+	repeated int32 lock_seat = 4;			// 加锁座位号
+	optional int32 room_type = 5;			// 0为普通场，1为富豪，2为精英
+	optional int32 room_model = 6;		// 0:组队模式，1:单人模式
+	optional int32 enter_way = 7;			// 进入方式 0:匹配房间，1:创建房间，2:受邀进入房间, 3:个人模式
+	optional int32 left_round = 8;		// 剩余回合数
+	optional int32 countdown = 9;		// 剩余时间
+	optional int32 peak_city = 10;		// 举办奥运会,的格子
+}
+
+message AllPlayerInfo
+{
+	repeated PlayerInfo info = 1;
+}
+////////////////////////////////////自主创建房间后，标记其他玩家可以进入房间//////////////////////////
+message C2S_SetEnterFlagReq
+{
+	
+}
+
+message S2C_SetEnterFlagRsp
+{
+	required int32 ret = 1;						// 0:设置成功 1:失败
+}
+
+///////////////////////////////////通知房间有人进来/////////////////////////////////////////////////////
+message S2C_NotifyPlayerEnter
+{
+	required PlayerInfo info = 2;
+}
+
+//////////////////////////////////准备游戏//////////////////////////////////////////////////////////////
+message C2S_GameReadReq
+{
+	required int32 action = 1;			// 0：准备游戏 1:取消准备
+}
+
+message S2C_GameReadRsp
+{
+	required int32 ret = 1;			// 0:成功 1:失败 
+}
+
+/////////////////////////////////通知有人准备游戏////////////////////////////////////////////////
+message S2C_NotifyPlayerRead
+{
+	required int32 role_id = 1;		// 玩家ID
+	required int32 flag = 2;			// 0:准备 1:取消准备
+}
+
+/////////////////////////////////解锁座位/////////////////////////////////////////////////////
+message C2S_SetSeatStateReq
+{
+	required int32 seat_no = 1;
+	required int32 seat_state = 2; // 0:解锁 1:关闭解锁
+}
+
+message S2C_NotifySeatState
+{
+	required int32 seat_no = 1;
+	required int32 seat_state = 2; // 0:解锁 1:关闭解锁
+}
+
+////////////////////////////////////////踢出房间///////////////////////////////////////////////////////
+message S2C_TickOut
+{
+	required int32 role_id = 1; 	// 玩家
+}
+
+///////////////////////////////////////通知房主是否可以开始游戏///////////////////////////////////////
+message S2C_ShowStartGameBtn
+{
+	required int32 flag = 1;		// 0:显示，1:禁用
+}
+
+//////////////////////////////////////房主变更//////////////////////////////////////////////////
+message S2C_HostChange
+{
+	required int32 host_no = 1;	// 房主座位号
+}
+
+//////////////////////////////////////游戏信息变化通知//////////////////////////////////////////////////
+message S2C_NotifyGameInfoChange
+{
+	required int32 seat_no = 1;
+	required GameInfo game_info = 2;
+}
+
+////////////////////////////////////////离开房间/////////////////////////////////////////////
+message C2S_LeaveRoomReq
+{
+	
+}
+
+/////////////////////////////////////////通知有人离开房间/////////////////////////////////////
+message S2C_NotifyPlayerLeave
+{
+	required int32 role_id = 1;		// 玩家ID
+}
+
+/////////////////////////////////////////邀请对战/////////////////////////////////////
+message C2S_Invite_Player_Req
+{
+	required uint32 invitee = 1;
+}
+
+message S2C_Invite_Player_Rsp
+{
+	//0为发送邀请成功，-1为被邀请者不在线，-2为被邀请者已在游戏中，
+	//-3为邀请者暂时不可邀请，可能是时间间隔未到
+	required int32 ret_code = 1;
+	required uint32 invitee = 2;
+}
+
+message S2C_Notify_Invitee
+{
+	required uint32 serial = 1;
+	optional uint32 inviter_id = 2;
+	optional bytes inviter_name = 3;
+}
+
+message C2S_Invitee_Reply
+{
+	enum ReplyCode
+	{
+		ACCEPT = 0;
+		REJECT = 1;
+	}
+	
+	required uint32 serial = 1;
+	required int32 reply_code = 2;
+}
+
+message S2C_Invitation_Result
+{
+	enum InviteResult
+	{
+		SUCCESS = 0;
+		FAILED  = 1;
+	}
+	
+	required uint32 serial = 1;
+	required int32 ret_code = 2;
+}
+
+
+
+message Z2Z_Invite_Player_Req
+{
+	required uint32 serial = 1;
+	required uint32 inviter = 2;
+	optional bytes inviter_name = 3;
+	required uint32 invitee = 4;
+	required uint32 game_server_id = 5;
+	required uint32 room_number = 6;
+	required uint32 zone_bus_id = 7;
+}
+
+message Z2Z_Invite_Player_Rsp
+{
+	required uint32 serial = 1;
+	required int32 ret_code= 2;
+}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>字段值管理</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a  href="/field/list?log_type={{log_type}}">字段管理</a> -> 字段值管理
+ <a href="/field/edit?log_type={{log_type}}">添加</a>
+</div>
+
+<form action="/value/save/{{field_id}}" method="post">
+<table class="list editor">
+<tr>
+<th width="200">值ID</th>
+<th>对应值</th>
+<th width="200">状态</th>
+<th width="100">操作</th>
+</tr>
+{%for item in list_record%}
+<tr>
+<td><input type="text" name="value_id|{{item.id}}" value="{{item.value_id}}" /></td>
+<td><input type="text" name="value|{{item.id}}" value="{{item.value}}" /></td>
+<td id="status_{{item.id}}">&nbsp;</td>
+<td>
+ <a href="/value/remove?id={{item.id}}" class="del">删除</a></td>
+</tr>
+{%endfor%}
+</table>
+</form>
+
+
+<form action="/value/save?field_id={{field_id}}" method="post">
+<table class="form">
+<tr>
+<th>批量添加</th>
+<td><textarea name="value"></textarea><td>
+</tr>
+<tr>
+<th></th>
+<td><input type="submit" value="添加" /></td>
+</tr>
+</table>
+
+</form>
+
+{% endblock %}

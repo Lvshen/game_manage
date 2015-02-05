@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>充值审核</title>
+<script  type="text/javascript" src="/static/js/ajaxForm.js"> </script>
+<script type="text/javascript">
+	function finish(result){
+		$("#tip_box").html(result);
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<form class="ajax" action="/pay/confirm/{{pay_id}}" todo="finish" method="get">
+<input type="hidden" name="ajax" value="true" />
+<table class="list" style="width:100%;margin:0">
+<tr>
+<th width="120">时间</th>
+<th>金币发放</th>
+</tr>
+{%for item in list_record%}
+<tr>
+<td>{{item.0|date:"Y-m-d H:i:s"}}</td>
+<td>{{item.1}}</td>
+</tr>
+{%endfor%}
+<tr>
+<td><input type="submit" value="审核为金币已发放" /> </td><td> <a href="/pay/confirm/{{pay_id}}?cmd=resend" class="ask red">补发金币</a> </td>
+</tr>
+</table>
+</form>
+
+<a href="javascript:parent.$('#dialog').dialog('close')">关闭</a>
+<p class="green">小提示:首充超多100多加200</p>
+{% endblock %}

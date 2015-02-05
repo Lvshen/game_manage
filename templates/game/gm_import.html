@@ -1,0 +1,6 @@
+<link href="/static/js/gm_plugins/css/common.css" rel="stylesheet" />
+<script type="text/javascript" src="/static/js/gm_plugins/common.js" ></script>
+<script type="text/javascript" src="/static/js/doT.min.js" ></script>
+{% for item in plugin_list %}
+<script type="text/javascript" data-gm-plugin="true" src="/static/js/gm_plugins/{{item}}/main.js" ></script>
+{% endfor %}

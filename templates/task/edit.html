@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>编辑任务配置</title>
+<script type="text/javascript" src="/static/js/jquery.json.min.js" ></script>  
+<script type="text/javascript" > 
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	编辑任务配置
+	<span class="buttons" > <a href="/task/list" >返回</a> </span>
+</div>
+
+<form action="/task/save?id={{model.id}}" method="post" >
+	<table class="form"  >
+		<tr>
+			<th>
+				ID:
+			</th>
+			<td>
+				<input type="text" name="save_id" value="{{model.id}}" style="width:50px;" />
+				标题: <input type="text" name="title" value="{{model.title}}" />*
+			</td>
+		</tr>
+		<tr>
+			<th>
+				类别:
+			</th>
+			<td>
+				<input type="text" name="type" value="{{model.type}}" />*
+				状态：<input type="text" name="state" value="{{model.state}}" />
+			</td>
+		</tr>
+		<tr>
+			<th>
+				原始url:
+			</th>
+			<td>
+				<input type="text" name="source_url" value="{{model.source_url}}" style="width:500px;" />
+			</td>
+		</tr>
+		<tr>
+			<th>
+				执行url:
+			</th>
+			<td>
+				<input type="text" name="request_url" value="{{model.request_url}}" style="width:500px;" />*
+			</td>
+		</tr>
+		<tr>
+			<th> 原来的配置: </th>
+			<td>
+				<textarea name="source_cfg"  >{{model.source_cfg}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<th > 执行的配置：
+			</th>
+			<td>
+				<textarea name="target_cfg">{{model.target_cfg}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<th> 触发时间: </th>
+			<td>
+				 <input type="text" name="trigger_date" value="{{model.get_trigger_date}}" class="Wdate" />*
+			</td>
+		</tr>
+		<tr>
+			<th > 任务过期时间: </th>
+			<td>			
+				<input type="text" name="end_date" value="{{model.get_end_date}}" class="Wdate" />*
+			</td>
+		</tr>
+		<tr>
+			<th > 执行间隔: </th>
+			<td>			
+				<input type="text" name="interval"  value="{{model.interval}}" />*
+			</td>
+		</tr>
+		<tr>
+			<th > 执行正常放回值: </th>
+			<td>			
+				<textarea name="result_msg" >{{model.result_msg}}</textarea>*
+			</td>
+		</tr>
+		<tr>
+			<th>描述:</th>
+			<td>
+				<textarea name="remark" >{{model.remark}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<th>执行失败次数：</th>
+			<td>			
+				<input type="text" name="counter"  value="{{model.counter}}" />
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><input type="submit" value="保存" /></td>
+		</tr>
+	</table>
+</form>
+
+{% endblock %}

@@ -1,0 +1,5 @@
+{"total_record":{{total_record}},
+"start_num":{{start_num}},
+"list":[{%for item in list_record%}
+{"order_id":"{{item.query_id}}","post_amount":{{item.pay_amount|floatformat:"2" }},"pay_gold":{{item.pay_gold}},"post_time":{{item.post_time_int}},"pay_type":{{item.pay_type}},"pay_type_name":"{{item.pay_type_name}}","pay_status":{{item.pay_status}},"unit":"{{item.unit}}","remark":"{{item.remark}}"}{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}
+{%endfor%}]}

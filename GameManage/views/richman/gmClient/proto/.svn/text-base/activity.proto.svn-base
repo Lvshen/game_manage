@@ -1,0 +1,69 @@
+import "db_cache.proto";
+
+
+message S2C_Sign_In_Avaliable_Rsp
+{
+	required int32 ret = 1;
+}
+
+message S2C_Sign_In_Now_Rsp
+{
+	required int32 ret 					= 1;
+	required uint32 lasting_sign_in_days= 2;
+	repeated DBCACHE.Prop drew_prop		= 3;
+}
+
+message S2C_Clover_Reward_Sync
+{
+	enum TIMING_STATUS
+	{
+		ON = 0;
+		OFF = 1;
+	}
+	
+	required int32 need_timing = 1;
+	optional int32 next_reward_time = 2;
+}
+
+
+message C2S_Present_Clover_Req
+{
+	required int32 receiver_id = 1;
+}
+
+message S2C_Present_Clover_Rsp
+{
+	enum RET_CODE
+	{
+		SUCCESS = 0;
+		NOTTIMEOUT = 1;
+		FAIL = 2;
+	}
+	required int32 ret_code = 1;
+	optional int32 curr_present_points = 2;
+	optional int32 left_time = 3;
+}
+
+message C2S_Lottery_Draw_Req
+{
+	enum DrawType
+	{
+		Normal							= 0;
+		Lucky							= 1;
+		Marble							= 2;
+		Normal2							= 3;
+		Lucky2							= 4;
+
+	}
+	
+	required int32 draw_type			= 1;
+}
+
+message S2C_Lottery_Draw_Rsp
+{
+	required int32 ret_code 			= 1;
+	optional uint32 curr_present_points = 2;
+	repeated DBCACHE.Prop drew_prop		= 3;
+	repeated DBCACHE.Prop undrew_prop1	= 4;
+	repeated DBCACHE.Prop undrew_prop2	= 5;
+}

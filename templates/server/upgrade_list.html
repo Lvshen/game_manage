@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>版本管理</title>
+<script type="text/javascript" src="/static/js/ajaxLoad.js"></script>
+<script type="text/javascript" >
+	function changeCheckBox(ele) {
+		$("input[name='file_id']:checkbox").attr("checked", $(ele).attr("checked"));
+	}
+	 
+	$(document).ready(function() { 
+		
+		var btn_make = $("#btn_make");
+		btn_make.bind('click', function(){
+			var file_list = $('input[name="file_id"]:checked');
+			$('.msg_tip').remove();
+			for(var i = 0;i < file_list.length; i++){
+				var item_ele = file_list[i];
+				console.log(item_ele);
+				item_ele = $(item_ele);
+				var file_id = item_ele.val();
+				try{
+					do_make_file(item_ele, file_id);
+			   }catch(ex){
+			   		server_ele.css("background", "red");
+			   }
+			}
+		});
+		
+	});
+	
+	function do_make_file(item_ele, file_id){
+		$.ajax({ url: "/upgrade/make?ajax=1&model_id=" + file_id, context: document.body, success: function(result){
+			result = eval('(' + result + ')');
+			if(result){
+				if(result.code == 0){
+					item_ele.after('<span class="msg_tip" style="color:green;" >ok</span>');
+					item_ele.removeAttr('checked');
+				}else{
+					item_ele.after('<span class="msg_tip">失败</span>');
+				}
+			}else{
+				item_ele.after('<span class="msg_tip">失败</span>');
+			}
+	      }
+	    });
+	} 
+	
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+版本管理
+<span class="buttons">
+ <a href="/upgrade/clear" class="ask" >清除旧文件</a>
+ <a href="/upgrade/make/0" class="ask" >生成全部文件</a> 
+ <a href="/upgrade/edit">添加</a>
+ </span>
+</div>
+
+<div class="sub-menu">
+	<a href="/upgrade/list"{%ifequal group_id 0%} class="active"{%endifequal%}>全部</a>
+	{%for item in list_group%}
+	<a href="/upgrade/list?group_id={{item.id}}"{%ifequal item.id group_id%} class="active"{%endifequal%}>{{item.name}}</a>
+	{%endfor%}
+</div>
+
+<table class="list">
+<tr>
+	<th width="40">
+		<input type="checkbox" name='allserv' onclick="javascript:changeCheckBox(this);" >
+	</th>
+	<th width="40">编号</th>
+	<th width="150">更新版本</th>
+	<th width="60">包大小</th>
+	<th>下载页面URL</th>
+	<th width="150">发布时间</th>
+	<th width="100">操作</th>
+</tr>
+{%for item in list_record%}
+
+<tr>
+	<td>
+		<input type="checkbox"  value="{{item.id}}" name="file_id">
+	</td>
+	<td>{{item.id}}</td>
+	<td>{{item.ver_name}}{{item.ver_num}}</td>
+	<td>{{item.filesize}}</td>
+	<td>{{item.page_url}}</td>
+	<td>{{item.create_time_str}}</td>
+	<td><a href="/upgrade/make?model_id={{item.id}}" class="ask" >生成</a>&nbsp;&nbsp;<a href="/upgrade/remove?model_id={{item.id}}" class="del"  tip="确定要删除？">删除</a> <a href="/upgrade/edit?model_id={{item.id}}">编辑</a></td>
+</tr>
+
+{%endfor%}
+</table>
+<div class="sub-menu-1">
+	<input type="button" value="生成文件(点击一次)" id="btn_make" />
+</div>
+{% endblock %}

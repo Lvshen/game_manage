@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>同步统计汇总</title>
+<script type="text/javascript" >
+	$(document).ready(function(){
+		$("#syncStatus").dialog('close');
+		
+		$("#selectAll").bind("click", function(){
+			$("[name='summary_id']").attr("checked", $("#selectAll").attr("checked"));
+		});
+	});
+
+	var task_list = new Array();
+	var count = 0;
+	var posted_count = 0;
+	
+	function syncSummary(){
+		initState();
+		var addr = $("[name='address']").val();
+		if (addr == null || addr == ''){
+			alert('请输入地址!');
+			return true;
+		}
+		$("[name='summary_id']:checked").each(function(){
+			 task_list.push($(this).val());
+		});
+		if (task_list.length != 0){
+			ajaxPost(addr,task_list.pop());
+		}
+	}
+	
+	function initState(){
+		task_list = new Array();
+		count = $("[name='summary_id']:checked").length;
+		posted_count = 0;
+		$(".item_state").html('');
+		$("#syncStatus").html('');
+	} 
+	
+	function updateState(summary_id, result){
+		var s = '成功';
+		if (result == '-1'){
+			s = '失败';
+		}
+		var post_msg = "ID:" + summary_id + "," + s + "";
+		$(".item_state_"+summary_id).html(post_msg);
+		if (count == posted_count){
+			$("input").attr('disabled', false);
+			post_msg ="<p>已全部完成</p>";
+			$("#syncStatus").html(post_msg);
+			$("#syncStatus").dialog();
+		}
+	}
+	
+	function ajaxPost(addr,summary_id){
+		$("input").attr('disabled', true);
+ 
+ 		var user_name = $("[name='user_name']").val();
+ 		var password = $("[name='password']").val();
+ 		
+		var param = {"summary_id":summary_id, "address":addr, "user_name":user_name, "password":password};
+
+		var url = '/sync/summary/update';
+
+		var options = {
+			type : "post",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				posted_count ++; 
+				updateState(summary_id, result);
+				if(count > posted_count){
+					ajaxPost(addr, task_list.pop());
+				}
+			},
+			cache : false,
+			timeout : 10000,
+			error : function(msg) {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog();
+				$("input").attr('disabled', false);
+			}
+		}
+		$.ajax(options);
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+	<div class="sub-menu-1">
+		<form action="/sync/summary" method="post" >
+			{% include "log/sync_check_form.html" %}
+			<input type="submit" value="获取列表" />
+			<input type="button" value="同步" class="button"  onclick="syncSummary()" />
+		</form>
+	</div>  
+	<table class="list">
+		<tr>
+			<th>全<input type="checkbox" id="selectAll" /></th>
+			<th>ID</th>
+			<th>名称</th> 
+			<th>备注</th> 
+		</tr>
+	{%for item in result_list%}
+		<tr>
+			<td>
+				<input type="checkbox" name="summary_id" value="{{item.id}}" />
+			</td>
+			<td>
+				{{item.id}}
+				<div class="item_state item_state_{{item.id}}" style="color:green;"></div>
+			</td>
+			<td>
+				{{item.name}}
+			</td>
+			<td>
+				{{item.remark}}
+			</td>
+		</tr>
+	{%endfor%}
+	</table> 
+	<div id="syncStatus">
+		
+	</div>
+{% endblock %}

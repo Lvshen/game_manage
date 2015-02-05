@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+{% include "header.html" %}
+<title>GameAnalys</title>
+</head>
+
+<body scroll="no">
+
+<form action="/channel/login/do" method="post">
+<table class="form login">
+<tr class="header">
+<th></th><td>渠道登录</td></tr>
+<tr><th>用户名：</th>
+<td><input type="text" name="username" value="{{username}}" /></td>
+</tr>
+
+<tr><th>密码：</th>
+<td><input type="password" name="password" value="{{password}}" /></td>
+</tr>
+<tr><th></th>
+<td><input type="submit" value="登录" /></td>
+</tr>
+</table>
+</form>
+{% if err_msg %}
+<p class="red">{{err_msg}}</p>
+{% endif %}
+</body>
+</html>

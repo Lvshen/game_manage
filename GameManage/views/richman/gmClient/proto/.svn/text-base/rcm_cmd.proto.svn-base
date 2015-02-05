@@ -1,0 +1,22 @@
+/**
+* @file:   rcm_cmd.proto
+* @author: Xuefeng Li  lixuefeng@gzyouai.com
+* @brief:  统一命令字定义
+*
+*
+*/
+
+
+package rcm;
+
+message RCM_CMD
+{
+    enum CMD
+    {
+        CMD_CLIENT_LONGIN_REQ=0x3002;
+        CMD_CLIENT_LONGIN_RESP=0x3003;
+    }
+
+
+}
+

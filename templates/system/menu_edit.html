@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>功能模块编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/menu/list">功能列表</a> -> 功能模块编辑
+<span class="buttons">
+ <a href="/menu/list">返回</a>
+ </span>
+</div>
+
+<form action="/menu/save?menu_id={{menu.id}}" method="post">
+<table class="form">
+<tr>
+<th>模块名称：</th><td><input type="text" name="name" value="{{menu.name}}" /></td>
+</tr>
+<tr>
+<th>父级：</th><td>
+<select name="parent_id">
+<option value="0">顶级</option>
+{%for item in list_menu%}
+{%ifnotequal item.id menu.id%}
+<option value="{{item.id}}" {%ifequal item.id menu.parent_id%}selected="selected"{%endifequal%}>{{item.name}}</option>
+{%endifnotequal%}
+{%endfor%}
+</select>
+</td>
+</tr>
+
+<tr>
+<th>排序：</th><td><input type="text" name="order" value="{{menu.order}}" /></td>
+</tr>
+<tr>
+<th>菜单显示：</th><td><input type="checkbox" name="is_show" value="1"{%ifequal menu.is_show 1%} checked="checked"{%endifequal%}/></td>
+</tr>
+<tr>
+<th>记录日志：</th><td><input type="checkbox" name="is_log" value="1"{%ifequal menu.is_log 1%} checked="checked"{%endifequal%}/></td>
+</tr>
+
+<tr>
+<th>模块路径：</th><td><input type="text" name="url" value="{{menu.url}}" /></td>
+</tr>
+<tr>
+<th>模块图标：</th><td><input type="text" name="icon" value="{{menu.icon}}" /></td>
+</tr>
+<tr>
+<th>模块样式：</th><td><input type="text" name="css" value="{{menu.css}}" /></td>
+</tr>
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+{% csrf_token %}
+</form>
+{% endblock %}

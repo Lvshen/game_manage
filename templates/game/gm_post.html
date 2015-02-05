@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+ 
+
+{% block header%}
+<title>GM参数填写</title>
+<style type="text/css">
+	.msg_tip_div{
+		color: red;
+	    font-size: 18px;
+	    margin: 20px auto;
+	    width: 75%;
+	}
+</style>
+
+<script type="text/javascript">
+	var current_page = "gm_post"; 
+	var result_type = "{{gm_def.result_type}}";
+	var now_time_str = "{{now_time_str}}";
+	var system_timestamp = {{system_timestamp}};
+	 
+	 {% if has_lost_server_id or gm_def.result_type == 'msg'  or gm_def.result_type == 'json_result' %}
+	 	var group_server_list = [ {% for item in group_server_list %} {"group_id":"{{item.group.id}}", "server_list":[{%for server in item.server_list%}{"id":"{{server.id}}", "name":"{{server.name}}"}, {% endfor %} {"id":"-1"}]},  {% endfor %} {"group_id":"-1"} ];
+	 	var ele_server_list = null;
+	 	var group_list_len = group_server_list.length;
+	 	function change_server_list(group_id){
+	 		ele_server_list.html('');
+	 		var options_str = '';
+	 		for(var i = 0 ; i < group_list_len; i ++){
+	 			var group_item = group_server_list[i];
+	 			if (group_item.group_id == group_id){
+	 				var server_list = group_item.server_list;
+	 				if (!server_list){
+	 					continue;
+	 				}
+	 				var server_list_len = group_item.server_list.length;
+	 				{% if gm_def.result_type == 'msg' or gm_def.result_type == 'json_result' %}
+	 				options_str += "<label><input type='checkbox' onclick='selall(this);'  />全选</label>";
+	 				{% endif %}
+	 				for(var k = 0; k < server_list_len; k++){
+	 					var server_item = server_list[k];
+	 					if ("-1" == server_item.id){
+	 						continue;
+	 					}
+	 					{% if gm_def.result_type == 'msg' or gm_def.result_type == 'json_result'  %}
+	 					options_str += "<label><input type='checkbox' flag='batch_server_id' value='" + server_item.id + "' /> " + server_item.name + "</label>";
+	 					{% else %}
+	 					options_str += "<option value="+ server_item.id +">"+server_item.name+"</option>";
+	 					{% endif %}
+	 				}
+	 				break;
+	 			}
+	 		}
+	 		ele_server_list.html(options_str);
+	 	}
+	 	$(document).ready(function(){
+	 		{% if gm_def.result_type == 'msg' or gm_def.result_type == 'json_result'  %}
+	 		ele_server_list = $("div.batch_server_id");
+	 		{% else %}
+	 		ele_server_list = $("select[name='server_id']");
+	 		{% endif %} 
+	 		if (0 < group_list_len);
+	 			change_server_list(group_server_list[0].group_id);
+	 	});
+	 {% endif %}
+	 
+	 function selall(that){
+	 	var chk_all = $("input[flag='batch_server_id']");
+	 	chk_all.attr('checked', $(that).attr('checked'));
+	 }
+	
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	{{gm_def.title}}
+	<div class="buttons" >
+		<a href="/game/gm/list" >返回列表</a>
+	</div>
+</div>
+<form id="gm_form" action="/game/gm/{{gm_def.id}}/" method="POST" >
+	{%for item in has_value_param_list %}
+	<input type="hidden" name="{{item.key}}" value="{{item.value}}" />
+	{%endfor%}
+	
+	{%if has_lost_server_id %}
+	<div class="sub-menu-1" >
+	{% for item in group_server_list %}
+	<a href="#" onclick="change_server_list({{item.group.id}})" >{{item.group.name}}</a>
+	{% endfor %}
+	</div>
+	{% endif %}
+  	
+	<table class="form">
+	{%if has_lost_server_id %}
+	<tr>
+		<th>
+			服务器列表：
+		</th>
+		<td>
+			{% if gm_def.result_type == 'msg' or gm_def.result_type == 'json_result' %}
+			<div class="batch_server_id"></div>
+			{% else %}
+			<select  name="server_id"   >
+				 
+			</select>
+			{% endif %}
+		</td>
+	</tr>
+	{% endif %}
+	{%for item in lost_param_list %}
+	<tr>
+		<th width="160px">{{item.value.name}}({{item.value.type}}):</th>
+		<td> 
+			{% if item.value_map == '' %}
+				
+				{% if item.value.type == 'string' or item.value.type == 'int' %}
+				 <input type="text" name="{{item.key}}" value="{{item.value.value}}" />
+				{% endif %}
+				{% if item.value.type == 'text' %}
+				<textarea name="{{item.key}}" >{{item.value.value}}</textarea>
+				{% endif %} 
+				{% if item.value.type == 'boolean' %}
+				<select name="{{item.key}}" >
+					<option value="1" {% if item.value.value %}  selected="selected" {% endif %} >true</option>
+					<option value="0" {% if not item.value.value  %}  selected="selected" {% endif %} >false</option>
+				</select>
+				{% endif %}
+			{% else %} 
+				<select name="{{item.key}}" >
+					{% for item in item.value_map %}
+					<option value="{{item.key}}" >
+						{{item.value}}
+					</option>
+					{% endfor %}
+				</select>
+			{% endif %}
+		</td>
+	</tr>
+	{%endfor%}
+	 <tr class="bottom-buttons">
+	 	<td>
+	 		
+	 	</td>
+	 	<td>
+	 		<div class="buttons">
+	 			<input id="btn_submit" type="submit" value="提交" {% if gm_def.result_type == 'msg' %} onclick="return loopComit()"  {% endif %} />
+	 			or 
+	 			<a href="/game/gm/list" >返回列表</a>
+	 		</div>
+	 	</td>
+	 </tr>
+	</table>
+	
+	<div class="msg_tip_div" >&nbsp;</div>
+</form>
+
+	{% if gm_def.result_type == 'msg' %}
+<script type="text/javascript" >
+	
+		//需要提交的数量
+		var post_count = 0;
+		//已提交次数
+		var post_counter = 0;
+		var server_id_list = new Array();
+		var tip_div = $(".msg_tip_div");
+		var the_form = $("#gm_form");
+		
+		function initPostState() {
+			post_counter = 0;
+			server_id_list = new Array();
+			var _server_list = $("input[flag='batch_server_id']:checked");
+			server_list_len = _server_list.length;
+			for (var i = 0; i < server_list_len; i++){
+				server_id_list.push($(_server_list[i]).val());
+			}
+			post_count = server_id_list.length;
+			tip_div.html("");
+			tip_div.hide();
+		}
+		
+
+		function loopComit(post_delegate) {
+			var server_list = $("input[flag='batch_server_id']");
+			if (0 >= server_list.length){ 
+				return true;
+			}
+			
+			initPostState();
+			if(server_id_list.length == 0){
+				tip_div.html('没选择服务器');
+				return false;
+			}
+			tip_div.html('保存中...');
+			tip_div.show();
+			 
+			postModify(server_id_list.pop(), post_delegate);
+			 
+			return false; 
+		}
+	 
+		
+		function postModify(server_id, post_delegate){
+			if(post_delegate){
+				post_delegate(server_id, function(is_allow){
+					if(!is_allow){
+						post_counter++;
+						checkfinish(post_delegate);
+						return;
+					}
+					do_post(server_id, post_delegate);
+				});
+			}else{
+				do_post(server_id);
+			}
+		}
+		
+		function do_post(server_id, post_delegate){
+			var url = the_form.attr('action');
+			if (-1 == url.indexOf('?')){
+				url += '?';
+			}else{
+				url += "&";
+			}
+			url += "ajax=1";
+			var param = GetJSON("#gm_form");
+			param['server_id'] = server_id;
+			var options = {
+				type : "post",
+				url : url,
+				contentType : "application/x-www-form-urlencoded; charset=utf-8",
+				data : param,
+				success : function(result) {
+					post_counter++;
+					tip_div.html(tip_div.html() + "<p>serverID:" + server_id +",结果:" + result + "</p>");
+					window.clearInterval(task_id);
+					checkfinish(post_delegate);
+				},
+				cache : false,
+				timeout : 20000,
+				error : function(msg) {
+					post_counter++;
+					var error_msg = "<p>链接超时！保存服务器id为:" + server_id  + "时出错！</p>";
+					tip_div.html(tip_div.html() + error_msg);
+					window.clearInterval(task_id);
+					checkfinish(post_delegate);
+				}
+			}
+			$.ajax(options);
+		}
+		
+		var task_id = 0;
+		function checkfinish(post_delegate) {
+			if (post_count <= post_counter) {
+				tip_div.html(tip_div.html() + "<p>操作完成</p>");
+				//tip_div.dialog({ modal: true });
+				tip_div.show();
+				return;
+			}
+			{% if is_root %}
+			//task_id = self.setInterval("postModify(server_id_list.pop())",5000);
+			postModify(server_id_list.pop(), post_delegate);
+			{% else %}
+			task_id = self.setInterval("postModify(server_id_list.pop())",5000);
+			{% endif %}
+		}
+		
+</script>
+
+	{% endif %}
+	
+	
+	{% include "game/gm_import.html" %}
+{% endblock %}

@@ -1,0 +1,4 @@
+[{"tp":{{total_page}},"pn":{{page_num}}}
+{%for item in list_record%}
+,{"qc":"{{item.question}}","rc":"{{item.answer}}","qs":{{item.status}},"qt":"{{item.post_time_str}}","rt":"{{item.reply_time_str}}","rn":"{{item.reply_user}}","qtp":{{item.question_type}},"sc":{{item.score}}}
+{%endfor%}]

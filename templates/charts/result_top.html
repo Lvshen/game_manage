@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{item.title}}</title>
+<script type="text/javascript" src="/static/js/highcharts.js" ></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	var options = {
+		chart : {
+			renderTo:'container',
+			defaultSeriesType:'{{charts_type}}',
+		} ,
+		title : {
+			text:'',
+		} ,
+		subtitle : {
+			text:'',
+		} ,
+		xAxis : {
+                categories:{% autoescape off %}{{xAxis}}{% endautoescape %}
+                },
+		yAxis : {
+			min:0,
+			title:{
+				text:''
+			}
+		} ,
+		series : [{name:'{% autoescape off %}{{query_item_name.name}}{% endautoescape %}',data:{{data}},dataLabels: {enabled: true}}] ,
+		legend : {
+			layout:'horizontal',
+			align:'center',
+			backgroundColor:null,
+			borderColor:'#909090',
+			borderRadius:5,
+			enabled:1,
+			floating:0,
+			shadow:0,
+			style:'',borderWidth:1
+		} ,
+		credits : {
+			enabled:0
+		} ,
+        tooltip: {
+            formatter: function() {
+                return '<b>'+ this.x +'</b><br/>'+
+                    ''+ Highcharts.numberFormat(this.y, 1) +
+                    '';
+            }
+        },
+		plotOptions : { 						
+		   bar: {
+                dataLabels: {
+                    enabled: true
+                }
+           }			 
+		}
+	};
+	new Highcharts.Chart(options);
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+{% include "charts/component/filter_box.html"  %}
+<div class="box">
+	<div class="title" >{{title}}
+	</div>
+	<div id="container" style="width:98%;" >
+	
+	</div>
+</div>
+
+{% endblock %}

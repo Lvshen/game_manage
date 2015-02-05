@@ -1,0 +1,192 @@
+#!/usr/bin/env python
+#coding=utf-8 
+import datetime
+import time
+import os, sys,string
+from socket import *
+import struct
+import zlib
+from base import md5
+
+class CTcpClient:
+	"a class connet to with tcp"
+	m_host = '10.1.1.250'
+	m_port = 10000
+	m_clisock = None 
+	def Init(self, host, port):
+		self.m_host = host
+		self.m_port = port
+		self.m_clisock = socket(AF_INET, SOCK_STREAM) 
+		self.m_clisock.connect((self.m_host, self.m_port)) 
+		#self.m_clisock.settimeout(5)
+		
+	def GetSockname(self):
+		return self.m_clisock.getsockname()
+
+	def SendAndRecv(self,sendbuf):
+		BUFSIZE=2048
+		self.m_clisock.send(sendbuf) 
+		recvbuf = self.m_clisock.recv(BUFSIZE)
+		return recvbuf
+	def Send(self,sendbuf):
+		BUFSIZE=2048
+		print repr(sendbuf)
+		self.m_clisock.send(sendbuf) 
+		
+
+	def Fini(self):
+		self.m_clisock.close()
+
+
+def gen_sign(openid, timestamp, app_key):
+	sign_str = '%s&%u&%s'%(openid,timestamp,app_key)
+	print 'len:', len(sign_str), 'sign:',sign_str
+	sign_str = md5(sign_str)
+	print 'len:', len(sign_str), 'sign:',sign_str
+	return  sign_str
+
+def houdai_pack(netflag, player_id, msg_type,msg):
+	pack = "netflag=%d|player_id=%d|msg_type=%d|msg=|%s|"%(netflag, player_id,msg_type, msg)
+	print "pack:", pack
+	
+
+	fmt = "<HHII%ds"%(len(msg))
+	pack_len = struct.calcsize(fmt)
+	pack = struct.pack(fmt, pack_len, msg_type, netflag, player_id, msg)
+
+	print "msglen=", len(msg), "send_lend:", len(pack), "pack_len:", pack_len
+	return pack
+def houdai_unpack(pack):
+	pack_len = len(pack)
+	msg_len = pack_len - struct.calcsize("<HHII")
+	fmt =  "<HHII%ds"%(msg_len)
+	pack_len, msg_type, netflag,player_id, msg = struct.unpack(fmt, pack)
+	return (pack_len, msg_type, netflag,player_id, msg)
+
+
+
+def test_youai():
+	oTcpClient = CTcpClient()
+	oTcpClient.Init('10.1.1.250', 2108)
+	print "socket name:",oTcpClient.GetSockname()
+
+	server_id = 1
+
+	sendbuf = struct.pack("<I", server_id)
+	print 'sendbuf::'
+	#print sendbuf
+	recv = oTcpClient.Send(sendbuf)
+	
+
+	app_key = 'bc7c272ca1b91c2d66ad7608819119ed'
+	user_type = 1
+	user_id = "100"
+	
+	time_stamp  = int(time.time())
+	channel_key = "00100000"
+	client_ver = "v1.2"
+	terminate_id = "dfdgd123"
+
+	sign = gen_sign(user_id, time_stamp, app_key)
+
+	msg = '{"msg":[%d, "%s","%s", %u, "%s","%s","%s"]}'%(user_type,user_id,sign,time_stamp,channel_key,client_ver,terminate_id)
+	print "msg=%s"%(msg)
+
+	msg_type = 12
+	player_id = 10020
+	netflag = 100
+	sendbuf = houdai_pack(netflag, player_id,msg_type, msg)
+
+	print "len:", len(sendbuf), "buf:", repr(sendbuf)
+
+	#pack_len = len(sendbuf)
+	#msg_len = pack_len - struct.calcsize("!HHII")
+	#print "pack_len:",pack_len, "msg_len:", msg_len
+	
+
+	#fmt="!HHII%ds"%(msg_len)
+
+	#pack_len, msg_type, netflag, player_id, unmsg = struct.unpack(fmt, sendbuf)
+
+	#unpack = "netflag=%d|player_id=%d|msg_type=%d|msg=|%s|"%(netflag, player_id,msg_type, unmsg)
+	
+	#print "unpack:%s"%(unpack)
+	#recv=""
+	recv = oTcpClient.SendAndRecv(sendbuf)
+
+
+	print 'recv:', houdai_unpack(recv)
+
+	oTcpClient.Fini()
+
+
+
+def test_youaipay():
+	oTcpClient = CTcpClient()
+	oTcpClient.Init('10.1.1.253', 10000)
+	print "socket name:",oTcpClient.GetSockname()
+
+	pay_id = "90900"
+	pay_money = 90
+	pay_state = 1
+	pay_type = 9
+	pay_rmb = 5
+	reason = "This is reason"
+	pay_unit = "yuan"
+	vip = 890
+
+	
+	msg_type = 16
+	player_id = 262144004
+	netflag = 100
+
+
+	msg = '{"msg":[%d, "%s",%d, %u, "%s",%02f,"%s", "%s", %d]}'%(player_id,pay_id, pay_money, pay_state, pay_type, pay_rmb, reason, pay_unit,vip)
+	print "msg=%s"%(msg)
+
+	sendbuf = houdai_pack(netflag, player_id,msg_type, msg)
+
+	print "len:", len(sendbuf), "buf:", repr(sendbuf)
+
+	#pack_len = len(sendbuf)
+	#msg_len = pack_len - struct.calcsize("!HHII")
+	#print "pack_len:",pack_len, "msg_len:", msg_len
+	
+
+	#fmt="!HHII%ds"%(msg_len)
+
+	#pack_len, msg_type, netflag, player_id, unmsg = struct.unpack(fmt, sendbuf)
+
+	#unpack = "netflag=%d|player_id=%d|msg_type=%d|msg=|%s|"%(netflag, player_id,msg_type, unmsg)
+	
+	#print "unpack:%s"%(unpack)
+	#recv=""
+	recv = oTcpClient.SendAndRecv(sendbuf)
+
+
+	print 'recv:', houdai_unpack(recv)
+
+	oTcpClient.Fini()
+
+def test_getpay():
+	oTcpClient = CTcpClient()
+	oTcpClient.Init('10.1.1.253', 2208)
+	print "socket name:",oTcpClient.GetSockname()
+
+	server_id = 1
+
+	sendbuf = struct.pack("<I", server_id)
+
+	print "server id:", server_id, " buf:", sendbuf
+
+	recv = oTcpClient.SendAndRecv(sendbuf)
+
+
+	print 'recv:', recv
+
+	oTcpClient.Fini()
+
+
+if __name__ == '__main__':
+	test_youaipay()
+

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>更新包编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript" >
+	$(document).ready(function(){
+		
+
+		var checked_list = $("input[name='group_id']:checked");
+		
+		checked_list.parent().parent().prepend(checked_list.parent());
+		
+		checked_list = $("input[name='channel_id']:checked");
+		
+		checked_list.parent().parent().prepend(checked_list.parent());
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/upgrade/list">更新包列表</a> -> 更新包编辑
+<span class="buttons">
+ <a href="/upgrade/list">返回</a>
+ </span>
+</div>
+
+<form action="/upgrade/save?model_id={{model.id}}" method="post">
+<table class="form">
+<tr>
+<th>版本名及版本号：</th><td><input type="text" name="ver_name" size="7" value="{{model.ver_name}}" />.<input type="text" name="ver_num" size="4" value="{{model.ver_num}}" /> 版本号为SVN版本号</td>
+</tr>
+
+<tr>
+<th>更新备注：</th><td><textarea name="remark">{{model.remark}}</textarea></td>
+</tr>
+
+<tr>
+<th>可更新版本：</th><td><input type="text" name="client_ver" size="50" value="{{model.client_ver}}" /> 输入数字部份即可,多个用逗号隔开</td>
+</tr>
+
+<tr>
+<th><a href="/group/list">可更服务分区</a>：<br/>
+<label><input type="checkbox" id="select_group" onchange="selectAll(this.id)" />全选</label>
+</th>
+<td id="select_group_area">
+	{%for item in group_list%}
+	<label><input type="checkbox" name="group_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+	{%endfor%}
+</td>
+</tr>
+
+<tr>
+<th><a href="/channel/list">可更新渠道</a>：<br/>
+<label><input type="checkbox" id="select_channel" onchange="selectAll(this.id)" />全选</label></th><td id="select_channel_area">
+{%for item in channel_list%}
+<label><input type="checkbox" name="channel_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+{%endfor%}
+</td>
+</tr>
+
+<tr>
+<th>文件大小描述：</th><td><input type="text" name="filesize" size="7" value="{{model.filesize}}" /> 例如:12.5M</td>
+</tr>
+
+<tr>
+<th>下载包URL：</th><td><textarea name="download_url">{{model.download_url}}</textarea> 多个地址以逗号隔开</td>
+</tr>
+
+<tr>
+<th>下载页面URL：</th><td><input type="text" name="page_url" size="50"  value="{{model.page_url}}" /></td>
+</tr>
+
+<tr>
+<th>发布时间：</th><td><input type="text" name="create_time" size="50" class="Wdate" value="{{model.create_time_str}}" /></td>
+</tr>
+<tr>
+	<th>
+		
+	</th>
+		<td><input type="submit" value="保存" /></td>
+	</tr>
+</table>
+{% csrf_token %}
+</form>
+{% endblock %}

@@ -1,0 +1,1 @@
+protoc -I=../../snslib/comm/richman  --python_out=. ../../snslib/comm/richman/*.proto

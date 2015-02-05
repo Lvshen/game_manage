@@ -1,0 +1,214 @@
+#!/usr/bin/env python
+#coding=utf-8 
+import os, sys,string
+import MySQLdb
+import datetime 
+import sys
+import time 
+
+
+
+
+def get_propdb_conf_by_userid(conf_host, conf_user, conf_passwd, roleid):
+	db_charset='utf8'
+	db_port=3306
+	db_name = "chess_config"
+	sql = ""
+	recordInfo = {}
+	try:
+		conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+#		print "get_propdb_conf connect| %s@%s:%d/%s charset=%s, passwd=%s"%(conf_user,conf_host, db_port, db_name, db_charset, conf_passwd)
+		
+		cur = conn.cursor() 
+		sql = "SELECT DBServerAddr, DBUser, DBPassWord, DBName, sub_mod FROM property_server"
+
+		count = cur.execute(sql)
+		if (0 == count):
+			print "warning count=0|sql=%s"%(sql) 
+			return recordInfo
+
+		role_sub_mod = roleid % count
+#		print "count=%d|sub_mod=%d|sql=%s"%(count, role_sub_mod, sql)
+		cds=cur.fetchall() 
+		for record in cds:
+#			print record[0],record[1],record[2], record[3], record[4]
+			if (role_sub_mod == record[4]):
+				recordInfo = {'name': record[3], 'host': record[0], 'user': record[1], 'passwd': record[2]}
+#				print recordInfo
+				break;
+
+#		print cds
+		
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except MySQLdb.Error,e:
+		print "sql=%s"%(sql)
+		print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+	
+	return recordInfo
+
+def select_userinfo(propdb_conf, user_id):
+	db_charset='utf8'
+	db_port=3306
+	db_name = "chess_config"
+	sql = ""
+	recordInfo = {}
+
+	conf_host = propdb_conf['host']
+	conf_user = propdb_conf['user']
+	conf_passwd = propdb_conf['passwd']
+	db_name = propdb_conf['name']
+
+	try:
+		conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+#		print "get_propdb_conf connect| %s@%s:%d/%s charset=%s, passwd=%s"%(conf_user,conf_host, db_port, db_name, db_charset, conf_passwd)
+		
+		cur = conn.cursor(cursorclass = MySQLdb.cursors.DictCursor)
+		tbindex = ( user_id / 1000 ) % 32
+		sql = "SELECT * FROM UserInfo_%d where userid = %d"%(tbindex, user_id)
+
+		count = cur.execute(sql)
+		if (0 == count):
+			print "warning count=0|sql=%s"%(sql) 
+			return recordInfo
+
+#		print "user_id=%d|tbindex=%d|count=%d|sql=%s"%(user_id, tbindex, count, sql)
+		recordInfo =cur.fetchall() 
+		#print recordInfo
+		
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except MySQLdb.Error,e:
+		print "sql=%s"%(sql)
+		print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+	
+	return recordInfo[0]
+
+def translate(userinfo):
+    if userinfo == {}:
+         return userinfo
+    for info in userinfo:
+        if  type(userinfo[info]) is long:
+            userinfo[info] = "%d"%(userinfo[info])
+        elif type(userinfo[info]) is unicode:
+            userinfo[info] = "%s"%(userinfo[info])
+            #print info,' notype:',type(userinfo[info]), 'val:', userinfo[info]
+        elif type(userinfo[info]) is str:
+            userinfo[info] = "%s"%(userinfo[info])
+        elif type(userinfo[info]) is None:
+            userinfo[info] = "%s"%(userinfo[info])
+            #print info,' notype:',type(userinfo[info]), 'val:', userinfo[info]
+        else:
+            userinfo[info] = "%s"%(str(userinfo[info]))
+            #print info,' type:',type(userinfo[info]), 'val:', userinfo[info]
+
+        #print info,' type:',type(userinfo[info]), 'val:', userinfo[info]
+
+    if userinfo.has_key('chainloginreward'):
+        chainloginreward_list = userinfo['chainloginreward'].split(u',')
+        if chainloginreward_list != ['None'] and  chainloginreward_list != [''] and chainloginreward_list != None and chainloginreward_list != 'None' and chainloginreward_list != '':
+            last_gottime = time.strftime("%Y-%m-%d %X",time.localtime(string.atoi(chainloginreward_list[1])))
+            userinfo['chainloginreward'] = "daynum:%s|last_gottime:%s|isvip:%s"%(chainloginreward_list[0],last_gottime, chainloginreward_list[2])
+        else:
+            chainloginreward_list = ''
+	if userinfo.has_key('onlinereward'):
+		onlinereward_list = userinfo['onlinereward'].split(u',')
+        if onlinereward_list != ['None'] and  onlinereward_list != [''] and onlinereward_list != None and onlinereward_list != 'None' and onlinereward_list != '':
+            last_gottime = time.strftime("%Y-%m-%d %X",time.localtime(string.atoi(onlinereward_list[1])))
+            userinfo['onlinereward'] = "last_gottime:%s|online_long:%s|got_minu_award:%s(second)"%(last_gottime, onlinereward_list[1], onlinereward_list[2])
+        else:
+			onlinereward_list = ''
+    if userinfo.has_key('bag'):
+        bag_list = userinfo['bag']
+#        bag_list = bag_list.replace('[', '')
+#        bag_list = bag_list.replace(']', '')
+#        bag_list = bag_list.split(u',')
+        propinfo = ""
+        if bag_list != ['None'] and  bag_list != [''] and bag_list != None and bag_list != 'None' and bag_list != '':
+            bag_list = bag_list.replace('[','')
+            bag_list = bag_list.replace(']','')
+            bag_list = bag_list.split(u',')
+            for i in range(0, len(bag_list),2):
+#                print i, string.atoi(bag_list[i], 16), i+1, bag_list[i+1]
+                propid = string.atoi(bag_list[i], 16)
+                val = bag_list[i+1]
+            if (40000 != propid):
+                if (len(val) > 5): 	#时间类型
+                    endtime = string.atoi(val, 16)
+                    val = time.strftime("%Y-%m-%d %X",time.localtime(endtime))
+                else:
+                    val = "%u"%(string.atoi(val, 16))
+            print bag_list
+            propinfo = propinfo + "%u,%s"%(propid, val) + "|"
+#            print "id=", propid, "val=", val
+
+        userinfo['bag'] = propinfo	
+        #last_gottime = time.strftime("%Y-%m-%d %X",time.localtime(string.atoi(onlinereward_list[1])))
+        #userinfo['bag'] = "last_gottime:%s|online_long:%s|got_minu_award:%s(second)"%(last_gottime, onlinereward_list[1], onlinereward_list[2])
+
+	if userinfo.has_key('vipexp') and userinfo['vipexp'] != ['None'] \
+		and  userinfo['vipexp'] != [''] and userinfo['vipexp'] != None and userinfo['vipexp'] != 'None' and userinfo['vipexp'] != '':
+		vipexp = string.atoi(userinfo['vipexp'])
+		level_list = [0, 5, 35, 100, 250, 700, 1350, 2300, 3600, 6000, 10000]
+		vip_level = 0
+		for i in range(len(level_list) -1, 0, -1):
+			#print vipexp, level_list[i]
+			if vipexp >= level_list[i]:
+				vip_level = i
+				break
+		userinfo['vipexp'] = "vip_exp=%d|vip_level=%d"%(vipexp, vip_level)
+
+	if userinfo.has_key('sex'):
+		if userinfo['sex'] != ['None'] and  userinfo['sex'] != [''] and userinfo['sex'] != None and userinfo['sex'] != 'None' and userinfo['sex'] != '':
+			sex = string.atoi(userinfo['sex'])
+			userinfo['sex'] = 'female'
+			if 0 == sex:
+				userinfo['sex'] = 'man'
+
+	if userinfo.has_key('reg_gametype'): 
+		reg_gametype = 0
+		print 'reg_gametype:', userinfo['reg_gametype'] 
+		if userinfo['reg_gametype'] != ['None'] and  userinfo['reg_gametype'] != [''] \
+			and userinfo['reg_gametype'] != None and userinfo['reg_gametype'] != 'None' and userinfo['reg_gametype'] != '':
+			reg_gametype = string.atoi(userinfo['reg_gametype'])
+		if 10 == reg_gametype:
+			userinfo['reg_gametype'] = 'dou di zhu'
+		elif 11 == reg_gametype:
+			userinfo['reg_gametype'] = 'lai zi'
+		elif 20 == reg_gametype:
+			userinfo['reg_gametype'] = 'dou niu'
+		elif 30 == reg_gametype:
+			userinfo['reg_gametype'] = 'zha jin hua'
+		else:
+			userinfo['reg_gametype'] = 'miss type'
+
+    return userinfo
+
+def query_userinfo(user_id):
+    #conf_host = '10.21.210.250'
+    conf_host = '10.21.210.253'
+    conf_user = 'root'
+    #conf_passwd = '2u3oijflas2398j9lkjssaf'
+    conf_passwd = '123456'
+    propdb_conf = get_propdb_conf_by_userid(conf_host, conf_user, conf_passwd, user_id)
+#   print propdb_conf
+
+    userinfo = select_userinfo(propdb_conf, user_id)
+    userinfo = translate(userinfo)
+    print userinfo
+    return userinfo
+
+def test_query_userinfo():
+    user_id = 1048897
+    query_userinfo(user_id)
+
+if __name__ == "__main__":  
+	test_query_userinfo()
+
+

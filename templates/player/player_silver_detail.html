@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>充值统计</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="#">充值统计</a> -> 充值用户排行
+</div>
+
+<div class="sub-menu-1">
+<form method="post">
+<table>
+<tr>
+	<th style="width:70px;">服务器</th>
+	<td>
+		<select name="server_id">
+				<option value="0">全选</option>
+				{%for item in list_server%}
+				<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+				{%endfor%}
+		</select>
+	</td>
+</tr>
+<tr>
+	<th>
+		收入类型:<br/>
+		<label>全选<input type="checkbox" id="select_incoming" onchange="selectAll(this.id)" ></label>
+	</th>
+	<td>
+		<div id="select_incoming_area">
+		{%for inItem in incoming_list%}
+			<label><input type="checkbox" name="incoming_type" value="{{inItem.value_id}}" {%ifequal inItem.is_show 1 %}checked="checked"{%endifequal%} />{{inItem.value}}</label>
+		{%endfor%}
+		</div>
+	</td>
+</tr>
+<tr>
+	<th>
+		消耗类型:<br/>
+		<label>全选<input type="checkbox" id="select_outcoming" onchange="selectAll(this.id)" ></label>
+	</th>
+	<td>
+		<div id="select_outcoming_area">
+		{%for outItem in outcoming_list%}
+			<label><input type="checkbox" name="outcoming_type" value="{{outItem.value_id}}" {%ifequal outItem.is_show 1 %}checked="checked"{%endifequal%} />{{outItem.value}}</label>
+		{%endfor%}
+		</div>
+	</td>
+</tr>
+<tr>
+	<th></th>
+	<td>
+		开始日期:<input type="text" id="sdate" name="sdate" class="Wdate" value="{{sdate}}" />
+		结束日期:<input type="text" id="edate" name="edate" class="Wdate" value="{{edate}}" />
+		
+		<a href="javascript:setSelectDate(1);">前天</a>
+		<a href="javascript:setSelectDate(2);">昨天</a>
+		<a href="javascript:setSelectDate(3);">今天</a>
+		<a href="javascript:setSelectDate(4);">近三天</a>
+		
+		
+	</td>
+</tr>
+<tr>
+	<th>
+		
+	</th>
+	<td>
+		用户ID:<input type="text" id="user_id" name="user_id" value="{{user_id}}" />
+		用户名:<input type="text" id="user_name" name="user_name" value="{{user_name}}" />
+		<input type="submit" value="查询" />
+	</td>
+</tr>
+</table>
+</form>
+</div>
+
+<table class="list">
+<tr>
+<th width="85">角色id</th>
+<th width="120">角色名</th>
+<th width="140">操作时间</th>
+<th width="130px">变动金额</th>
+<th width="130">变动后数值</th>
+<th width="90">操作类型Id</th>
+<th width="90">操作类型</th>
+<th width="90">备注Id</th>
+<th width="90">备注</th>
+</tr>
+{%for item in silver_list%}
+<tr>
+<td>{{item.0}}</td>
+<td>{{item.1}}</td>
+<td>{{item.2|date:"Y-m-d H:i:s"}}</td>
+<td>{{item.3}}</td>
+<td>{{item.4}}</td>
+<td>{{item.5}}</td>
+<td>{{item.6}}</td>
+<td>{{item.7}}</td>
+<td>{{item.8}}</td>
+</tr>
+{%endfor%}
+</table>
+
+<script type="text/javascript">
+function setSelectDate(type)
+{
+	if(type==1)
+	{
+		$('#sdate').attr('value',GetDateStr(-2));
+		$('#edate').attr('value',GetDateStr(-1));
+	}
+	else if(type==2)
+	{
+		$('#sdate').attr('value',GetDateStr(-1));
+		$('#edate').attr('value',GetDateStr(0));
+	}
+	else if(type==3)
+	{
+		$('#sdate').attr('value',GetDateStr(0));
+		$('#edate').attr('value',GetDateStr(1));
+	}
+	else if(type==4)
+	{
+		$('#sdate').attr('value',GetDateStr(-2));
+		$('#edate').attr('value',GetDateStr(1));
+	}
+}
+function GetDateStr(AddDayCount) {
+    var dd = new Date();
+    dd.setDate(dd.getDate()+AddDayCount);//获取AddDayCount天后的日期
+    var y = dd.getFullYear();
+    var m = dd.getMonth()+1;//获取当前月份的日期
+    var d = dd.getDate();
+    return y+"-"+m+"-"+d +" 00:00:00";
+}
+
+</script>
+{% include "page_post.html" %}
+{% endblock %}

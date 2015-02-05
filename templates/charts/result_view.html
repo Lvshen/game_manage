@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{chart_result.name}}</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	{{chart_result.name}}
+	<span class="buttons" > <a href="/charts/result/edit/{{chart_result.id}}" >添加</a> </span>
+</div>
+
+<div class="sub-menu-1" >
+	<form action="" action='GET' >
+		服务器:
+		<select name="server_id" >
+			{% for item in server_list %}
+			<option value="{{item.id}}" {%if server_id == item.id %} selected="selected" {% endif %} > {{item.name}} </option>
+			{% endfor %}
+		</select>
+		<input type="submit" value="切换" />
+	</form>
+</div>
+
+<div class="charts_container">
+	
+{%for situation in situation_list %}
+<iframe width="100%" height="{{situation.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{situation.src}}" ></iframe>
+
+{%endfor%}
+
+{%for summary in summary_list %}
+{% if forloop.counter0|divisibleby:2 %}
+<iframe width="49%" style="float:left;margin-left:15px;" height="{{summary.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{summary.src}}"  ></iframe>
+{% else %}
+<iframe width="48%" style="float:right;margin-right:15px;" height="{{summary.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{summary.src}}"  ></iframe>
+{% endif %}
+{%endfor%}
+
+{%for chart in charts%}
+
+<iframe width="100%"  height="{{chart.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{chart.src}}"   ></iframe>
+
+{%endfor%}
+
+{%for trend in date_trend%}
+
+<iframe width="100%"  height="{{trend.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{trend.src}}"   ></iframe>
+
+{%endfor%}
+
+{%for r in pie%}
+
+<iframe width="100%"  height="{{r.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{r.src}}"   ></iframe>
+
+{%endfor%}
+
+{%for t in top%}
+
+<iframe width="100%"  height="{{t.chart_height}}" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" src="{{t.src}}"   ></iframe>
+
+{%endfor%}
+</div>
+
+{% endblock %}

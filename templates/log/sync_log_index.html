@@ -1,0 +1,157 @@
+
+{% block header%}
+<title>同步日志索引</title>
+<script type="text/javascript" >
+	function select_all(ele){
+		var value = $(ele).attr('checked');
+		$("[name='log_id']").attr('checked', value);
+	}
+	
+	var count = 0;
+	var posted_count = 0;
+	var post_array = new Array();
+	var server_id = {{server_id}};
+	
+	function begin(){ 
+		var server_list = $('input[name="sy_serv_id"]:checked');
+		var log_list = $("[name='log_id']:checked");
+		if(server_list.length){
+			for(var i=0;i<server_list.length;i++){
+				var server = $(server_list[i]);
+				var b_server_id = server.val();
+				for(var k=0;k<log_list.length; k++){
+					var log_item = $(log_list[k]);
+					var log_id = log_item.val();
+					var log_name = log_item.attr("data-flag");
+					do_sync_batch(server, b_server_id, log_id, log_name);
+				}
+			}
+		}else{
+			if (!init()){
+				return;
+			}
+			do_sync(server_id, post_array[0]);
+		}
+	}
+	
+	function do_sync_batch(server_ele, b_server_id, log_id, log_name){
+		$.ajax({ url: "/log/syncdb/dosyindex?server_id=" + b_server_id + "&log_id="+log_id, context: document.body, success: function(result){
+			result = eval('(' + result + ')');
+			if(result){
+				if(result.code == 0){
+					server_ele.after('<span class="msg_tip" style="color:green;" >'+log_name+'成功,</span>');
+					server_ele.removeAttr('checked');
+				}else{
+					server_ele.after('<span class="msg_tip">'+log_name+'失败</span>');
+				}
+			}else{
+				server_ele.after('<span class="msg_tip">'+log_name+'失败</span>');
+			}
+	      }
+	    });
+	}
+	
+	function do_sync(server_id, log_id){
+		var get_sql = 0;
+		if (0 < $(".create_sql:checked").length){
+			get_sql = 1;
+		}
+		var action_str = "/log/syncdb/dosyindex?server_id=" + server_id + "&log_id="+log_id + "&get_sql=" + get_sql;
+		$.ajax(action_str)
+			.done(function(msg){
+				result = eval('(' + msg +')');
+				check_state(result, log_id);
+				if (post_array.length <= 0){
+					return;
+				}
+				do_sync(server_id, post_array.pop());
+			})
+			.fail(function(msg){ 
+				result = eval("({'code':1})");
+				check_state(result, log_id);
+			});
+	}
+	
+	function init(){ 
+		$('.sync_state').hide();
+		posted_count = 0;
+		$("[name='log_id']:checked").each(function(){
+			post_array.push($(this).val()); 
+		});
+		count = post_array.length;
+		
+		if (count <= 0){
+			return false;
+		}
+		
+		$("input").attr("disabled", "disable");
+		return true;
+	}
+	
+	function check_state(result, id){
+		var str = ',执行成功';
+		if (result.code == 1){
+			str = ',执行失败';
+		}
+		$("#item_state_" + id).html("id:" + id + str);
+		
+		posted_count ++ ; 
+		if (count <= posted_count){ 
+			$(".sync_state").html("操作完成");
+			$("input").attr("disabled", "");
+			$(".sync_state").show();
+			return;
+		}
+	}
+	
+	function changeCheckBox(ele) {
+		$("input[name='sy_serv_id']:checkbox").attr("checked", $(ele).attr("checked"));
+	}
+</script>
+{% endblock %}
+
+{% block content %} 
+<form id="post_form"   >
+	<table class="list">
+	<tr>
+	<th width="40"><input type="checkbox"  onclick="select_all(this);" /></th>
+	<th width="200">名称</th>
+	</tr>
+	{%for item in log_list%}
+		<tr>
+			<td>
+				<input type="checkbox" name="log_id" value="{{item.id}}" data-flag="{{item.name}}" />
+			</td>
+			<td>
+				 {{item.name}} <div id="item_state_{{item.id}}"></div>
+			</td> 
+		</tr>
+	{%endfor%}
+	</table>  
+	<div class="sync_state" >
+		
+	</div>
+	<input type="checkbox" class="create_sql" />只是创建sql文件
+	<input type="button" style="float:right;" onclick="begin();" value="执行同步" />
+</form>
+<table class="list">
+	<tr>
+		<td>
+			全选
+		</td>
+		<td>
+			<input type="checkbox" name='allserv' onclick="javascript:changeCheckBox(this);" >
+		</td>
+	</tr>
+	{% for item in server_list %}
+	<tr>
+		<td>
+			{{item.name}}
+		</td>
+		<td>
+			<input type="checkbox"  value="{{item.id}}" name="sy_serv_id">
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

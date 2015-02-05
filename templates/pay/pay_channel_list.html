@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>支付通道列表</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+支付通道列表
+<span class="buttons">
+ <a href="/pay/channel/edit/0">添加</a>
+ </span>
+</div>
+
+
+<div class="sub-menu">
+	<a href="?"{%ifequal '' func_name%} class="active"{%endifequal%}>全部</a>
+	{%for item in list_func%}
+	<a href="?func={{item}}"{%ifequal item func_name%} class="active"{%endifequal%}>{{item}}</a>
+	{%endfor%}
+</div>
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="150">名称</th>
+<th width="80">支付函数</th>
+<th width="80">支付类型标识</th>
+<th>备注</th>
+<th width="40">汇率</th>
+<th width="40">单位</th>
+<th width="40">状态</th>
+<th width="70">返利状态</th>
+<th width="70">操作</th>
+</tr>
+{%for item in list_record%}
+{%if item.is_show%}
+<tr>
+<td>{{item.id}}</td>
+<td>{{item.name}}</td>
+<td>{{item.func_name}}</td>
+<td>{{item.link_id}}</td>
+<td>{{item.remark}}</td>
+<td>1:{{item.exchange_rate|floatformat}}</td>
+<td>{{item.unit}}</td>
+<td>{{item.get_status_display}}</td>
+{%if item.is_extra %}
+<td class="green">开</td>
+{%else%}
+<td class="red">关</td>
+{%endif%}
+<td>
+<a href="/pay/channel/remove?model_id={{item.id}}" class="del">删除</a>
+
+
+<a href="/pay/channel/edit?model_id={{item.id}}">编辑</a>
+
+</td>
+</tr>
+{%endif%}
+{%endfor%}
+</table>
+
+{% endblock %}

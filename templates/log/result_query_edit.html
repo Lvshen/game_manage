@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计汇总编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript" >
+	var resultArray = new Array();
+	$(document).ready(function() {
+		result_list = $("#result_list");
+
+		$("[name='statistic_id']").each(function() {
+			var checked = $(this).attr("checked");
+			if (checked != 'checked' && checked != "true" && !checked) {
+				return;
+			}
+			var value = $(this).val();
+
+			resultArray.push(parseInt(value));
+			arrayToStr();
+			sortCheckBox();
+		});
+
+	});
+
+	//排序复选框
+	function sortCheckBox() {
+
+		var checkboxsParent_eleID = "#result_list";
+
+		var lastEle = '';
+		for (var i = 0; i < resultArray.length; i++) {
+			$("[name='statistic_id']").each(function() {
+
+				var value = $(this).val();
+				var target_id = "#lbl_chk_" + value;
+				var target = $(target_id);
+				if (value == resultArray[i] + '') {
+					if (lastEle == '') {
+						$(checkboxsParent_eleID).after(target);
+					} else {
+						lastEle.after(target);
+					}
+					lastEle = target;
+				}
+
+			});
+		}
+	}
+
+	function remove_result(ele) {
+		var value = $(ele).val();
+		value = parseInt(value);
+		for (var i = 0; i < resultArray.length; i++) {
+			if (resultArray[i] == value) {
+				resultArray[i] = -1;
+			}
+		}
+		arrayToStr();
+	}
+
+	function select_result(ele) {
+		var value = $(ele).val();
+		resultArray.push(parseInt(value));
+		arrayToStr();
+	}
+
+	function arrayToStr() {
+		var value = '';
+		var first = true;
+		for (var i = 0; i < resultArray.length; i++) {
+			var v = resultArray[i];
+			if (v == -1)
+				continue;
+			if (!first)
+				value += '|';
+			value += v;
+			first = false;
+		}
+		result_list.val(value);
+	}
+
+	function click_result(ele) {
+		var checked = $(ele).attr("checked");
+		if (checked == 'checked' || checked == "true" || checked) {
+			select_result(ele);
+		} else {
+			remove_result(ele);
+		}
+		sortCheckBox();
+	}
+
+	function select_all_result() {
+		$("[name='statistic_id']").each(function() {
+			$(this).attr("checked", $("#select_result").attr("checked"));
+			click_result(this);
+		});
+	}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	<a href="/result/query/list">统计汇总列表</a> -> 统计汇总编辑 <span class="buttons"> <a href="/result/query/list">返回</a> </span>
+</div>
+
+<form action="/result/query/save?model_id={{model.id}}" method="post">
+	<table class="form">
+
+		<tr>
+			<th>名称：</th>
+			<td>
+			<input type="text" value="{{model.name}}" name="name" />
+			</td>
+		</tr>
+
+		<tr>
+			<th>备注：</th>
+			<td>			<textarea name="remark">{{model.remark}}</textarea></td>
+		</tr>
+
+		<tr>
+			<th>可选统计项目：
+			<br/>
+			<label>
+				<input type="checkbox" id="select_result" onchange="select_all_result()" />
+				全选 </label></th>
+			<td id="select_result_area">
+			<input type="hidden" id="result_list" name="result_list" value="" />
+			{%for item in list_statistic%} <label id='lbl_chk_{{item.id}}'>
+				<input type="checkbox" name="statistic_id" value="{{item.id}}" onclick="javascript:click_result(this);"    {%ifequal item.is_show 1%} checked="checked"{%endifequal%} />
+				{{item.name}} </label> {%endfor%} </td>
+
+		</tr>
+
+		<tr>
+			<td>
+			<input type="submit" value="保存"   />
+			</td>
+		</tr>
+	</table>
+	{% csrf_token %}
+</form>
+{% endblock %}

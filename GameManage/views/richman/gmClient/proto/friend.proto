@@ -1,0 +1,223 @@
+import "db_cache.proto";
+package FRIEND;
+message FriendInfo//点击好友， 可以显示出来的信息
+{
+  enum ONLINESTATUS
+  {
+  	ONLINE = 1;
+	OFFLINE = 2;
+  }
+  required int32 role_id = 1;//用户ID
+  optional bytes nick_name = 2;//昵称
+  optional int64  points = 3;//本周当前积分
+  optional int32  equipmentCardId = 4;//装备卡牌ID
+  optional int32 current_die_id = 5; //装备筛子ID
+  optional bytes under_write = 6;
+  optional int32 head_icon = 7;
+  repeated DBCACHE.PlayerGameRecord game_record = 8;
+  optional int32 send_clover_time = 9;
+  optional int32 isOnline = 10;// 1 is online, 2 is offOnline
+  optional string custom_head = 11;
+
+  //required int32   historyTopPoints = 4;//历史最高积分
+  //required int32   victoryProbability = 5;//胜率
+//  required int32 win_game_inaweek = 7;
+ // required int32 play_game_inaweek = 8;
+
+  //required int32 highest_points = 9;
+  //required int32 game_high_points = 10;
+}
+
+
+message PlayerFriendInfo//玩家的好友信息
+{
+    //repeated friendID = 1;
+    //repeated ToBeConfirmedFiendID = 2;
+    repeated FriendInfo friend = 1;//好友列表
+    repeated FriendInfo ToBeConfirmedFriend = 2;//待确认好友列表
+    repeated int32 apply_friendid = 3;//已经申请没有确认的好友
+    optional int64  mypoints = 4;
+	optional bytes nickname = 5;
+  	optional int32 last_week_rank = 6;//point ranking in friend list
+  	optional int32 last_week_rank_change_time = 7;//point ranking in friend list time
+	optional int32 last_week_point = 8;
+  	optional int32 this_week_rank = 9;//point ranking in friend list
+  	optional int32 this_week_rank_change_time = 10;
+	optional int32 this_week_point = 11;
+	optional int32 last_rank_reward_time = 12;// if never before get the reward ,the value is you add frist friend's time, and the value is negative(-time(NULL))
+}
+message C2S_SearchFriend //关键字好友搜索
+{
+  required bytes keyWorld = 1;
+    
+}
+
+message S2C_SearchFrindAnsList//关键字好友搜索结果列表
+{
+  enum STATUS
+  {
+  	SUCCESS = 1;
+	STRING_EXCEPTION = 2;
+	NO_SEARCH_ANS = 3;
+  	
+  }
+  required int32 ret_code = 1;
+  repeated FriendInfo user = 2;
+}
+message F2D_GetRecommandFriendList
+{
+	repeated int32 role_id = 1;
+}
+
+message C2S_AddToMyFriend//申请加为好友
+{
+  
+ // required int32 userID = 1;//要添加的好友ID //todoing delete
+  //required FriendInfo user = 2;//todoing
+  required int32 user = 1;
+}
+message S2C_AddToMyFriend_Rsp
+{
+	enum STATUS
+	{
+		SUCCESS = 0;//add success
+		FRIEND_LIST_FULL = 1;// friend list has full
+		ADD_YOURSELF = 2; //can't add yourself
+		IN_FRIEND_LIST = 4;// had in your fiendlist 
+		IN_FEER_COMFIRMED_LIST = 8; //had in peer to_be_comfirmed list
+		IN_COMFIRMED_LIST = 16; //had in your to_be_comfirmed list
+		DB_CONNECT_EXCEP = 32;
+		NO_PLAYER_DB = 64;
+	}
+	required int32 retcode = 1;
+}
+
+message S2C_PleaseConfirmFriend//转发给添加的目标好友
+{
+    required FriendInfo userSrc = 1;//添加来源用户
+}
+
+message ComfirmFriend
+{
+    required int32 userid = 1; //要确认的用户 
+    //required int32 isComfirm = 2; // 1 是确认， 2是拒绝
+    
+}
+message C2S_ComfirmFriend
+{
+    required int32 isComfirm = 1; // 1 是确认， 2是拒绝
+    optional int32 userSrc = 2;//todoing
+ //   optional FriendInfo userSrc = 2;//todoing
+//	optional FriendInfo mine = 3;//todoing delete
+}
+message S2C_ComfirmFriend_Rsp
+{
+	enum STATUS
+	{
+		SUCCESS = 0;
+		DELETE_APPLY_LIST_EXCEP = 1;
+		NO_PLAYER_DB = 2;
+		COMFIRM_YOURSELF = 4;
+		FRIEND_REACH_MAX = 8;
+		DELETE_COMFIRM_LIST_EXCEP = 16;
+		DB_CONNECT_EXCEP = 32;	
+		ADD_FRIEND_LIST_EXCEP = 64;
+		FAIL = 128;
+	}
+	required int32 retcode = 1;
+}
+message S2C_AddFriendToList
+{
+	required FriendInfo user = 1;
+}
+message S2C_AllFriendList
+{
+	enum STATUS
+	{
+		SUCCESS = 0;
+		FAIL = 1;
+	}
+	optional PlayerFriendInfo myFriendsInfo = 1; 
+	optional int32 ret_code = 2;
+}
+
+message F2D_AllFriendRoleIdList
+{
+	repeated int32 friendId = 1;
+	repeated int32 	ToBeConfirmedFriendID = 2;
+}
+message C2S_DeleteMyFriend
+{
+	required int32 role_id = 1;//the friend id you want to delete
+}
+message S2C_DeleteMyFriendRsp
+{
+	enum STATUS
+	{
+		SUCCESS = 0;
+		FAIL = 1;
+	}
+	required int32 role_id = 1;//the roleId that will delete
+	required int32 isSuccess = 2;//1 is success, 2 is fail;
+	optional int32 reason = 3; // -1 is role is not existence, -2 is friend is not existence
+}
+message F2P_NotifyAllFriendOnline
+{
+	enum status
+	{
+		OFFLINE = 1;
+		ONLINE = 2;
+	}
+	repeated int32 userid = 1;//broadcastList
+	required int32 theonlineuserid = 2;
+	required int32 onlineoroffline = 3;
+
+}
+message S2C_NotifyAllFriendOnline
+{
+	enum status
+	{
+		OFFLINE = 1;
+		ONLINE = 2;
+	}
+	repeated int32 userid = 1;//broadcastList
+	required int32 theonlineuserid = 2;
+	required int32 onlineoroffline = 3;
+}
+//message S2C_RankingGlodcoin_Req// one week get  once
+message S2C_RankingGlodcoin_Rsp
+{
+	enum RETCODE
+	{
+		SUCCESS = 0;
+		HADGOT = 1;//you had gotten the last weekly reward
+		NOFRIEND = 2;// you have no friends in your fiend list
+		EXCEPTION = 3;//in general, the player is not existence
+		NORANK = 4; //you are latest add friend begin in this week ,so you are not rank
+	}	
+	required int32 ret_code = 1;
+	required int32 goldcolin_number = 2;
+
+}
+message S2C_RankingChange
+{
+  required int32 friend_ranking = 1;// ranking of the friend that you surpass
+  required string friend_nickname = 2;// nickname of the friend that you surpass
+  required int32 friend_points = 3; //points of the friend that you surpass
+  required int32 ranking = 4;// your  ranking
+}
+message C2S_ResetFrinedInfo_Req
+{
+   repeated int32 roleid = 1;
+}
+message C2S_ResetFrinedInfo_Rsp
+{
+   enum RETCODE
+   {
+   		SUCCESS = 0;
+		FAIL = -1;
+   }
+   required int32 retcode = 1;
+}
+
+

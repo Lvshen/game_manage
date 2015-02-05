@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>解锁管理员</title>
+{% endblock %}
+
+{% block content %}
+<form action="/admin_user/unlock" method="post">
+	<table class="form">
+		<tr>
+			<th>登录名</th><td>
+			<input type="text" name="username" />
+			</td>
+		</tr>
+		<tr>
+			<th>密码：</th><td>
+			<input type="password" name="password" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<input type="submit" value="解锁" />
+			</td>
+		</tr>
+	</table>
+</form>
+{% endblock %}

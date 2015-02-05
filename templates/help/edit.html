@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>帮助内容编辑</title>
+{% endblock %}
+
+
+{% block content %}
+<div id="bar">
+帮助内容编辑
+	<span class="buttons">
+		<a href="/help/list">返回</a>
+	</span>
+</div>
+<form action="/help/save?id={{model.id}}" name="form" method="post">
+	<table class="form" >
+	    <tr>
+	        <td>名称：</td>
+	        <td><input name="title" type="text" value="{{ model.title }}"></td>
+	    </tr>
+	    <tr>
+	        <td>文件名：</td>
+	        <td><input name="filename" type="text" value="{{ model.filename }}"></td>
+	    </tr>
+	    <tr>
+	        <td>排序：</td>
+	        <td><input name="order" type="text" value="{{ model.order }}"></td>
+	    </tr>
+	    <tr>
+	        <td>所属分类：</td>
+	        <td><select name="parent_id">
+	        <option value="0" selected="selected">请选择</option>
+	        {% for item in cgname %}
+	        <option value="{{ item.id }}" {%ifequal model.parent_id item.id %} selected="selected" {% endifequal %}>{{ item.name }}</option>
+	        {% endfor %}
+	    </select> <a href="/help/category/list">分类添加和管理</a></td>
+	    </tr>
+	    <tr>
+	        <td>内容：</td>
+	        <td><textarea name="content" id="content" style="width:550px; height:230px;">{{ model.content}}</textarea></td>
+	    </tr>
+	    <tr>
+	        <td>&nbsp;</td>
+	        <td><input name="addhelp" type="submit" value="点击提交" onclick=" return checkform();" />{{err_msg}}</td>
+	    </tr>
+	</table>
+</form>
+{% endblock %}

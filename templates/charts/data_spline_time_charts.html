@@ -1,0 +1,36 @@
+{
+    name: '今天',
+    data: [
+    	{%for item in today_data%}
+        [Date.UTC({{item.year}},  {{item.month}}, {{item.day}}), {{item.value}}   ]
+        {% if not forloop.last %} , {% endif %}
+        {%endfor%}
+    ]
+},
+{
+    name: '前一天',
+    data: [
+    	{%for item in yesterday_data%}
+        [Date.UTC({{item.year}},  {{item.month}}, {{item.day}}), {{item.value}}   ]
+        {% if not forloop.last %} , {% endif %}
+        {%endfor%}
+    ]
+},
+{
+    name: '上一周',
+    data: [
+    	{%for item in week_data%}
+        [Date.UTC({{item.year}},  {{item.month}}, {{item.day}}), {{item.value}}   ]
+        {% if not forloop.last %} , {% endif %}
+        {%endfor%}
+    ]
+},
+{
+    name: '上月同期',
+    data: [
+    	{%for item in month_data%}
+        [Date.UTC({{item.year}},  {{item.month}}, {{item.day}}), {{item.value}}   ]
+        {% if not forloop.last %} , {% endif %}
+        {%endfor%}
+    ]
+}

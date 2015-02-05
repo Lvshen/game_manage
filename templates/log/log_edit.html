@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>日志类型编辑</title>
+<script type="text/javascript" src="/static/js/ajaxForm.js"></script>
+<script type="text/javascript">
+	function postFinish(msg){
+		alert(msg);
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/log/list">日志类型列表</a> -> 日志类型编辑
+<span class="buttons">
+ <a href="/log/list">返回</a>
+ </span>
+</div>
+
+<form action="/log/save?id={{model.id}}" method="post" class="ajax" todo="postFinish" >
+<input type="hidden" name="ajax" value="true" />
+<table class="form">
+<tr>
+<th>类型名称：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+
+<tr>
+<th>类型标识：</th><td><input type="text" name="key" value="{{model.key}}" />可输入：字母，数字，下划线</td>
+</tr>
+
+
+<tr>
+	<th>数据存放位置:</th>
+	<td>
+		<input type="radio" name="save_center" value="1" {% if model.status = 1 %} checked="checked" {% endif %} />中央服
+		<input type="radio" name="save_center" value="0" {% if model.status = 0 %} checked="checked" {% endif %} />分服
+	</td>
+</tr>
+
+<tr>
+<th>备注：</th><td><textarea name="remark">{{model.remark}}</textarea></td>
+</tr>
+
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+{% csrf_token %}
+</form>
+{% endblock %}

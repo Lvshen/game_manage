@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+ 
+{% block header%}
+<title>GM工具</title>
+ 
+{% endblock %}
+
+{% block content %}
+	<div id="bar">
+		{{title}}
+	</div>
+	
+	<div class="sub-menu-1">
+		{%for item in nemu_list%}
+		<a href="/game/gm/{{item.id}}?1=1{% for item in postback_param %}&{{item.key}}={{item.value}}{% endfor %}" >{{item.title}}</a>
+		{%endfor%} 
+	</div>
+	
+	{{result}}
+	<p>
+		<div class="buttons" >
+			<a href="javascript:history.go(-1);">返回</a>
+		</div>
+	</p>
+	
+	
+	{% include "game/gm_import.html" %}
+{% endblock %}

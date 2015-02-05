@@ -1,0 +1,174 @@
+#!/usr/bin/env python
+#coding=utf-8 
+from base import md5
+import sys
+import MySQLdb
+
+sys.path.append("/home/xuefeng/chessprj/ddztool/py")
+
+from ddzclient import * 
+
+
+class LogHelp :
+    _logger = None
+
+    @staticmethod
+    def _initlog():
+        import logging
+
+        LogHelp._logger = logging.getLogger()
+        logfile = '/data/log/get_onlinenum.log'
+        hdlr = logging.FileHandler(logfile)
+        formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(lineno)d|%(funcName)s|%(message)s')
+        hdlr.setFormatter(formatter)
+        LogHelp._logger.addHandler(hdlr)
+        LogHelp._logger.setLevel(logging.NOTSET)
+
+        LogHelp._logger.info("\n\n\n")
+        LogHelp._logger.info("logger is inited!")
+
+    @staticmethod
+    def get_logger() :
+        if LogHelp._logger is None :
+            LogHelp._initlog()
+
+        return LogHelp._logger
+
+
+def get_chess_game(conf_host, conf_user, conf_passwd):
+	db_charset='utf8'
+	db_port=3306
+	db_name = "chess_config"
+	sql = ""
+	chess_game = []	
+	try:
+		conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+		print "get_chess_game connect| %s@%s:%d/%s charset=%s, passwd=%s"%(conf_user,conf_host, db_port, db_name, db_charset, conf_passwd)
+		
+		cur = conn.cursor()
+		sql = "SELECT gameid, serverid FROM GameInfo"
+
+		count = cur.execute(sql)
+		print "count=%d|sql=%s"%(count, sql)
+		cds=cur.fetchall() 
+		for record in cds:
+			print record[0],record[1]
+			recordInfo = {'gameid': "%u"%(record[0]), 'serverid': "%u"%(record[1])}
+			
+			chess_game.append(recordInfo) 
+			#print chess_game
+
+		#print cds
+		
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except MySQLdb.Error,e:
+		print "sql=%s"%(sql)
+		print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+	
+	return chess_game
+
+def report_svrid_num(youai_svrid,svrid_num):
+	svrtime = time.strftime("%Y-%m-%d %X",time.localtime(time.time()))
+	sql = "INSERT INTO `log_svronline` (`log_type`, `log_user`, `log_server`, `log_channel`,`log_data`, `log_result`, `log_time`) VALUES"
+	sqlval = ""
+
+	print svrid_num
+	for key,value in svrid_num.items():
+		print key, value
+		sqlval = sqlval + "(%d, 0, 0, 0,%s,%s, '%s')"%(youai_svrid,key, value, svrtime) + ','
+
+
+	sqlval = sqlval.rstrip(',')
+	sql = sql + sqlval
+	print sql	
+
+	db_charset='utf8'
+	db_port=3306
+	db_name = "taige"
+	
+	chess_game = []	
+	conf_host = '10.21.210.250'
+	conf_user = 'root'
+	conf_passwd = '2u3oijflas2398j9lkjssaf'
+
+
+	try:
+		conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+		print "get_chess_game connect| %s@%s:%d/%s charset=%s, passwd=%s"%(conf_user,conf_host, db_port, db_name, db_charset, conf_passwd)
+		
+		cur = conn.cursor()
+		
+		count = cur.execute(sql)
+		print "count=%d|sql=%s"%(count, sql)
+		
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except MySQLdb.Error,e:
+		print "sql=%s"%(sql)
+		print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+def getonline():
+
+	conf_host = '10.21.210.250'
+	conf_user = 'root'
+	conf_passwd = '2u3oijflas2398j9lkjssaf'
+	#conf_passwd = '123456'
+	cds = get_chess_game(conf_host, conf_user, conf_passwd)
+	print cds
+	list_svrid = []
+	for item in cds:
+		list_svrid.append(item['serverid'])
+
+	list_svrid.append('1')
+	print list_svrid
+
+	oDDz  = CDDZClient()
+	#oDDz.Init('14.17.123.194', 10000)
+
+	oDDz.Init('10.21.210.250', 10000)
+	#tmp_list_svrid=['31001', '31301', '1']
+	youai_svrid = 0
+	ret = oDDz.get_onlinenum(youai_svrid,list_svrid)
+	svrid_num = ret['svrid_num']
+	
+	report_svrid_num(youai_svrid, svrid_num)
+
+
+def GetTotalOnline():
+
+	conf_host = '10.21.210.250'
+	conf_user = 'root'
+	conf_passwd = '2u3oijflas2398j9lkjssaf'
+	#conf_passwd = '123456'
+	cds = get_chess_game(conf_host, conf_user, conf_passwd)
+	print cds
+	list_svrid = []
+	#for item in cds:
+	#	list_svrid.append(item['serverid'])
+
+	list_svrid.append('1')
+	print list_svrid
+
+	oDDz  = CDDZClient()
+	#oDDz.Init('14.17.123.194', 10000)
+
+	oDDz.Init('10.21.210.250', 10000)
+	#tmp_list_svrid=['31001', '31301', '1']
+	youai_svrid = 0
+	ret = oDDz.get_onlinenum(youai_svrid,list_svrid)
+	svrid_num = ret['svrid_num']
+	
+	report_svrid_num(youai_svrid, svrid_num)
+
+
+
+if __name__ == "__main__":   
+	GetTotalOnline()
+
+

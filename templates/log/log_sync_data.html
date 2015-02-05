@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>执行统计</title>
+{% endblock %}
+
+{% block content %}
+
+{%if is_reload%}
+已同步{{sync_num}}条
+{%else%}
+parent.$("#sync_data_{{server_id}}").html("同步已完成!");
+{%endif%}
+<script type="text/javascript">
+
+{%if is_reload%}
+document.location = "/log/syncdb/data/{{server_id}}?page_num={{page_num}}";
+{%endif%}
+</script> 
+
+{% endblock %}

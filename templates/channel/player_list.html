@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家管理</title>
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>
+<script type="text/javascript" >
+	$(document).ready(function() {
+		$("#shutup_dialog").hide();
+		$(".shutup").unbind();
+		$(".shutup").each(function() {
+			$(this).bind('click', function() {
+				var player_id = $(this).attr('player');
+				
+				var action = '/channel/player/shutup/'+player_id;
+
+				$("#form_shutup").attr('action', action);
+
+				var dialog_param = {
+					maxHeight : 150,
+					maxWidth : 350,
+					minHeight : 150,
+					minWidth : 350
+				};
+				$("#shutup_dialog").dialog(dialog_param);
+				return false;
+			});
+		});
+	}); 
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+玩家管理
+
+<span class="buttons">
+ <a href="/user/edit">添加</a>
+ </span>
+</div>
+
+<div class="sub-menu-1">
+<form action="/channel/player/list" method="get">
+服务器:<select name="server_id" id="server_id">
+{%for item in list_server%}
+<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</a>
+{%endfor%}
+</select>
+查询:
+<select name="key_type">
+<option value='1'>角色名称</option>
+<option value='0'>角色ID</option>
+<option value='2'>关联账号</option>
+<option value='3'>手机标识</option>
+</select>
+<input type="text" name="key" value="{{player_key}}" />
+<input type="submit" value="查询" />
+</form>
+</div>
+
+<div id="list_{{page_num}}" name="list_{{page_num}}" >
+<table class="list">
+<tr>
+<th width="80">角色ID</th>
+<th width="100">角色名称</th>
+<th>关联账号</th>
+<th>登录数</th>
+<th>手机标识</th>
+<th>上次登录时间</th>
+<th>创建时间</th>
+<th width="60">操作</th>
+</tr>
+{%for item in player_list%}
+<tr>
+<td>{{item.0}}</td>
+<td>{{item.1}}</td>
+<td>{{item.2}}</td>
+<td>{{item.3}}</td>
+<td>{{item.4}}</td>
+<td>{{item.5|date:"m-d H:i:s"}}</td>
+<td>{{item.6|date:"m-d H:i:s"}}</td>
+<td>
+{%ifequal item.7 0%}
+<a href="/channel/player/block/{{server_id}}/{{item.0}}?is_lock=1" class="dialog" id="link_{{item.0}}">封号</a>
+{%else%}
+<a href="/channel/player/block/{{server_id}}/{{item.0}}?is_lock=0" class="dialog" id="link_{{item.0}}">解封</a>
+{%endifequal%} 
+<a href="/channel/player/shutup/{{item.0}}"  player="{{item.0}}" class="ask shutup" tip="确定操作？" >禁言</a>
+</td>
+</tr>
+{%endfor%}
+</table>
+</div>
+
+<div id="dialog">
+<iframe id="iframe_playerInfo" height=550 width=740 frameborder=0 scrolling=auto></iframe>
+</div>
+
+<!-- 禁言dialog -->
+<div id="shutup_dialog">
+	<form id="form_shutup" method="get"  >
+		<input type="hidden" name="ajax" value="true" />
+		<label>禁言时间:
+			<input type="text" name="time" value="1800" />
+			(秒)</label>
+		<input type="submit" name="提交" value="提交" onclick="javascript:return shutup_finish();" />
+		<script type="text/javascript" >
+			function shutup_finish() {
+				$("input").attr('disabled', true);
+
+				var param = GetPostParameter($("#shutup_dialog"));
+				
+				var url = $("#form_shutup").attr("action");
+				 
+				var options = {
+					type : "get",
+					url : url,
+					contentType : "application/x-www-form-urlencoded; charset=utf-8",
+					data : param,
+					success : function(result) { 
+						if (result != 0 || result != '0') {
+							$("#tip_box").html("未知错误!");
+							$("#tip_box").dialog();
+						} else {
+							$("#shutup_dialog").dialog('close');
+						}
+
+						$("input").attr('disabled', false);
+					},
+					cache : false,
+					timeout : 5000,
+					error : function() {
+						$("#tip_box").html("链接超时！请重试");
+						$("#tip_box").dialog();
+						$("input").attr('disabled', false);
+					}
+				}
+				$.ajax(options);
+				return false;
+			}
+		</script>
+	</form>
+</div>
+{% include "pager.html" %}
+{% endblock %}

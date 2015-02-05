@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>备份列表</title>
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script> 
+<script type="text/javascript">
+$(document).ready(function(){
+	if ($("#date_type").val() == 5) {
+		$("#show_time").show();	
+	}
+	else{
+		$("#show_time").hide();	
+	}	
+	$("#backup_execute").click(function(){
+		$("#backup_box").html("");
+		$("#file_box").html("");
+		if ($("#backup_area input[type='checkbox']:checked").length == 0) {
+			alert("请选择备份！");
+			return false;
+		}
+		$("#backup_box").html('<span id="file_box" style="margin:0 auto;width:300px;" title="提示框" ></span>');		$("#backup_area input[type='checkbox']").each(function() {
+			if ($(this).attr('checked') == true) {
+				gene_file($(this).val());	
+			}
+		});
+	});
+	$("#date_type").change(function(){
+		if ($(this).val() == 5) {
+			$("#show_time").show();	
+		}
+		else{
+			$("#show_time").hide();	
+		}
+	});
+});
+
+	function changeServer(ele){ 
+		var auto_change = {%if allowChannel %}true{%else%}false{%endif%};
+		if(auto_change){
+			//切换服务器，更新渠道
+			$("#search_form").submit();
+		}
+	}
+	var close_export = false;
+	
+	function gene_file(backup_id){
+		close_export = false;
+		$("#file_box").html("");
+		$("#file_box").show();
+		$("#backup_box").show();
+		do_gene_file(backup_id,0);
+		return false;
+	}
+	
+	function do_gene_file(backup_id,i){
+		//$("input").attr('disabled', true);
+		
+		//var post_form = $("#search_form");
+		var arr = new Array()
+		if ($("[name='server_id']").val() > 0) {
+			arr = [$("[name='server_id']").val()];
+		}
+		else {
+			arr = eval("{{server_list}}");			
+		}
+		var param = '';//GetPostParameter(post_form);
+		if ($("#date_type").val() == 5) {
+			param = "sdate="+$("#start_date").val()+"&edate="+$("#end_date").val()+'&';
+		}
+		var clear = 0;
+		if ($("#clear_export_old_file:checked").length == 1)
+			clear = 1;
+		
+		param += "server_id="+arr[i]+"&date_type="+$("[name='date_type']").val()+"&clear_export_old_file=" + clear + "&close_export=" + (close_export? 1:0);
+		var url = '/backup/execute/'+backup_id;
+
+		var options = {
+			type : "get",
+			url : url,
+			dataType:"json",
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				// alert(parm);
+				//result = eval('(' + result + ')');
+				close_export = check_export_file_state(result,backup_id,i);
+				if (close_export){
+					return false;	
+				}
+				else if (result.is_finish && i < arr.length-1 && $("[name='server_id']").val() == 0) {
+					i = i+1;
+					do_gene_file(backup_id,i);
+				}
+			},
+			cache : false,
+			timeout : 20000,
+			error : function(result) {
+				if ($("[name='server_id']").val() > 0) {
+					$("#backup_box").append("<br/>服务器"+arr[0]+"链接超时！请重试")
+				}
+				else{
+					$("#backup_box").append("<br/>服务器"+arr[i]+"链接超时！请重试")	
+				}				
+				
+				$("#backup_box").dialog({ modal: true });
+				$("input").attr('disabled', false);
+				if (i < arr.length-1 && $("[name='server_id']").val() == 0) {
+					i = i+1;
+					do_gene_file(backup_id,i);
+				}				
+			}
+		}
+		window.setTimeout(function(){
+			$.ajax(options);	
+		},3000);
+		return false;
+	}
+	
+	function check_export_file_state(result,backup_id,i){
+		if (close_export){
+			$("#backup_box").html("<br/>已关闭导出");
+			$("#file_box").html("");  
+			$("input").attr('disabled', false);
+			close_export = false;
+			return true;
+		}
+		if (result.is_finish){
+			var arr = new Array()
+			if ($("[name='server_id']").val() > 0) {
+				arr = [$("[name='server_id']").val()];
+			}
+			else {
+				arr = eval("{{server_list}}");			
+			}			
+			//alert(result.url);
+			$("#file_box").html("");		
+			var download_url = '<a href="'+result.url+'" style="color:blue;" >'+result.url.split("/")[result.url.split("/").length-1]+'</a>';
+			$("#backup_box").append("<br/>服务器"+arr[i]+"已导出:" + download_url);
+			if (i >= arr.length-1) {
+				$("#backup_box").append("<br/>全部导出完成<br/>");
+			}			
+			$("input").attr('disabled', false);
+		}else{
+			var current_url = result.url;
+			do_gene_file(backup_id,i);
+		}
+		$("#backup_box").dialog({ modal: true,  
+			close: function(event, ui) {
+				  close_export = true;
+			}
+		});
+	}
+	
+	function get_progress_bar(page_num, total_page){
+		var str = '<div style=" background-color:#E5E5E5; width:100%;" >';
+		var width = page_num / total_page * 100;
+		str += '<div style=" background-color:blue; width:' + width + '%;" >&nbsp;</div>';
+		str += '</div>';
+		return str;
+	}
+	function creatBackupFile() {
+		$("#backup_box").html("");
+		$("#file_box").html("");		
+		if ($("#backup_area input[type='checkbox']:checked").length == 0) {
+			alert("请选择备份选项！");
+			return false;
+		}		
+		var arr = new Array();
+		$("#backup_area input[type='checkbox']:checked").each(function() {
+			arr.push($(this).val());
+		});
+		if (confirm("确定生成？")) {
+			$.dialog('正在生成，请稍等...');
+			$.ajax({
+				type : "GET",
+				url : "/backup/create/",
+				data:{
+					backup_ids:arr.join(",")
+				},
+				datatype : "html",
+				cache : false,
+				success : function(data) {
+					$.dialog('生成文件成功!');
+				},
+				error:function(data){
+					$.dialog('生成文件文件失败!');
+				}
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}	
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	{%ifnotequal log_type 0%}
+	<a href="/backup/list">备份管理-></a>
+	{%endifnotequal%}
+	备份列表
+	<span class="buttons"> <a href="/backup/edit/0/{{log_type}}">添加</a> <a href="/log/list">返回</a> </span>
+</div>
+<div class="sub-menu-1">
+	<form method="post" id="search_form">
+		服务器:
+		<select name="server_id">
+			<option value="0">全部</option>
+			{%for item in list_server%}
+			<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+				{%endfor%}
+		</select>
+
+		备份类型:
+		<select name="type" onchange="submit();">
+			<option value="">全部</option>
+			{% for item in type_list %}
+			<option value="{{item.type}}" {% ifequal item.type type %}selected="selected"{% endifequal%}>{{item.type}}</option>
+			{% endfor %}
+		</select>
+		时间：
+		<select name="date_type" id="date_type">
+			<option value="1">daily</option>
+			<option value="2">monthly</option>
+			<option value="3">first</option>
+			<option value="4">closed</option>
+			<option value="5">自定义时间</option>
+		</select>
+		<span id="show_time" style="display: none;">
+		开始日期:<input type="text" name="start_date" id="start_date" class="Wdate" value="{{sdate}}" />
+		结束日期:<input type="text" name="end_date" id="end_date" class="Wdate" value="{{edate}}" />
+		备份类型
+		</span>
+<!-- 		<select name="exprot_format">
+			<option value="3">txt</option>
+			<option value="1">excel</option>
+			<option value="2">csv</option>
+		</select> -->
+		<input type="checkbox" checked="checked" id="clear_export_old_file" />清除旧文件
+		<input type="button" name="backup_execute" id="backup_execute" value="备份"/>	
+		<!--<a href="#" class="creat" onclick=" return creatBackupFile();">生成备份文件</a>-->
+	</form>
+</div>
+<table class="list">
+	<thead>
+	<tr>
+		<th width="50"><input type="checkbox" id="backup" onchange="selectAll(this.id)"/>全选</th>
+		<th width="40">编号</th>
+		<th width="130">名称</th>
+		<th width="50">类型</th>
+		<th width="100">备份格式</th>
+		<th width="30">sql</th>
+		<th width="200">操作</th>
+	</tr>
+	</thead>
+	<tbody id="backup_area">
+	{%for item in list_model%}
+	<tr>
+		<td><input type="checkbox" name="id" value="{{item.id}}"/></td>
+		<td>{{item.id}}</td>
+		<td><a href="/backup/edit/{{item.id}}" title="{{item.url}}">{{item.name}}</a></td>
+		<td>{{item.type}}</td>
+		<td>{{item.backup_format}}</td>
+		{%if item.sql%}
+		<td class="red">true</td>
+		{%else%}
+		<td>&nbsp;</td>
+		{%endif%}
+		<td>
+			<a href="/backup/del/{{item.id}}" onclick="javascript:if (confirm('确定删除？')) {return true;} else {return false;}">删除</a> |	
+			<a href="/backup/edit/{{item.id}}">编辑</a>
+		</td>
+	</tr>
+	{%endfor%}
+	</tbody>
+</table>
+{% include "page_post.html" %}
+<div id="backup_box" style="margin:0 auto;display:none;height:300px;width:500px;overflow:scroll;" title="提示框" >
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>同步统计</title>
+<script type="text/javascript" >
+	$(document).ready(function(){
+		$("#syncStatus").dialog('close');
+		
+		$("#selectAll").bind("click", function(){
+			$("[name='statistic_id']").attr("checked", $("#selectAll").attr("checked"));
+		});
+	});
+
+	var task_list = new Array();
+	var count = 0;
+	var posted_count = 0;
+	
+	function syncStatistic(){
+		initState();
+		var addr = $("[name='address']").val();
+		if (addr == null || addr == ''){
+			alert('请输入地址!');
+			return true;
+		}
+		$("[name='statistic_id']:checked").each(function(){
+			 task_list.push($(this).val());
+		});
+		if (task_list.length != 0){
+			ajaxPost(addr,task_list.pop());
+		}
+	}
+	
+	function initState(){
+		task_list = new Array();
+		count = $("[name='statistic_id']:checked").length;
+		posted_count = 0;
+		$(".item_state").html('');
+		$("#syncStatus").html('');
+	}
+	
+	function updateState(statistic_id, result){
+		var s = '成功';
+		if (result == '-1'){
+			s = '失败'
+		}
+		var post_msg = "ID:" + statistic_id + "," + s + "";
+		$(".item_state_"+statistic_id).html(post_msg);
+		if (count == posted_count){
+			$("input").attr('disabled', false);
+			post_msg ="<p>已全部完成</p>";
+			$("#syncStatus").html(post_msg);
+			$("#syncStatus").dialog();
+		}
+	}
+	
+	function ajaxPost(addr,statistic_id){
+		$("input").attr('disabled', true);
+ 
+ 		var user_name = $("[name='user_name']").val();
+ 		var password = $("[name='password']").val();
+ 		
+		var param = {"statistic_id":statistic_id, "address":addr, "user_name":user_name, "password":password, "clearTime": $('[name="clearTime"]').attr("checked")};
+
+		var url = '/sync/statistic/update';
+
+		var options = {
+			type : "post",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				posted_count ++; 
+				updateState(statistic_id, result);
+				if(count > posted_count){
+					ajaxPost(addr, task_list.pop());
+				}
+			},
+			cache : false,
+			timeout : 10000,
+			error : function(msg) {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog();
+				$("input").attr('disabled', false);
+			}
+		}
+		$.ajax(options);
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+	<div class="sub-menu-1">
+		<form action="/sync/statistic" method="post" >
+			{% include "log/sync_check_form.html" %}
+			<input type="submit" value="获取列表" />
+			清空最后执行时间<input type="checkbox" name="clearTime" />
+			<input type="button" value="同步" class="button"  onclick="syncStatistic()" />
+		</form>
+	</div>  
+	<table class="list">
+		<tr>
+			<th>全<input type="checkbox" id="selectAll" /></th>
+			<th>ID</th>
+			<th>名称</th>
+			<th>SQL</th>
+			<th>自动统计</th> 
+		</tr>
+	{%for item in result_list%}
+		<tr>
+			<td>
+				<input type="checkbox" name="statistic_id" value="{{item.id}}" />
+			</td>
+			<td>
+				{{item.id}}
+				<div class="item_state item_state_{{item.id}}" style="color:green;"></div>
+			</td>
+			<td>
+				{{item.name}}
+			</td>
+			<td>
+				{%if item.sql%}
+					true
+				{%endif%}
+			</td>
+			<td>
+				{%if item.is_auto_execute%}
+					true
+				{%endif%}
+			</td> 
+		</tr>
+	{%endfor%}
+	</table> 
+	<div id="syncStatus">
+		
+	</div>
+{% endblock %}

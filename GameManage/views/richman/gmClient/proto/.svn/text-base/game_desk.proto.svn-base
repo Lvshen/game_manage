@@ -1,0 +1,535 @@
+import "player_match.proto";
+
+//////////////////////////////////////抽先手牌请求///////////////////////////////////////////
+message C2S_SelectFirstCard
+{
+	required int32 index = 1; 	// 选择的先手牌序号 0-3
+}
+//////////////////////////////////////广播玩家抽先手牌////////////////////////////////////
+message SelectedFirstCard
+{
+	required int32 seat_id = 1;		// 玩家ID
+	required int32 index = 2;			// 牌序号 0-3
+}
+
+//////////////////////////////////////开始游戏信息///////////////////////////////////////////////
+message FirstCardInfo
+{
+	required int32 index = 1;		// 先手牌索引 0-3
+	required int32 seat_no = 2; // 抽到先手牌的玩家座位号
+	repeated int32 player_sort = 3; // 排序
+}
+
+
+///////////////////////////////////投骰子结果/////////////////////////////////////////
+message DicingResult
+{
+	message ThreeSamePoint
+	{
+		optional bool three_point_same = 1; // 三次投相同骰子
+		optional int32 posi = 2; 			// 位置点
+	}
+	required int32 seat_id = 1; 	// 玩家ID
+	optional int32 first_point = 2; // 第一个骰子点数
+	optional int32 second_point = 3; // 第二个骰子点数
+	optional int32 has_dice_ctrl = 4; // 骰子控制 0:触发骰子控制技能 1:没触发
+	optional bool pass_start = 5; 		// true ：经过起点
+	optional bool can_move = 6;	// true:能移动
+	optional ThreeSamePoint three_same_point = 7;
+	optional int32 total_round = 8; // 总回合
+	optional int32 target_posi = 9; // 目的位置
+	optional int32 user_prop = 10; // 使用何种道具 1：2：3：4:使用黄金卡
+	optional GridOper grid_oper = 11; // 移动到的格子可做的操作
+}
+//格子操作
+message GridOper
+{
+	required int32 opra_type = 1; // 操作类型 0:建设城市 1:交过路费 2:投硬币 3:建设岛屿 4:奥运会 5:起始点 6:进入无人岛 7:交税 8:飞行点 9:随机事件
+	optional int32 opra_grid = 2; // 操作格子
+	optional BuildCity build = 3;	// 建设城市
+	optional GiveToll toll = 4;		// 过路费
+	optional Coin coin = 5; 			// 投硬币
+	optional BuildIsland build_island = 6; // 建设岛屿
+	optional HoldPeak peak = 7; // 举办奥运会
+	optional Tollage tollage = 8; // 交税点
+	optional RandEvent event = 9; // 随机事件
+	optional Start start = 10; // 起始点
+}
+message SellOffCity
+{
+	required int32 index = 1; // 格子索引
+	required uint32 worth = 2; // 价格
+}
+message Bankrupt
+{
+	required int32 bk_type = 1; // 0：可变卖 可贷款 1:可变卖 不可贷款 2: 不可变卖 可贷款 3:直接倒闭
+	repeated SellOffCity sell_off_city = 2; // 可变卖城市列表
+	optional int32 cost_credit_gold = 3; // 贷款要花费的金币
+	optional int32 credit_money = 4; // 需要贷款的游戏币
+	repeated int32 close_city = 5; // 倒闭的城市列表
+}
+// 建设
+message BuildCity
+{
+	required int32 opre_res = 1; // 0:可建设 -1:金钱不够 -2:
+	optional int32 higth_lvl = 3;  // 可建设的最高级
+	repeated int32 can_build = 4;	// 能建设的等级房
+	repeated int32 build_cost = 5; // 能建设的等级房相应费用
+	repeated int32 has_build = 6; // 已建设的房子
+}
+// 交过路费
+message GiveToll
+{
+	message Purch
+	{
+		required bool can_purch = 1; // true:可收购
+		optional uint32 purch_cost = 2; // 收购费用
+	}
+	message Toll
+	{
+		required int32 hald_type = 1; // 0:使用黄金卡(天使或优惠券) 1:交钱 2:不够钱
+		optional int32 card_type = 2; // 如果hald_type是0, 0:天使卡 1:优惠券
+		required uint32 money = 3; 		// 过路费
+		optional Bankrupt bk = 4;			// 不够钱交过路费处理
+		optional BuildIsland build_island = 5; // 交完费岛屿升级
+	}
+	
+	optional Toll toll = 1;				// 交费处理
+	optional Purch purch = 2;			// 收购
+}
+// 投硬币
+message Coin
+{
+	required int32 ret = 1; // 0:可以投硬币 -1:不能投硬币
+	repeated int32 stake = 2;		// 赌注 3个，从小到大
+	repeated int32 result_list = 3; // 结果列表 0:正 1:反
+}
+// 建设岛屿
+message BuildIsland
+{
+	required int32 opre_res = 1; // 0:可建设 1:直接升级 -1:金钱不够
+	optional uint32 money = 2; // 费用
+	optional int32 lvl = 3;		// 当前级别
+	repeated int32 grid_index = 4; // 升级的岛屿
+}
+// 举办奥运会
+message HoldPeak
+{
+	optional int32 result = 1; // 0: 可以举办 -1:金钱不够 -2:没有城市
+	optional uint32 money = 2; // 费用
+	repeated int32 can_hold_grid = 3;  // 可举办的城市
+}
+// 交税
+message Tollage
+{
+	required int32 hald_type = 1; // 0:使用黄金卡(天使或优惠券) 1:交钱 2:不够钱
+	optional int32 card_type = 2; // 如果hald_type是0, 0:天使卡 1:优惠券
+	required uint32 base_price = 3; // 基础价
+	required uint32 sale_price = 4; // 折扣价
+	optional Bankrupt bk = 5;			// 不够钱交过路费处理
+}
+// 随机事件
+message RandEvent
+{
+	message CmdCardOper
+	{
+		repeated int32 contribut_city_list = 1; // 捐献城市列表
+		repeated int32 contribut_role_list = 2; // 可捐献给的目标玩家
+		repeated int32 hold_peak_city_list = 3; // 举办奥运城市列表
+		optional int32 curr_hold_peak_city = 4; // 当前举办奥运的城市 -1：没有城市
+	}
+	message AttackOper
+	{
+		message ChangeCity
+		{
+			repeated int32 self_city_list = 1; // 自己的城市列表
+			repeated int32 enemy_city_list = 2; // 敌方的城市列表
+		}
+		repeated int32 can_attack_city_list = 1; // 可地震攻击的城市列表
+		optional ChangeCity change_city_list = 2; // 交换城市
+	}
+	required int32 card_type = 1; // 卡牌类型 0:命令卡牌 1:攻击卡牌 2:防御卡牌
+	required int32 event_id = 2; // 事件类型 1:参观奥运会 2:移动到无人岛 3:征税 4:捐献城市 5:环游世界 6:举办奥运 7:参加投硬币游戏 
+																	//						8:移动到起始点 9:援助 10:地震 11:城市停电 12:沙尘暴 13:强制拍卖 14:传染病
+																	//						15:更换城市	16:外星人入侵	17:逃出无人岛	18:盾牌	19:天使	20:优惠券
+	required bool is_trigger_skill = 3;	// 是否触发技能
+	optional CmdCardOper cmd_card_oper = 4; // 命令卡牌操作
+	optional AttackOper attack_card_oper = 5; // 攻击型卡牌
+	optional int32 tips_id = 6;	// 提示语id
+	repeated int32 recommend_cartoon_city = 7;		// 推荐动画城市索引
+}
+// 起始点
+message Start
+{
+	repeated int32 up_grid = 1; // 可升级的房子
+}
+///////////////////////////////////投骰子结果 END/////////////////////////////////////////
+
+
+////////////////////////////////////操作结果////////////////////////////////////////////////
+message ActionResult
+{
+	required int32 action_seat_id = 1; // 操作者
+	required int32 action_type = 2; // 操作类型 0:放弃 1:建造 2:使用卡牌 3:破产 4:举办奥运会 5:收购 6:投硬币 7:无人岛 8:起始点升级建筑 9:随机事件请求 10:飞行 11:动作完成确认
+	required int32 action_res = 3; // 操作结果 0:成功 -1:失败
+	optional BuildRsp build_rsp = 4; // 建设房子结果
+	optional CoinThrowRsp coin_throw_rsp = 5; // 投金币
+	optional HoldPeakRsp hold_peak_rsp = 6; // 举办奥运会
+	optional PurchaseRsp purchase = 7;	// 收购结果
+	optional FlyRsp fly_rsp = 8; // 飞行结果
+	optional BankruptRsp bankrupt_rsp = 9; // 破产结果
+	optional RandEventRsp rand_event_rsp = 10; // 随机事件结果
+	optional UseCardRsp user_card_rsp = 11; // 使用卡牌结果
+	optional StartPointRsp start_point_rsp = 12; // 起点升级
+}
+message BuildRsp
+{
+	message BuildCity
+	{
+		required int32 grid_index = 1; // 格子索引
+		repeated int32 builded = 2;  // 建好的等级房
+	}
+	message BuildIsland
+	{
+		required int32 grid_index = 1; // 格子索引
+		required int32 builded = 2;  // 等级
+		repeated int32 up_grid_list = 3; // 升级的岛屿索引
+	}
+	required int32 type = 1; // 0：城市 1:岛屿
+	optional BuildCity build_city = 2;
+	optional BuildIsland build_island = 3;
+}
+message HoldPeakRsp
+{
+	required int32 hold_index = 1; // 举办城市索引
+	optional int32 last_hold = 2; // 上次举办的城市
+}
+message CoinThrowRsp
+{
+	required int32 time = 1;			// 第几回
+	required int32 res = 2; 			// 0:赢 1:输 2:停止
+	required int32 side = 3;			// 0:正 1:反
+	optional int32 win_money = 4;	// 赢的金额
+	required int32 throw_kill = 5; // 0:触发技能 1:未触发
+}
+message PurchaseRsp
+{
+	required int32 grid_index = 1; // 收购的城市
+	optional BuildCity buld_city = 2; // 升级
+}
+message FlyRsp
+{
+	optional GridOper oper = 1;		// 可做的操作
+}
+
+message StartPointRsp
+{
+	optional GridOper oper = 1;		// 可做的操作
+}
+
+message BankruptRsp
+{
+	required int32 deal_type = 1; // 处理方式 0:变卖 1:贷款 2:倒闭
+	repeated int32 sale_city_list = 2; // 变卖城市列表 0-31
+	required int32 toll_type = 3; // 0:交过路费 1:交税点
+	required uint32 money = 4; 		// 过路费
+}
+// 使用卡牌结果
+message UseCardRsp
+{
+	required int32 use_card_type = 1; // 卡类型 17:逃出无人岛	18:盾牌	19:天使	20:优惠券
+	repeated int32 grid_list = 2;		// 使用卡的城市
+	optional GridOper oper = 3; // 
+}
+// 随机事件处理结果
+message RandEventRsp
+{
+	message IslandInfo
+	{
+		required int32 grid_index = 1;
+		required int32 lvl = 2;
+	}
+	message CmdCardOperRes
+	{
+		message MoveCmd
+		{
+			required int32 move_posi = 1; // 移动到的格子
+			optional GridOper oper = 2;		// 目地格子可做的操作
+		}
+		optional int32 contribut_city = 1; // 捐献城市
+		optional int32 contribut_role = 2; // 捐献对象
+		optional HoldPeakRsp peak_rsp = 3; // 举办奥运
+		optional MoveCmd move_cmd = 4;		 // 移动类型命令
+		optional bool can_to_peak = 5;		// 能否参观奥运会
+	}
+	message AttackOperRes
+	{
+		message ChangeCityRsp
+		{
+			required int32 my_city_index = 1; // 我的城市
+			required int32 my_seat_no = 2;		// 我的ID
+			required int32 he_city_index = 3; // 其他城市
+			required int32 he_seat_no = 4;		// 交换者ID
+		}
+		message EarthQuakeRsp
+		{
+			required int32 quake_lvl = 1;			// 地震破坏了哪级房
+			required int32 attacked_city = 2; // 地震的城市
+		}
+		message UfoRsp
+		{
+			required int32 quake_lvl = 1;			// 外星人破坏了哪级房
+			required int32 attacked_city = 2; // 外星人破坏的城市
+		}
+		message RecoveryInfo
+		{
+			required int32 seat_id = 1; 	// 座位ID
+			required int32 card_type = 2; // 18:盾牌	19:天使	
+			required int32 attacked_city = 3; //
+		}
+		repeated int32 attacked_city = 1; 					// 被攻击的城市列表
+		optional ChangeCityRsp change_city_rsp = 2; // 交换城市结果
+		optional EarthQuakeRsp quake_rsp = 3; 			// 地震结果
+		repeated UfoRsp ufo_rsp = 4;							 // 外星人攻击结果
+		optional RecoveryInfo recovery_info = 5;		// 防御信息
+	}
+	required int32 card_type = 1; // 卡牌类型 0:命令卡牌 1:攻击卡牌 2:防御卡牌
+	required int32 event_id = 2; // 事件类型 1:参观奥运会 2:移动到无人岛 3:征税 4:捐献城市 5:环游世界 6:举办奥运 7:参加投硬币游戏 
+																	//						8:移动到起始点 9:援助 10:地震 11:城市停电 12:沙尘暴 13:强制拍卖 14:传染病
+																	//						15:更换城市	16:外星人入侵	17:逃出无人岛	18:盾牌	19:天使	20:优惠券
+	optional CmdCardOperRes cmd_card_oper_res = 3; // 命令卡牌操作
+	optional AttackOperRes attack_card_oper_res = 4; // 攻击型卡牌
+	repeated IslandInfo island_info = 5;	// 捐献、强拍、交换 观光岛屿时，其他岛屿等级会变化
+	optional bool save_gold_card = 6;	// true:保存 fale:不保存
+}
+
+////////////////////////////////////操作结果 END////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////结算信息//////////////////////////////////////////////
+message PlayerResult
+{
+	required int32 seat_no = 1;		// 座位号
+	required int32 result = 2; 		// 0:赢 1:输
+	optional int32 gold_res = 3;	// 赠送的金币
+	optional int32 exp_res = 4;	// 赢或输的经验
+	optional int32 score_res = 5;	// 赢或输的积分; 
+	optional bool is_mvp = 6;			// 是否mvp
+	optional int32 win_type = 7; // 胜利类型 0:三色独裁 1:行独裁 2:观光点独裁 3:时间结束警告 4:回合数结束警告 5:所有敌方玩家破产
+	optional int32 lvl_reward = 8; // 等级奖励
+	optional int32 can_continue = 9; // 0:可续局 1:提示购买入场券 2:不能续局; 
+	optional int32 offset_gold_cost = 10; // 抵消积分花费的金币
+	optional int32 enter_way = 11;			// 进入方式 0:匹配房间，1:创建房间，2:受邀进入房间, 3:个人模式, 4:简单模式
+	optional int32 game_model = 12;		// 游戏模式	0:组队模式，1:单人模式，当enter_way为2时，标示邀请者id; 当enter_way为3时，标示模式难度 4:简单模式
+	//以下是NPC专用
+	optional int32 npc_base = 13;   //基础奖励
+	optional int32 npc_color = 14;  //三色独裁
+	optional int32 npc_line = 15;   //行独裁
+	optional int32 npc_sight = 16;	//观光点独裁
+	
+	//新增字段
+	optional int32 additional_score = 17;  //额外加成积分
+	optional int32 all_score = 18;         //最新积分
+}
+/////////////////////////////////////结算信息 END//////////////////////////////////////////////
+
+
+
+////////////////////////////////////场景信息///////////////////////////////////////////////
+message GridInfo
+{
+	message AttackState
+	{
+		required int32 state = 1; // -1:无攻击 11:城市停电 12:沙尘暴 14:传染病
+		required int32 round = 2; // 回合数
+		optional int32 round_change_reason = 3;  //回合数变化原因：0-回合发生交替， 1--人物踩上去使回合数马上变化
+	}
+	required int32 index = 1;		// 格子序号 0-31
+	optional int32 owner_id = 2;	// 所有者
+	optional int32 double = 3;	// 倍数
+	repeated int32 builded_info = 4;	// 已建好的等级房
+	optional int32 lvl = 5;		// 等级
+	optional bool hold_peak = 6; // 有无举办奥运会
+	optional AttackState attack_stat = 7; // 攻击状态
+	optional bool is_occupy = 8; // 是否被独裁
+	optional int32 base_toll = 9;		// 基础过路费
+	optional int32 base_toll_change_reason = 10; //1--人物踩上去  base_toll 发生变化
+}
+message PlayerGameInfo
+{
+	required int32 rold_id = 1;
+	required int32 position = 2; // 当前位置 0-31
+	required int32 game_money = 3; // 剩余钱
+}
+message GameInfoChange
+{
+	required int32 seat_id = 1; 				// 座位ID
+	optional int32 estate_change = 2; 	// 不动产变化量
+	optional int32 money_change = 3; 		// 现金变化量
+	optional int32 money_change_type = 4; // 现金变化类型 0:玩家 1:系统  10-过路费 11-经过起点
+	optional int32 rank = 5; 					// 排名
+	optional bool double_toll = 6; // true：交双倍过路费
+	optional int32 curr_money = 7; // 当前现金
+	optional int32 curr_estate = 8; // 当前不动产
+}
+
+message OccupyWarn
+{
+	message LastOccupy
+	{
+		repeated int32 occupy_list = 1;	// 已占领的格子
+		optional int32 last_grid = 2;	// 最后一个没占领的格子
+	}
+	message ThreeColor
+	{
+		repeated int32 occupy_color1_list = 1;	// 全部占领一种颜色的格子
+		repeated int32 occupy_color2_list = 2;	// 全部占领一种颜色的格子
+		repeated LastOccupy last_occupy = 3;		// 再占领一种颜色就独裁的格子
+	}
+	required int32 warn_type = 1; 							// 警告类型 0:三色独裁警告 1:行独裁警告 2:观光点独裁警告 3:时间结束警告 4:回合数结束警告
+	required int32 warn_flag = 2; 							// 0:独裁警告 1:取消独裁警告
+	optional ThreeColor three_color_occupy = 3; // 三色独裁
+	optional LastOccupy row_occupy = 4; 			// 行独裁
+	optional LastOccupy sightsee_occupy = 5; // 观光岛独裁
+	repeated int32 winner_list = 6;	// 赢家列表
+}
+
+message NextOper
+{
+	required int32 next_ctrl_seatid = 1; // 控制权玩家id
+	required int32 next_ctrl_oper = 2; // 操作类型 0:投骰子 1:无人岛操作 2:飞行点操作
+	optional int32 esc_island_oper = 3; // 0:可出钱,可使用黄金卡 1:可出钱,不可使用黄金卡 2:不可出钱,可使用黄金卡 3:不可出钱, 不可使用黄金卡
+	optional int32 esc_island_cost = 4;	// 逃出无人的岛花费
+	repeated int32 can_fly_city = 5; // 可飞行的城市
+	optional bool no_money_fly = 6; // 没钱飞行
+}
+
+message ActionTips
+{
+	required int32 seat_id = 1; // 座位ID
+	optional int32 tips_id = 2;
+	repeated int32 recommend_cartoon_city = 3;		// 推荐动画 城市索引
+}
+
+message S2C_SenceInfo
+{
+	required int32 stage = 1; // 游戏阶段 0:选先手牌 1:开始游戏 2:投骰子 3:操作完成 4:游戏结束
+	optional bool is_reconnect = 2; // 断线重连
+	optional NextOper next_oper = 3; // 
+	optional SelectedFirstCard select_card = 5; // 选先手牌 
+	repeated int32 cere_city = 6; // 盛典城市列表	
+	optional FirstCardInfo first_card = 7;	// 先手牌信息
+	optional DicingResult dicing_res = 8;	// 骰子结果
+	optional ActionResult action_res = 9; // 操作结果
+	repeated GameInfoChange info_change = 10; // 资产变化
+	repeated GridInfo grid_info = 11;		// 格子信息
+	repeated OccupyWarn occupy_warn = 12; // 独裁警告
+	optional AllPlayerInfo player_info = 13;	// 房间玩家信息
+	repeated PlayerResult game_res = 14; // 游戏结果
+	optional RoomInfo room_info = 15;		// 房间信息
+	repeated int32 players_rank = 16; // 房间内排行
+	repeated ActionTips tips = 17;
+}
+
+////////////////////////////////////场景信息 END///////////////////////////////////////////////
+
+
+////////////////////////////////////邀请玩家到达指定格子////////////////////////////////////////
+message C2S_InviteReq
+{
+	required int32 grid_index = 1; 	// 目的地
+}
+
+message S2C_NitifyPlayerInvite
+{
+	required int32 seat_id = 1; // 座位号
+	required int32 grid_index = 2; // 目的地
+}
+////////////////////////////////////邀请玩家到达指定格子 END/////////////////////////////////////
+
+////////////////////////////////////////////托管///////////////////////////////////////////////
+message C2S_AutoReq
+{
+	required int32 stat = 1; // 0:托管 1:取消托管
+}
+
+message S2C_NotifyPlayerAuto
+{
+	required int32 seat_id = 1; // 座位号
+	required int32 stat = 2; // 0:托管 1:取消托管
+}
+////////////////////////////////////////////托管 END///////////////////////////////////////////////
+
+////////////////////////////////////////////用金币抵消积分///////////////////////////////////////////////
+message C2S_OffsetSocreReq
+{
+}
+
+message S2C_OffsetSocreRsp
+{
+	required int32 res = 1; // 0:成功 -1：失败
+}
+////////////////////////////////////////////用金币抵消积分 END///////////////////////////////////////////////
+
+////////////////////////////////////////////////聊天///////////////////////////////////////////////
+message C2S_SendSmsInRoom
+{
+	required bytes msg = 1;	// 消息内容
+}
+
+message S2C_NotifySms
+{
+	required int32 seat_no = 1; // 发送者
+	required bytes msg = 2;	// 消息内容
+}
+/////////////////////////////////////////////聊天 END///////////////////////////////////////////////
+
+////////////////////////////////////////////////取消提示///////////////////////////////////////////////
+message C2S_CancelTipReq
+{
+	required int32 tip_id = 1;	// 提示id
+}
+
+message S2C_CancelTipResp
+{
+	required int32 ret = 1; // 0:成功 -1：失败
+}
+/////////////////////////////////////////////取消提示 END///////////////////////////////////////////////
+
+
+////////////////////////////////////切入、切出后台////////////////////////////////////////
+message C2S_InBackgroundReq
+{
+	required int32 role_id = 1; 	//角色id
+}
+
+message S2C_InBackgroundRsp
+{
+	required int32 ret = 1; 	//0--成功，
+}
+
+message C2S_OutBackgroundReq
+{
+	required int32 role_id = 1; 	//角色id
+}
+
+message S2C_OutBackgroundRsp
+{
+	required int32 ret = 1; 	//0--成功
+	optional S2C_SenceInfo sence = 2;
+}
+////////////////////////////////////切入、切出后台 END////////////////////////////////////////
+
+
+////////////////////////////////////强制退出///////////////////////////////////////////
+message C2S_ForceQuickReq
+{
+	required int32 type = 1; 	//1--破产退出
+}
+
+message S2C_ForceQuickRsp
+{
+	required int32 ret = 1; 	//0--成功
+}
+////////////////////////////////////强制退出 END////////////////////////////////////////

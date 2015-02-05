@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>直充</title>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$(".add_order_dialog .hidden_span").hide();
+		if ('0' == $(".add_order_dialog input[name='server_id']").val() + '' || '0' == $(".add_order_dialog input[name='player_id']").val() + ''){
+			$(".add_order_dialog .hidden_span").show();
+		}
+		
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+ 
+
+<!-- 添加订单 -->
+<div class="add_order_dialog" >
+	<div id="bar">
+	直充
+	</div>
+	
+	<form  method="post" action="/pay/do_add" >
+		 
+		<table class="form">
+			
+			<tr class="hidden_span">
+				<th width="100">
+					服务器ID：
+				</th>
+				<td>
+					<input type='text' name="server_id" value="{{server_id}}" />
+				</td>
+			</tr>
+			
+			<tr class="hidden_span">
+				<th>
+					角色ID：
+				</th>
+				<td>
+					<input type='text' name="player_id" value="{{player_id}}" />
+				</td>
+			</tr>
+			
+			<tr>
+				<th>
+					充值通道：
+				</th>
+				<td>
+					<select name="pay_channel">
+						{% for item in list_pay_channel %}
+							<option value="{{item.id}}">
+								{{item.name}}-1:{{item.exchange_rate}}
+							</option>
+						{% endfor %}
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					金额：
+				</th>
+				<td>
+					<input type="text" name="amount" maxlength="4" />
+				</td>
+			</tr>
+			<tr>
+				<th>
+					订单号：
+				</th>
+				<td>
+					<input type="text" name="order_id" maxlength="40" />
+				</td>
+			</tr>
+			<tr>
+				<th> </th>
+				<td>
+					<input type="submit" value="添加" />
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+<!-- 添加订单 END -->
+
+{% endblock %}

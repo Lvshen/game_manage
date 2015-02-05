@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>分区编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript" src="/static/js/ajaxForm.js" ></script>
+<script type="text/javascript" >
+	function editFinish(result) {
+		$("#tip_box").html(result);
+		$("#tip_box").dialog();
+
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/group/list">分区管理</a> -> 分区编辑
+<span class="buttons">
+ <a href="/group/list">返回</a>
+ </span>
+</div>
+
+<form class="ajax" action="/group/save?model_id={{model.id}}" method="post" todo="editFinish">
+	<input type="hidden" value="true" name='ajax' />
+<table class="form">
+<tr>
+<th>分区标识：</th><td><input type="text" name="key" value="{{model.key}}" /> 字母数据,确保唯一</td>
+</tr>
+<tr>
+<th>分区名：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+<tr>
+<th><a href="/server/list">分区内服务器</a>：<br/><label><input type="checkbox" id="select_server" onchange="selectAll(this.id)" />全选</label></th><td id="select_server_area">
+{%for item in list_server%}
+<label><input type="checkbox" name="server_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+{%endfor%}
+</td>
+</tr>
+<tr>
+<th>客服URL：</th><td><input type="text" name="custom_url" size="50" value="{{model.custom_url}}" /></td>
+</tr>
+<tr>
+<th>支付接口URL：</th><td><input type="text" name="pay_url" size="50"  value="{{model.pay_url}}" /></td>
+</tr>
+<tr>
+<th>更新URL：</th><td><input type="text" name="upgrade_url" size="50"  value="{{model.upgrade_url}}" /></td>
+</tr>
+<tr>
+<th>公告URL：</th><td><input type="text" name="notice_url" size="50" value="{{model.notice_url}}" /></td>
+</tr>
+<tr>
+<th>分区公告：</th><td>
+<select name="notice_select">
+<option value="0">无公告</option>
+{%for item in list_notice%}
+<option value="{{item.id}}" {%ifequal item.id model.notice_select%} selected="true"{%endifequal%}>{{item.title}}</option>
+{%endfor%}
+</select> <a href="/notice/edit">添加新公告</a>
+</td>
+</tr>
+<tr>
+<th>分区描述:</th>
+<td><textarea name="remark">{{model.remark}}</textarea></td>
+</tr>
+
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+<div id="tip_box" title="提示框" >
+	
+</div>
+</tr>
+</table>
+</form>
+{% endblock %}

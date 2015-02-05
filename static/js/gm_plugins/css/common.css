@@ -1,0 +1,189 @@
+.pull{
+	width:100%;
+}
+
+/*???*/
+.children-center{
+	text-align: center;
+}
+.children-center > *{
+	text-align: left;
+	margin: auto;
+}
+.margin-auto{
+	margin:auto;
+}
+.margin-top10{
+	margin-top:10px;
+}
+/*end*/
+.comment_area{
+	font-size: 16px;
+	color: #000000;
+	line-height: 18px;
+}
+
+span.divider {
+	height: 10px;
+	line-height: 10px;
+	margin: 0 6px;
+	padding: 0;
+	border-right: 1px solid #bbb;
+	border-left: 1px solid #bbb;
+}
+
+.btn.active {
+	background: #73a55b;
+	color:#fff;
+}
+.btn.btn-success{
+	background: #73a55b;
+}
+
+.btn { border:0;
+	display: inline-block;
+	font-size:20px;
+	color: #b7b7b3;
+	font-weight:normal;
+	text-align: center;
+	padding:5px;
+	vertical-align: middle;
+	cursor: pointer;
+	background-color: #dddddd;
+	border:0;
+	
+}
+/***************************metro******************************/
+
+.muted{
+	color:#999999;
+}
+.text-warning{
+	color:#FF6702;
+}
+.text-error {
+    color: #B94A48;
+}
+.text-info {
+    color: #0F820C;
+}
+.text-success {
+    color: #468847;
+}
+.align-left{
+	text-align: left;
+}
+.align-right{
+	text-align: right;
+}
+.span8{
+	width: 80%;
+}
+.input-append{
+	border:1px solid #999999;
+	background-color:#FFFFFF;
+	/*box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);*/
+}
+hr{ border-top:1px solid #fff; border-bootom:1px solid #e2e2e2;}
+
+.input-append > input[type="text"]{
+	border:0px;
+	text-indent: 10px;
+	width:85%;
+}
+.input-append > button, .input-append > .btn{
+	border:0px;
+	background-color:#FFFFFF;
+	height: 28px;
+    line-height: 28px;
+}
+.larg{
+	font-weight: 600
+}
+
+.inline-block{
+	display: inline-block;
+}
+.btn-primary{
+	border-radius:0px;
+	background-color:#73a55b;
+	padding-left:18px;
+	padding-right:18px;
+	height:45px;
+	line-height: 45px;
+	color:#FFFFFF;
+	font-size:20px;
+	width:100%;
+	
+	
+}
+.absolute{
+	position: absolute;
+}
+.right0{
+	right:0px;
+}
+.left0{
+	left:0px;
+}
+.top0{
+	top:0px;
+}
+.bottom0{
+	bottom: 0px;
+}
+.font-weight6{
+	font-weight: 600; 
+}
+.btn-primary-act{
+	border:0px;
+	padding-left:18px;
+	padding-right:18px;
+	height:28px;
+	line-height: 28px;
+	display: inline-block;
+}
+.btn-primary-act:active, .btn-primary-act:hover, .btn-primary-act.active{
+	background-color:#BBD80A;
+	color:#FFFFFF;
+}
+
+.pull-right {
+	float: right;
+}
+.pull-left {
+	float: left;
+}
+.hide {
+	display: none;
+}
+.show {
+	display: block;
+}
+.invisible {
+	visibility: hidden;
+}
+.affix {
+	position: fixed;
+}
+.align-center {
+	text-align: center;
+}
+
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+.span1{
+	width: 70px;
+}
+/***************************end of metro******************************/
+

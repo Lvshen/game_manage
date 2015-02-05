@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>公告编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/push/list">推送消息列表</a> -> 推送消息
+<span class="buttons">
+ <a href="/push/list">返回</a>
+ </span>
+</div>
+
+<form action="/notice/save/{{model.id}}" method="post">
+<input type="hidden" name="type" value="{{notice_type}}" />
+<table class="form">
+<tr>
+<th>公告标题：</th><td><input type="text" name="title" value="{{model.title}}" /></td>
+</tr>
+<tr>
+<th>公告内容：</th><td><textarea name="content">{{model.content}}</textarea></td>
+</tr>
+
+
+<tr>
+<th>链接地址：</th><td><input type="text" name="link_url" size="50"  value="{{model.link_url}}" /> 滚动公告无需地址</td>
+</tr>
+
+<tr>
+<th>公告状态：</th><td><select name="status">
+{%for item in model.STATUS_CHOICES%}
+<option value="{{item.0}}"{%ifequal model.status item.0%} selected="selected"{%endifequal%}>{{item.1}}</option>
+{%endfor%}
+</select></td>
+</tr>
+
+<tr>
+<th>针对客户端版本：</th><td><input type="text" name="client_ver" size="50" value="{{model.client_ver}}" />  输入数字部份即可,多个用逗号隔开</td>
+</tr>
+
+<tr>
+<th><a href="/group/list">接收分区</a>：<br/><label><input type="checkbox" id="select_server" onchange="selectAll(this.id)" />全选</label></th><td id="select_server_area">
+{%for item in list_group%}
+<label><input type="checkbox" name="group_id" value="{{item.id}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+{%endfor%}
+</td>
+</tr>
+
+
+<tr>
+<th>开始时间：</th><td><input type="text" name="begin_time" class="Wdate" value="{{model.begin_time_str}}" /></td>
+</tr>
+<tr>
+<th>结束时间：</th><td><input type="text" name="end_time" class="Wdate" value="{{model.end_time_str}}" /></td>
+</tr>
+
+<tr>
+	<th>间隔时间</th>
+	<td><input type="text" name="intervalSecond" value="{{model.intervalSecond}}"> 秒</td>
+<tr>
+
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+{% csrf_token %}
+</form>
+{% endblock %}

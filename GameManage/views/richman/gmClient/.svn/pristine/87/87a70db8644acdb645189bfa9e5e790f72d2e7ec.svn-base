@@ -1,0 +1,410 @@
+#!/usr/bin/env python
+#coding=utf-8 
+import datetime
+import time
+import os, sys,string
+from socket import *
+import struct
+import zlib
+
+class CTcpClient:
+	"a class connet to with tcp"
+	m_host = '10.1.1.250'
+	m_port = 10000
+	m_clisock = None 
+	def Init(self, host, port):
+		self.m_host = host
+		self.m_port = port
+		self.m_clisock = socket(AF_INET, SOCK_STREAM) 
+		self.m_clisock.connect((self.m_host, self.m_port)) 
+	def SendAndRecv(self,sendbuf):
+		BUFSIZE=2048
+		self.m_clisock.send(sendbuf) 
+		recvbuf = self.m_clisock.recv(BUFSIZE)
+		return recvbuf
+	def Fini(self):
+		self.m_clisock.close()
+
+	def GetSockname(self):
+		return self.m_clisock.getsockname()
+
+
+class CSvrClient:
+	DEF_CMD_IN_SEPERATOR = chr(0x1C)
+	DEF_CMD_SEPERATOR  = '\r'
+	DEF_CMD_SEPERATOR_SPACE = ' '
+	PACK_FMT = '!BB%ds'
+	m_TcpClient = CTcpClient()
+	m_host = '10.1.1.250'
+	m_port = 10000
+
+	def Init(self, host, port):
+		self.m_host = host
+		self.m_port = port
+
+	def GetSockname(self):
+		return self.m_TcpClient.GetSockname()
+
+	def pack_javaversion(self,listcmd):
+		if (len(listcmd) == 0):
+			return None
+		pack = listcmd[0] + self.DEF_CMD_SEPERATOR_SPACE
+		for i in range(1, len(listcmd)):
+			pack = pack + listcmd[i] 
+			if (i != len(listcmd) - 1):
+				pack = pack + self.DEF_CMD_IN_SEPERATOR
+
+		pack = pack + self.DEF_CMD_SEPERATOR	
+		#print repr(pack)
+		pack = zlib.compress(pack)
+		com_pack_len = len(pack)
+		hight = (com_pack_len >> 8) & 0xFF
+		low = (com_pack_len) & 0xFF
+		fmt=self.PACK_FMT%(len(pack))
+		pack =struct.pack(fmt,hight,low,pack)
+
+		return pack
+
+	def unpack_javaversion(self, pack):
+		buflen = len(pack)
+		packlen = buflen - 2
+		fmt=self.PACK_FMT%(packlen)
+		hight,low, unpack = struct.unpack(fmt,pack)
+		unpack = zlib.decompress(unpack)
+		rcvpacklen = (hight << 8) | low
+		unpack = unpack.replace(self.DEF_CMD_SEPERATOR_SPACE, self.DEF_CMD_IN_SEPERATOR)
+		unpack = unpack.replace(self.DEF_CMD_SEPERATOR, '', 1)
+		listcmd = unpack.split(self.DEF_CMD_IN_SEPERATOR)
+		#print "%d, %d,%s"%(packlen, rcvpacklen, repr(unpack))
+		return listcmd
+
+	def CheckPropList(self,strlist):
+		strlist = strlist.replace('[', '')
+		strlist = strlist.replace(']', '')
+		proplist = strlist.split(',')
+		count = 0
+		for i in range(0, len(proplist)):
+			if (len(proplist[i].strip()) > 0):
+				count = count + 1
+
+		return (0 != count and 0 == (count % 2))
+
+	#检验时间类型是否正确
+	def CheckDateTime(self,val):
+		format="%Y-%m-%d %H:%M:%S"
+		try:
+			t1=time.strptime(val,format)
+		except Exception, e:
+			print "ERROR time",e
+			return False
+		return True
+
+	def SendAndRecvCmdList(self, sendCmdList):
+		sendbuf = self.pack_javaversion(sendCmdList)
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+		return self.unpack_javaversion(recvbuf)
+
+	@staticmethod
+	def translate_cards(strlist):
+		result = {}
+		strlist = strlist.replace('|', ',')
+		cards_list = strlist.split(',')
+		cards_map = {'2': ['10001', '10014', '10027', '10040'],
+						'3': ['10002', '10015', '10028', '10041'],
+						'4': ['10003', '10016', '10029', '10042'] ,
+						'5': ['10004', '10017', '10030', '10043'] ,
+						'6': ['10005', '10018', '10031', '10044'] ,
+						'7': ['10006', '10019', '10032', '10045'] ,
+						'8': ['10007', '10020', '10033', '10046'] ,
+						'9': ['10008', '10021', '10034', '10047'] ,
+						'10': ['10009', '10022', '10035', '10048'] ,
+						'J': ['10010', '10023', '10036', '10049'] ,
+						'Q': ['10011', '10024', '10037', '10050'] ,
+						'K': ['10012', '10025', '10038', '10051'] ,
+						'A': ['10013', '10026', '10039', '10052'] ,
+						'X': ['10053'] ,
+						'D': ['10054']}
+		#print cards_list
+		#print cards_map
+		code_list = []
+		more_list = {}
+		for item in cards_list:
+		    index = item.strip()
+		    index = index.upper()
+		    if (len (cards_map[index]) == 0):
+		        print "too more  card val=", index
+		        if (more_list.has_key(index)):
+		            more_list[index] = more_list[index] + 1
+		        else:
+		            more_list[index] = 0
+
+		        #print more_list[index]
+		        continue
+		    cards_map[index][0]
+		    #print cards_map[index][0]
+		    code_list.append(cards_map[index].pop()) 
+
+		#print cards_map[index]
+		#print more_list
+		less_list = {}
+		#print less_list
+		#print cards_map
+		for card in cards_map:
+		    if (len (cards_map[card]) != 0):
+		        print "too less card val=", card
+		        less_list[card] = len(cards_map[card])
+		#print less_list
+
+		result['code_list'] = code_list
+		result['more_list'] = more_list
+		result['less_list'] = less_list
+
+		return result
+
+	def ctrl_fapai(self, reason, reasonparam, serverid,count, cardvals):
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		print cardvals
+		result = CSvrClient.translate_cards(cardvals)
+		code_list = result['code_list']
+		print result 
+		print code_list
+
+		str_list = ".".join(code_list)
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '1', "%d"%(count), str_list]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+
+	def ctrl_ZhaDanRange(self, reason, reasonparam,serverid, min, max):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		max = max + 1
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '2', "%d"%(min), "%d"%(max)]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+	def ctrl_JiaoFengRuLe(self, reason, reasonparam,serverid, JiaoFengRuLe):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '3', "%d"%(JiaoFengRuLe)]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+	def ctrl_JiaoFenLeastScore(self, reason, reasonparam,serverid, LeastScore):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '4', "%d"%(LeastScore)]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+	def ctrl_FaPaiType(self, reason, reasonparam,serverid, FaPaiType):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '5', "%d"%(FaPaiType)]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+	def ctrl_ShowOnline(self, reason, reasonparam,serverid, fixcount, rate):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_SHOWONLINE', reason,reasonparam, "%d"%(serverid), fixcount, rate]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+
+	def ctrl_prop_curtime(self, reason, reasonparam,roleid, strtime):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_CURTIME', reason,reasonparam, '1', "%d"%(roleid), strtime]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg
+
+
+	
+
+	def ctrl_Lz_Val_Weight(self, reason, reasonparam,serverid, Type, weight):
+
+		retmsg = {'code': 0, 'msg': "OK"}
+
+		listcmd = ['GMPRC_CTRL_GAME', reason,reasonparam, "%d"%(serverid), '9', "%d"%(Type), weight]
+		
+		print listcmd
+		#return retmsg
+		#print "send listcmd=%s"%(list(listcmd))
+		sendbuf = self.pack_javaversion(listcmd)
+		
+		self.m_TcpClient.Init(self.m_host, self.m_port)
+		recvbuf = self.m_TcpClient.SendAndRecv(sendbuf)
+		self.m_TcpClient.Fini()
+
+
+		listcmd = self.unpack_javaversion(recvbuf)
+
+		if len(listcmd) < 3:
+			retmsg['code'] = 3
+			retmsg['msg'] = "ret format error %s"%(list(listcmd))
+
+		if string.atoi(listcmd[4]) != 0:
+			retmsg['code'] = 4
+			retmsg['msg'] = "error %s"%(list(listcmd))
+
+		print "recv listcmd=%s"%(list(listcmd))
+		return retmsg

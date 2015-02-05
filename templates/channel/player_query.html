@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+玩家管理
+
+<span class="buttons">
+ <a href="/user/edit">添加</a>
+ </span>
+</div>
+
+<div class="sub-menu-1">
+<form action="/channel/player/query" method="get">
+服务器:<select name="server_id" id="server_id">
+{%for item in list_server%}
+<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</a>
+{%endfor%}
+</select>
+查询:
+<select name="key_type">
+<option value='0'>角色名称</option>
+<option value='1'>角色ID</option>
+<option value='2'>账号ID</option>
+</select>
+<input type="text" name="keyword" value="{{keyword}}" />
+<input type="submit" value="查询" />
+</form>
+</div>
+
+
+<table class="list">
+<tr>
+<th width="80">角色ID</th>
+<th>账号ID</th>
+<th width="100">角色名称</th>
+<th>创建时间</th>
+</tr>
+{%for item in player_list%}
+<tr>
+<td>{{item.0}}</td>
+<td>{{item.1}}</td>
+<td>{{item.2}}</td>
+<td>{{item.3|date:"m-d H:i:s"}}</td>
+</tr>
+{%endfor%}
+</table>
+<div id="dialog">
+<iframe id="iframe_playerInfo" height=550 width=740 frameborder=0 scrolling=auto></iframe>
+</div>
+<script type="text/javascript">
+	$(document).ready(
+//		function()
+//		{
+//			$("#server_id").change(
+//				function()
+//				{
+//					serverChanged();
+//				}
+//			);
+//		}
+	);
+
+	function serverChanged()
+	{
+		var refreshLink=document.location.href;
+		if(refreshLink.indexOf("?")==-1)
+		{
+			refreshLink+="?newDate="+new Date().getTime();
+		}	
+		else
+		{
+			refreshLink+="&newDate="+new Date().getTime();
+		}
+		document.location.href=refreshLink;
+//		$.get(refreshLink,{"server_id":$("#server_id").val()},function(data)
+//		{
+//		});
+	}
+	
+	function showPlayerInfo(playerId)
+	{
+		var url= "/player/info/"+playerId;
+		$("#iframe_playerInfo").attr("src",url);
+    	$("#dialog").dialog({ maxHeight:500,maxWidth:800,minHeight:400,minWidth:780 });
+	}
+</script>
+{% include "pager.html" %}
+{% endblock %}

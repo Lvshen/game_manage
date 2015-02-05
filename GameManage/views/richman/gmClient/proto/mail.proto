@@ -1,0 +1,166 @@
+import "db_cache.proto";
+
+package MAIL;
+
+message MailInfo
+{
+	required uint32 id				= 1;
+	required uint32 type				= 2;		//0为用户邮件，1为系统邮件
+	required uint32 sender				= 3;
+	optional bytes sender_nickname			= 4;
+	optional uint32 sender_head			= 5;
+	optional string sender_custom_head  		= 6;
+	required uint32 receiver			= 7;
+	required uint32 checked 			= 8;		//0为未读，1为已读
+	required uint32 state				= 9;		//0为未改变，1为以改变，2为已删除
+	optional bytes subject				= 10;
+	optional bytes context				= 11;
+	optional uint32 template_id			= 12;
+	optional uint64 expire_time 			= 13;
+	optional uint64 deliver_time 			= 14;
+	required uint32 create_time			= 15;
+
+	optional uint32 prop_flag			= 16;		//0为不存在，1为有道具，2为已领取
+	repeated DBCACHE.Prop attachments 		= 17;
+}
+
+
+message UserMailList
+{
+	required uint32 user_id				= 1;
+	optional uint32 user_head			= 2;
+	optional string user_custom_head  		= 3;
+	optional bytes user_name			= 4;
+	optional uint64 user_flag			= 5;
+	optional uint32 max_mail_id			= 6;
+	optional uint32 unread_mails			= 7;
+	//repeated MailInfo unread_mail			= 6;
+	repeated MailInfo mail				= 8;
+	
+}
+
+message C2S_Load_Mail_List_Req
+{
+	required int32 load_type			= 1;	//0为刚登陆，服务端会发送未读邮件数给客户端，不发送邮件，1为发送未读的邮件，包括正文，2为发送已读，包括正文，3为全部邮件，包括正文
+	optional uint32 start_index 			= 2;	//开始标记,做分页的，暂时未用
+	optional uint32 req_num 		 	= 3;	//请求数量
+}
+
+message S2C_Load_Mail_List_Rsp
+{
+	required int32 ret_code				= 1;	//0为成功，其他为失败，暂时没有原因
+	optional uint32 unread_count			= 2;	//未读邮件数，发送load_type为0的时候会填充
+	optional uint32 space_left			= 3;	//可用邮件数
+	repeated MailInfo mails				= 4;	//邮件列表，发送load_type为1,2,3的时候会填充
+}
+
+message C2S_Read_Mail_Req						//暂时未用
+{
+	required int32 mail_id				= 1;
+}
+message S2C_Read_Mail_Rsp						//暂时未用
+{
+	required int32 ret_code				= 1;
+	required uint32 mail_id				= 2;
+	optional bytes context				= 3;
+}
+
+message C2S_Take_Mail_Prop_Req
+{
+	required int32 mail_id				= 1;	//邮件id，如果为-1，则说明获取全部
+}
+message S2C_Take_Mail_Prop_Rsp
+{
+	enum RetCode
+	{
+		SUCCESS 				= 0;
+		CLOVER_FULL				= 1;
+		GOLDCOIN_FULL				= 2;
+		MARBLE_FULL				= 3;
+		CARD_FULL				= 4;
+		MAIL_NOT_EXISTS				= 5;
+		PROP_TAKEN				= 6;
+		MIAL_OUT_DATE				= 7;
+	}
+	
+	required int32 ret_code				= 1;	//0为成功，-1为没找到邮件，可能已经删除，-2为已经过期，-3为已经领取，获取全部时总是返回true的
+	required int32 mail_id				= 2;	//当获取一封邮件时为该邮件的id,获取全部时为-1
+	repeated DBCACHE.Prop	attachments = 3;
+}
+message Z2M_Take_Mail_Prop_Result
+{
+	required int32 ret_code				= 1;
+	required int32 mail_id				= 2;
+}
+
+message C2S_Delete_Mail_Req
+{
+	required int32 mail_id				= 1;
+}
+message S2C_Delete_Mail_Rsp
+{
+	required int32 ret_code				= 1;	//0为删除成功
+	required uint32 mail_id				= 2;
+}
+
+message C2S_Send_Mail_Req
+{
+	required uint32 receiver			= 1;
+	required bytes context				= 2;
+}
+
+message S2C_Send_Mail_Rsp
+{
+	required int32 ret_code				= 1;	//0为成功，-1为对方邮箱已满，-2为没找到用户，-3未知错误
+}
+
+message S2C_Notify_New_Mail
+{
+	required uint32 new_mail_count		= 1;	//新邮件数，一般为1
+	required uint32 unread_count		= 2;	//未读数
+}
+
+message Z2M_Player_Init_Mail_Box
+{
+	required uint32 user_id				= 1;
+	required bytes nickname				= 2;
+	optional uint32 head_icon			= 3;
+	optional string custom_head			= 4;
+}
+
+message Z2M_Notify_User_Enter
+{
+	required uint32 user_id				= 1;
+	optional bytes nickname				= 2;
+	optional uint32 head_icon			= 3;
+	optional string custom_head  			= 4;
+}
+
+message Z2M_Send_System_Mail_Req
+{
+	required uint64 serial				= 1;
+	required uint32 receiver			= 2;	//-1为广播所有人，0为广播在线玩家，其他为正常
+	optional bytes context				= 3;	//如果是模板邮件，则存放模板格式化的字符串
+	optional uint32 template_id			= 4;
+	optional bytes sender_name			= 5;
+	repeated DBCACHE.Prop	attachments 		= 6;
+}
+
+message M2Z_Send_System_Mail_Rsp
+{
+	required int32 ret_code				= 1;
+	required uint64 serial				= 2;
+}
+
+message Z2M_Broadcast_System_Mail_Req
+{
+	repeated uint32 receiver			= 1;
+	optional bytes context				= 2;
+	optional uint32 template_id			= 3;
+	repeated DBCACHE.Prop	attachments = 5;
+}
+
+message M2Z_Broadcast_System_Mail_Rsp
+{
+	required int32 ret_code				= 1;
+}

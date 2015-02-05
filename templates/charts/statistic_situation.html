@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{item.title}}</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="box">
+	<div class="title">
+		<strong  >{{title}}</strong>
+	</div>
+	<table class="list">
+		<tr>
+			<th>指标</th>
+			{%for item in statistic_list%}
+				<th>
+					{{item.name}}
+				</th>
+			{%endfor%}
+		</tr>
+		<tr>
+			<td>
+				今天
+			</td>
+			{%for item in today_data_list%}
+			<td>
+				{{item}}
+			</td>
+			{%endfor%}
+		</tr>
+		<tr>
+			<td>
+				昨天
+			</td>
+			{%for item in yesterday_data_list%}
+			<td>
+				{{item}}
+			</td>
+			{%endfor%}
+		</tr>
+		<tr>
+			<td>
+				上一周
+			</td>
+			{%for item in week_data_list%}
+			<td>
+				{{item}}
+			</td>
+			{%endfor%}
+		</tr>
+		<tr>
+			<td>
+				上一月
+			</td>
+			{%for item in month_data_list%}
+			<td>
+				{{item}}
+			</td>
+			{%endfor%}
+		</tr>
+	</table>
+</div>
+{% endblock %}

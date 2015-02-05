@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>编辑图表配置</title>
+<script type="text/javascript" > 
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	编辑图表配置
+	<span class="buttons" > <a href="/charts/list" >返回</a> </span>
+</div>
+
+<form action="/charts/save?id={{model.id}}" method="post" >
+	<table class="form"  >
+		<tr>
+			<th>
+				标题:
+			</th>
+			<td>
+				<input type="text" name="title" value="{{model.title}}" />*
+			</td>
+		</tr>
+		<tr>
+			<th>
+				类别:
+			</th>
+			<td>
+				<input type="text" name="charts_type" value="{{model.charts_type}}" />
+			</td>
+		</tr>
+		<tr>
+			<th>
+				统计汇总项目:
+			</th>
+			<td>
+				<select name="query_result_id" id="query_result_id">
+				{% for query in query_model %}
+				<option value="{{query.id}}" {% ifequal query.id model.query_result_id %}selected="selected"{% endifequal %}>{{query.name}}</option>
+				{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				显示类型:
+			</th>
+			<td>
+				<select name="display_type">
+					<option value="spline_time_chart" {%ifequal  model.display_type   "spline_time_chart" %} selected="selected" {%endifequal%} >图表</option>
+					<option value="date_trend" {%ifequal  model.display_type   "date_trend" %} selected="selected" {%endifequal%} >时段趋势</option>
+					<option value="situation"  {%ifequal  model.display_type   "situation" %} selected="selected"  {%endifequal%}  >近日概况</option>
+					<option value="summary"  {%ifequal  model.display_type   "summary" %}  selected="selected" {%endifequal%}  >信息摘要</option>
+					<option value="top"  {%ifequal  model.display_type   "top" %}  selected="selected" {%endifequal%}  >TOP10</option>
+					<option value="pie"  {%ifequal  model.display_type   "pie" %}  selected="selected" {%endifequal%}  >饼图</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th> 是否显示: </th>
+			<td>
+				<input type="checkbox" name="is_show" value="1" {% ifequal model.is_show 1 %}checked="checked"{% endifequal %}/>
+			</td>
+		</tr>
+		<tr>
+			<th> 报表单位: </th>
+			<td>
+				<input type="text" name="unit" value="{{model.unit}}" />
+			</td>
+		</tr>
+		<tr>
+			<th> 报表高度: </th>
+			<td>
+				<input type="text" name="chart_height" value="{{model.chart_height}}" />
+			</td>
+		</tr>
+		<tr>
+			<th> 公式表达式: </th>
+			<td>
+				<textarea name="expression_cfg">{{model.expression_cfg}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><input type="submit" value="保存" /></td>
+		</tr>
+	</table>
+</form>
+
+{% endblock %}

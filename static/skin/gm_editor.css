@@ -1,0 +1,10 @@
+#gm_editor{}
+#gm_editor .input_list { width:100px; }
+#gm_editor .input_int { width:80px; }
+#gm_editor .input_key { width:50px; }
+#gm_editor .input_value { width:60px; }
+
+
+#gm_params_editor{}
+#gm_params_editor .input_value { width:60px; }
+#gm_params_editor .input_key { width:50px; }

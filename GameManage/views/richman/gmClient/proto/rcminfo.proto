@@ -1,0 +1,66 @@
+package rcm;
+
+message RCMInfo
+{
+    optional uint32 role_id				= 1;
+	optional uint32 flag				= 2;
+	optional int32 status				= 3;
+    optional uint64 sync_time			= 4;
+
+	optional bytes nick_name			= 5;
+    optional uint32 level				= 6;
+	optional uint32 gold_coin			= 7;
+	optional uint32 marble				= 8;
+    
+	optional uint32 zonesvr_busid		= 9;
+	optional uint32 gamesvr_busid		= 10;
+	optional uint32 room_number			= 11;
+	optional uint32 seat_number			= 12;
+
+}
+
+message RCMInfoGetRequest
+{
+    repeated uint32 role_id				= 1;
+}
+
+message RCMInfoGetResponse
+{
+    repeated RCMInfo rcminfo			= 1;
+}
+
+message RCMInfoUpdateRequest
+{
+	enum InfoUpdateFlag
+	{
+		BaseDataInfo					= 0x0001;
+		OnlineInfo						= 0x0002;
+		JoinGameInfo					= 0x0004;
+	}
+	
+	optional uint32 flag				= 1;
+    optional RCMInfo rcminfo			= 2;
+}
+
+message RCMInfoUpdateResponse
+{
+    optional uint32 role_id				= 1;
+    optional int32 ret					= 2;
+}
+
+message RCMInfoSyncPlayer
+{
+    repeated RCMInfo rcminfo			= 1;
+}
+
+
+message RCMInfoDelReq
+{
+    optional uint32 role_id				= 1;
+}
+
+message RCMInfoDelRsp
+{
+    optional uint32 role_id				= 1;
+	optional int32 ret					= 2;
+}

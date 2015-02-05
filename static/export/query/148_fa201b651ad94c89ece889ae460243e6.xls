@@ -1,0 +1,6 @@
+<table><tr><td>日期</td><td>服务器</td><td>充值人数</td><td>充值次数</td><td>充值金额</td><td>充值金币</td><td>Arpu值</td><\/tr>
+<tr><td>2013-09-06</td><td>测试</td><td>9</td><td>14</td><td>14</td><td>1820</td><td>1.55555555556</td></tr>
+<tr><td>2013-09-06</td><td>测试250</td><td>1</td><td>2</td><td>2</td><td>500</td><td>2.0</td></tr>
+<tr><td>2013-08-23</td><td>测试250</td><td>1</td><td>2</td><td>15</td><td>15</td><td>15.0</td></tr>
+<tr><td>2013-08-14</td><td>测试</td><td>2</td><td>57</td><td>3600</td><td>19800</td><td>1800.0</td></tr>
+<\/table>

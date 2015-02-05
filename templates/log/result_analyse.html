@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计汇总</title>
+<style type="text/css">
+	ul li {
+		list-style-type: none;
+		padding: 1px 0;
+		display: inline;
+		width: 150px;
+		float: left;
+	}
+	.clear {
+		clear: both;
+		margin-top: 3px;
+	}
+</style>
+<script type="text/javascript" src="/static/js/highcharts.js"></script>
+<script type="text/javascript" src="/static/flot/jquery.flot.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".col span").each(function(){
+		if($(this).text().indexOf('-')!=-1)
+		{
+			$(this).attr('class','red');
+			$(this).prepend('↓ ');
+		}
+		else
+		{
+			$(this).attr('class','green');
+			$(this).prepend('↑ ');
+		}
+			
+	});
+	$(".def_date").click(function(){
+		$("#search_form").submit();
+	});
+});
+
+searchC1 = function(C1) {
+	alert(C1);
+	var selectObject = document.getElementById('channel_1');
+	for( i = 0;i < selectObject.options.length; i++){
+		if( selectObject.options[i].text.indexOf(C1.value) != -1 ){
+			selectObject.options[i].selected = true ;
+			return ;
+		}
+	}
+	if ($("#channel_1").find("option:selected").text().indexOf(($("#c1").val())) == -1 ) {
+		$("#channel_1").val("");
+		return false;
+	}		
+}
+function quick_search(object, id) {
+	var selectObject = document.getElementById('channel_2');
+	for( i = 0;i < selectObject.options.length; i++){
+		if( selectObject.options[i].text.indexOf(C2.value) != -1 ){
+			selectObject.options[i].selected = true ;
+			return ;
+		}
+	}
+	if ($("#channel_2").find("option:selected").text().indexOf(($("#c2").val())) == -1 ) {
+		$("#channel_2").val("");
+		return false;
+	}		
+}
+searchC2 = function(C2) {
+	var selectObject = document.getElementById('channel_2');
+	for( i = 0;i < selectObject.options.length; i++){
+		if( selectObject.options[i].text.indexOf(C2.value) != -1 ){
+			selectObject.options[i].selected = true ;
+			return ;
+		}
+	}
+	if ($("#channel_2").find("option:selected").text().indexOf(($("#c2").val())) == -1 ) {
+		$("#channel_2").val("");
+		return false;
+	}		
+}
+$(document).ready(function() {
+$("#channel_1").change(function(){
+	$("#c1").val("");
+});
+$("#channel_2").change(function(){
+	$("#c2").val("");
+});		
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/result/query/list">统计汇总列表-></a>
+{{the_query.name}} [统计结果 ]
+<span class="buttons">
+ <a href="/result/query/edit/0">添加</a>
+ <a href="/result/query/list">返回</a>
+ </span>
+</div>
+
+<div class="col" style="display: none;">
+{%for item in list_statistic%}
+<div> 
+<h4 title="{{item.remark}}">{{item.name}}</h4>
+<b>{{item.get_result_json.default}}</b>
+日同期:<span>{{item.get_result_json.day}}</span>
+<br/>周同期:<span>{{item.get_result_json.week}}</span>
+<br/>月同期:<span>{{item.get_result_json.month}}</span>
+</div>
+{%endfor%}
+</div>
+<script>
+	$(document).ready(function(){
+		//$("input[type='radio']:first").attr("checked",true);
+		select_op();
+		$(".st").click(select_op);
+		function select_op(){
+			if ($("input[name='select_op']:checked").val() == '0') {
+				$(".st_server").show();
+				$(".st_chl").hide();	
+			}
+			else {
+				$(".st_server").hide();
+				$(".st_chl").show();					
+			}
+		}
+		$(".def_date").click(function(){
+			$("#search_form").submit();
+		});
+	});
+</script>
+<div class="sub-menu-1">
+<form method="get" id="search_form">
+	<input type="hidden" name="base_group_id" value="{{base_group_id}}" />
+	<input type="hidden" name="op_group_id" value="{{op_group_id}}" />
+	<input type="hidden" name="base_server" value="{{base_server}}" />
+	<input type="hidden" name="op_server" value="{{op_server}}" />
+	<input type="hidden" name="select_op" value="{{select_op}}" />
+<div id="select_type"><input type="radio" value="0" name="select_op" id="select_op" class="st" {% ifequal select_op '0' %}checked="checked"{% else　%}checked="checked"{% endifequal %}/>服务器<input type="radio" name="select_op" id="select_op" {% ifequal select_op '1' %}checked="checked"{% endifequal %}class="st" value="1"/>渠道</div>	
+<table> 
+	{% if usm.current_userRole_is_root %}
+	<tr {%ifequal canSelectServer 0%}style="display:none"{%endifequal%} class="st_server">
+		<th width="90"><label>基准服</label></th>
+		<td>
+			<a href="?base_group_id=0&base_server={{base_server}}&op_group_id={{op_group_id}}&op_server={{op_server}}&sdate={{sdate}}&edate={{edate}}&select_op={{select_op}}&query_item={{query_item}}&def_date={{def_date}}" >全部</a>
+			{% for item in list_group %}
+			<a href="?base_group_id={{item.id}}&base_server={{base_server}}&op_group_id={{op_group_id}}&op_server={{op_server}}&sdate={{sdate}}&edate={{edate}}&select_op={{select_op}}&query_item={{query_item}}&def_date={{def_date}}" >{{item.name}}</a>
+			{% endfor %}	 
+		</td>
+	</tr>
+	{% endif %}
+	<tr {%ifequal canSelectServer 0%}style="display:none"{%endifequal%} class="st_server">
+		<th width="90"><label><input id="select_server2" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>服务器全选</label></th>
+		<td>
+			<div id="select_server2_area">
+				<ul>
+				{%for serverItem in list_server_base%}
+				<li><input type="checkbox" name="s1" value="{{serverItem.id}}" {%ifequal serverItem.is_show 1%}checked='checked'{%endifequal%} />{{serverItem.name}}</li>
+				{%endfor%}
+				</ul>
+			</div>
+		</td>
+	</tr>
+	{% if usm.current_userRole_is_root %}
+	<tr {%ifequal canSelectServer 0%}style="display:none"{%endifequal%} class="st_server">
+		<th width="90"><label>对比服</label></th>
+		<td>
+			<a href="?op_group_id=0&op_server={{op_server}}&base_group_id={{base_group_id}}&base_server={{base_server}}&sdate={{sdate}}&edate={{edate}}&select_op={{select_op}}&query_item={{query_item}}&def_date={{def_date}}" >全部</a>
+			{% for item in list_group %}
+			<a href="?op_group_id={{item.id}}&op_server={{op_server}}&base_group_id={{base_group_id}}&base_server={{base_server}}&sdate={{sdate}}&edate={{edate}}&select_op={{select_op}}&query_item={{query_item}}&def_date={{def_date}}" >{{item.name}}</a>
+			{% endfor %}	 
+		</td>
+	</tr>
+	{% endif %}
+	<tr {%ifequal canSelectServer 0%}style="display:none"{%endifequal%} class="st_server">
+		<th width="90"><label><input id="select_server" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>服务器全选</label></th>
+		<td>
+			<div id="select_server_area">
+				<ul>
+				{%for serverItem in list_server_op%}
+				<li><input type="checkbox" name="s2" value="{{serverItem.id}}" {%ifequal serverItem.is_show 1%}checked='checked'{%endifequal%} />{{serverItem.name}}</li>
+				{%endfor%}
+				</ul>
+			</div>
+		</td>
+	</tr>	
+	<tr style="display:none;" class="st_chl">
+		<th width="80"><label>基准渠道</label></th>
+		<td>
+			<select name="channel_1" id="channel_1">
+			{%for channelItem in list_channel%}
+			<option value="{{channelItem.id}}" {% if channelItem.id == channel_1 %}selected="selected"{% endif %}>{{channelItem.name}}</option>
+			{%endfor%}
+			</select>
+			<input type="text" name="c1" value="" id="c1" onchange="return quick_search(this,'channel_1');" onkeyup="return quick_search(this,'channel_1');"/>
+		</td>
+	</tr>
+	<tr style="display:none;" class="st_chl">
+		<th width="80"><label>对比渠道</label></th>
+		<td>
+			<select name="channel_2" id="channel_2">
+			{%for channelItem in list_channel%}
+			<option value="{{channelItem.id}}" {% if channelItem.id == channel_2 %}selected="selected"{% endif %}>{{channelItem.name}}</option>
+			{%endfor%}
+			</select>
+			<input type="text" name="c2" id="c2" value="" onchange="return searchC2(this);" onkeyup="return searchC2(this);"/>
+		</td>
+	</tr>	
+<tr>
+	<th>指标：</th>
+	<td>
+		<ul>
+			{%for item in join_results%}
+			<li><input type="checkbox" name="f" id="f" value="{{item.0}}" {% if item.2 == 1 %}checked="checked"{% endif %} />{{item.1}}</li>
+			{% endfor %}
+		</ul>		
+	</td>
+</tr>
+<tr>
+	<th>
+	</th>
+	<td>
+		开始时间:<input type="text" name="sdate" class="Wdate1" value="{{sdate}}" />
+		
+		结束时间:<input type="text" name="edate" class="Wdate1" value="{{edate}}" />
+		
+		<input type="submit" value="查询" />
+		<input type="radio" name="def_date" class="def_date" value="day" {% ifequal def_date 'day' %}checked="checked"{% else %}checked="checked"{% endifequal %}/>天
+		<input type="radio" name="def_date" class="def_date" value="month" {% ifequal def_date 'month' %}checked="checked"{% endifequal %}/>月
+		<input type="radio" name="def_date" class="def_date" value="year" {% ifequal def_date 'year' %}checked="checked"{% endifequal %}/>年	
+	</td>
+</tr>
+</table>
+</form>
+</div>
+{% if total_record %}
+<script>
+$(document).ready(function() {
+	var options = {
+		chart : {
+			backgroundColor:'#FFFFFF',
+			borderWidth:0,
+			borderRadius:5,
+			renderTo:'channel',
+			defaultSeriesType:'spline',
+			shadow:0,
+			reflow:1,
+			zoomType:'x',
+			events:''
+		} ,
+		title : {
+			text:'',
+			align:'center',
+			verticalAlign:'',
+			margin:50,
+			floating:0,
+			style:{
+				color: '#3E576F',
+				fontSize: '16px'
+			}
+		} ,
+		subtitle : {
+			text:'',
+			align:'center'
+		} ,
+		xAxis : { 
+			type : 'datetime',
+			labels:{
+				formatter:function(){
+					return Highcharts.dateFormat('{% if def_date == "day" %}%m-%d{% else %}{{chart_format}}{% endif %}',this.value);
+				}
+			},
+			tickInterval : 86400000
+		},
+		yAxis : {
+			title:{
+				text:''
+			},
+			allowDecimals:0
+		} ,
+		series : [] ,
+		legend : {
+			layout:'horizontal',
+			align:'center',
+			backgroundColor:null,
+			borderColor:'#909090',
+			borderRadius:5,
+			enabled:1,
+			floating:0,
+			shadow:0,
+			style:'',borderWidth:1
+		} ,
+		credits : {
+			enabled:0
+		} ,
+		tooltip : { 
+			formatter :  function() {
+				var s = '<b>'+ Highcharts.dateFormat('{{chart_format}}',this.x) +'</b>';
+				$.each(this.points, function(i, point) {
+					s += '<br/>'+ '<b style="color:'+point.series.color+';">'+point.series.name +'</b>'+': '+point.y +'';
+				});
+				return s;
+			} , 
+			crosshairs : '1', 
+			shared : '1'
+		},
+		plotOptions : { 						
+			line: {
+				lineWidth: 2,
+				states: {
+					hover: {
+						lineWidth: 4
+					}
+				},
+				dataLabels : {
+					enabled : 0,
+					align:"right"
+				},
+				marker: {
+					enabled: false,
+					states: {
+						hover: {
+							enabled: true,
+							symbol: 'circle',
+							radius: 5,
+							lineWidth: 3
+						}
+					}
+				}
+			}					 
+		}
+	};
+	Highcharts.setOptions({ 
+		global: {
+			useUTC: 0 
+		} 
+	});   	    	
+	$.each({% autoescape off %}{{list_record_arr}}{% endautoescape %}, function(key, value) {
+		var series = {};
+		series.name = key;
+		series.data = value;
+		options.series.push(series); 
+	});
+	new Highcharts.Chart(options);
+});		
+
+</script>
+<div id="channel" style="width:90%;height:90%;margin:10px auto 5px auto;"> </div>
+<table class="list">
+<tr>
+<th width="170">时间</th>
+{%for item in list_statistic_name%}
+<th title="{{item.remark}}">{{item}}</th>
+{%endfor%}
+</tr>
+{%for items in list_record%}
+<tr>
+{%for item in items%}
+{%if forloop.first%}
+<td>{{item}}</td>
+{%else%}
+<td>{{item|floatformat:'0'}}</td>
+{%endif%}
+{%endfor%}
+</tr>
+{%endfor%}
+</table>
+<div class="sub-menu-1" style="text-align: right">
+	<select name="exprot_format">
+		<option value="1">excel</option>
+		<option value="2">csv</option>
+	</select>
+	<input type="button" class="buttons" value="导出文件" onclick="gene_file()" />
+	<input type="checkbox"  id="clear_export_old_file" />清除旧文件
+</div>
+
+{% else %}
+<div class="sub-menu-1">
+	无记录！
+</div>
+{% endif %}
+<script>
+	var close_export = false;
+	
+	function gene_file(){
+		close_export = false;
+		do_gene_file();
+	}
+	
+	function do_gene_file(page_num){
+		$("input").attr('disabled', true);
+		
+		var post_form = $("#search_form");
+
+		var param = GetPostParameter(post_form);
+		
+		if (!page_num){
+			page_num = 1;
+		}
+		
+		var clear = 0;
+		if ($("#clear_export_old_file:checked").length == 1)
+			clear = 1;
+		
+		param += "exprot=" + $("[name='exprot_format']").val() +"&clear_export_old_file=" + clear + "&page_num=" + page_num + "&close_export=" + (close_export? 1:0);
+		
+		var url = '/result/analyse/{{query_id}}';
+
+		var options = {
+			type : "get",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				
+				result = eval('(' + result + ')');
+				check_export_file_state(result);
+			},
+			cache : false,
+			timeout : 10000,
+			error : function() {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog({ modal: true });
+				$("input").attr('disabled', false);
+			}
+		}
+		window.setTimeout(function(){$.ajax(options);},3000);
+		return false;
+	}
+	
+	function check_export_file_state(result){
+		
+		if (close_export){
+			$("#tip_box").html("已关闭导出"); 
+			$("input").attr('disabled', false);
+			close_export = false;
+			return;
+		}
+		
+		if (result.is_finish){
+			var download_url = '<a href="'+result.url+'" style="color:blue;" >下载</a>';
+			$("#tip_box").html("生成完成," + download_url);
+			$("input").attr('disabled', false);  
+		}else{
+			
+			var bar_html = get_progress_bar(result.page_num, result.total_page);
+			
+			$("#tip_box").html("已生成第" + result.page_num + "页" + bar_html);
+			
+			do_gene_file(result.page_num);
+		}
+		$("#tip_box").dialog({ modal: true,  
+			close: function(event, ui) {
+				  close_export = true;
+			}
+		});
+	}
+	
+	function get_progress_bar(page_num, total_page){
+		var str = '<div style=" background-color:#E5E5E5; width:100%;" >';
+		
+		var width = page_num / total_page * 100;
+		
+		str += '<div style=" background-color:blue; width:' + width + '%;" >&nbsp;</div>';
+		
+		str += '</div>';
+		
+		return str;
+	}
+</script>
+{% include "pager.html" %}
+{% endblock %}

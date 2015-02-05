@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+{% include "game/menu_read_only.html" %}
+
+
+<h4>训练位数量:{{result.content.0.pn}}</h4>
+<h4>突飞CD完成时间:{{result.content.0.hft}}</h4>
+<h4>训练任务:</h4>
+<table class="list">
+<tr>
+{%for key,value in def_params.items%}
+<th>{{value}}</th>
+{%endfor%}
+</tr>
+
+{%for row in list_infos%}
+<tr>
+{%for cell in row%}
+<td>{{cell}}</td>
+{%endfor%}
+</tr>
+{%endfor%}
+
+</table>
+{% endblock %}

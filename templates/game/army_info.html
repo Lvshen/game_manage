@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+<style>
+body
+{
+	 overflow-x : hidden;
+	 padding:0;
+}
+table.list{width:100%;margin:0}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "game/menu.html" %}
+
+
+<h4>可招幕武将:{{result.content.0.ec}}/{{result.content.0.gm}}</h4>
+{{result.content.0.crl}}
+<br/>
+<h4>赠送武将:</h4>
+<form method="post" action="/game/hero/add?player_id={{player_id}}">
+武将编号:<input type="text" name="hero_id" value="" /> <input type="submit" value="赠送" />
+</form>
+<h4>已招募武将:</h4>
+<table class="list">
+<tr>
+{%for key,value in def_params.items%}
+<th>{{value}}</th>
+{%endfor%}
+</tr>
+
+{%for row in list_infos%}
+<tr>
+{%for cell in row%}
+<td>{{cell}}</td>
+{%endfor%}
+</tr>
+{%endfor%}
+
+</table>
+
+{% endblock %}

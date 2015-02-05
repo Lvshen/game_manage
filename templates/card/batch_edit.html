@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}添加卡号种类{% endblock %}
+{% block header %}
+<style type="text/css">
+	.select_area ul li {
+		list-style-type: none;
+		padding: 1px 0;
+		display: inline;
+		width: 200px;
+		float: left;
+	}
+	.input_area ul li {
+		list-style-type: none;
+		padding: 1px 0;
+		display: inline;
+		width: 250px;
+		float: left;
+	}
+	.input_area ul li label {
+		text-align:right;
+		width:100px;
+	}	
+	.clear {
+		clear: both;
+		margin-top: 3px;
+	}
+	.batch {
+		width:100%;
+		padding:6px;
+	}
+	.batch .sub-menu-1 label {
+		display: inline-block;
+		width: 100px;
+		padding-right: 6px;
+		text-align: right;
+		color: #36588a;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<script>
+$(document).ready(function(){
+	// $("#save_batch").click(function(){
+		// var j = 0;
+		// for (var i=1; i <= 9; i++) {
+			// if ($(".input_area [name='prize_" + i + "']").length > 0 && $(".input_area [name='prize_" + i + "']").val() != '') {
+				// j = j+1;
+			// }
+		// }
+		// if (j == 0) {
+			// alert("至少有一项不能为空！");
+		// }
+		// return true;
+	// });
+
+	$(".prize_config").click(function(){
+		if($(".prize_config").text() == "辅助配置"){
+			$(".prize_config").text("快捷配置");
+			var content = '<ul>'
+						+ '<li><label id="prize_4_val">金币：</label><input type="text" name="prize_4" value="{{prize_help.4}}"/></li>'
+						+ '<li><label id="prize_5_val">军功：</label><input type="text" name="prize_5" value="{{prize_help.5}}"/></li>'
+					    + '<li><label id="prize_8_val">魂石：</label><input type="text" name="prize_8" value="{{prize_help.8}}"/></li>'
+						+ '<li><label id="prize_3_val">银币：</label><input type="text" name="prize_3" value="{{prize_help.3}}"/></li>'
+						+ '<li><label id="prize_1_val">武将ID：</label><input type="text" name="prize_1" value="{{prize_help.1}}"/></li>'
+						+ '<li><label id="prize_9_val">战魂：</label><input type="text" name="prize_9" value="{{prize_help.9}}"/></li>'
+						+ '<li><label id="prize_7_val">威望：</label><input type="text" name="prize_7" value="{{prize_help.7}}"/></li>'
+						+ '<li><label id="prize_2_val">装备ID：</label><input type="text" name="prize_2" value="{{prize_help.2}}"/></li>'
+						+ '<li><label id="prize_6_val">军令：</label><input type="text" name="prize_6" value="{{prize_help.6}}"/></li>'
+						+ '</ul>';	
+			$(".input_area").html(content);		
+		}else{
+			$(".prize_config").text("辅助配置");
+			var content = "<textarea rows='2' name='prize'>{{prize}}</textarea>"
+						 + "<div>格式：[[1, 1], [2, 1], [3, 1], [4, 10], [5, 10], [6, 1], [7, 1], [8, 1], [9, 1]]</div>"
+						 + "<div>说明：1:武将,2:装备,3:银币,4:金币,5:军功,6:军令,7:威望,8:魂石,9:战魂</div>";
+			$(".input_area").html(content);	
+		}
+	});
+})	
+</script>
+<div id="bar">
+	<a href="/card/batch/?status=1">礼包卡管理 </a> -> 添加卡号种类 <span class="buttons"> <a href="{{last_url}}">返回</a> </span>
+</div>
+<div class="batch">
+<form action="/card/batch/save?id={{model.id}}" method="post">
+	<input type="hidden" name="last_url" value="{{last_url}}"/>
+	<div class="select_area">
+		<div class="sub-menu">
+				<label><b>渠道选择：</b></label>所有渠道
+		</div>
+		<!-- <label><input id="select_channel" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>渠道全选</label>
+		<div id="select_channel_area" style="height:6em;overflow:hidden;">
+			<a href="#" id="div_expendAll" style="float:right" onclick="expendAll()">展开全部>>></a>
+			<ul>
+			{% for item in list_channel %}
+				<li><input type="checkbox" name="c" value="{{item.key}}" {%ifequal item.is_show 1 %}checked="checked"{%endifequal%}/>{{item.name}}</li>
+			{% endfor %}
+			</ul>
+		</div> -->
+		<div class="clear"></div>
+		{% if usm.current_userRole_is_root %}
+		<div class="sub-menu">
+		<label><b>服分区：</b></label>
+				<a href="?id={{model.id}}&group_id=0" {%ifequal group_id 0%} class="active"{%endifequal%}>全部</a>
+				{% for item in list_group %}
+				<a href="?id={{model.id}}&group_id={{item.id}}" {%ifequal item.id group_id%} class="active"{%endifequal%}>{{item.name}}</a>
+				{% endfor %}	
+		</div> 
+		{% endif %}		
+		<div class="clear"></div>
+		<div class="sub-menu">
+		<label><b>全选</b><input id="select_server" type="checkbox" onchange="selectAll(this.id)"  {% if model.id %}{%else%}checked="checked"{% endif %}/></label>
+		<div id="select_server_area">
+			<ul>
+			{% for item in list_server %}
+				<li><input type="checkbox" name="s" value="{{item.id}}" {%ifequal item.is_show 1 %}checked="checked"{%endifequal%} />{{item.name}}</li>
+			{% endfor %}
+			</ul>
+		</div>	
+		</div>		
+	</div>
+	<table class="form">
+		<tr>
+			<th>礼包卡名：</th><td>
+			<input type="text" name="name" value="{{model.name}}" />（建议15字符以内）
+			</td>
+		</tr>		
+		<tr>
+			<th>标识：</th><td>
+			<input type="text" name="key" value="{{model.key}}" {% if model.id %}readonly="readonly"{% endif %}/>如：1001<font color="red">(保存后不能修改)</font>
+			</td>
+		</tr>
+		<tr>
+			<th>可用次数：</th>
+			<td>
+			<input type="text" name="limit_count" value="{{model.limit_count}}" />
+			</td>
+		</tr>		
+		<tr>
+			<th>生效时间：</th>
+			<td>
+			<input type="text" name="start_time"  value="{% if model.id %}{{model.start_time|date:"Y-m-d H:i:s"}}{% else%}{{model.start_time}}{% endif %}" class="Wdate"/>
+			</td>
+		</tr>
+		<tr>
+			<th>失效时间：</th>
+			<td>
+			<input type="text" name="end_time" value="{% if model.id %}{{model.end_time|date:"Y-m-d H:i:s"}}{% else%}{{model.end_time}}{% endif %}" class="Wdate"/>
+			</td>
+		</tr>		
+		<tr>
+			<th>奖励：</th>
+			<td>
+				<a href="javascript:void(0);" class="prize_config">辅助配置</a>
+			</td>
+		</tr>	
+		<tr>
+			<th></th>
+			<td>
+				<div class="input_area">
+					<textarea rows='2' name='prize'>{{prize}}</textarea>
+					<div>格式：[[1, 1], [2, 1], [3, 1], [4, 10], [5, 10], [6, 1], [7, 1], [8, 1], [9, 1]]</div>
+					<div>说明：1:武将,2:装备,3:银币,4:金币,5:军功,6:军令,7:威望,8:魂石,9:战魂</div>
+				</div>
+			</td>
+		</tr>			
+		<tr>
+			<th>备注内容：</th><td><textarea name="remark" style="width:600px;height:30px;">{{model.remark}}</textarea></td>
+		</tr>
+		<tr>
+			<th></th>
+			<td>
+			<input type="submit" value="保存" id="save_batch"/>
+			</td>
+		</tr>
+	</table>
+</form>
+</div>
+<script type="text/javascript">
+	function expendAll()
+	{
+		if($("#select_channel_area").css('overflow')=='hidden')
+		{
+			$("#div_expendAll").html("折叠全部<<<");
+			$("#select_channel_area").css({'overflow':'visible','height':'auto'});	
+		}
+		else
+		{
+			$("#div_expendAll").html("展开全部>>>");
+			$("#select_channel_area").css({'overflow':'hidden','height':'6em'});
+		}
+	}
+
+</script>
+{% endblock %}

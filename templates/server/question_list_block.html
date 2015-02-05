@@ -1,0 +1,28 @@
+<div id="list_{{page_num}}" name="list_{{page_num}}" >
+	<table class="list" >
+		<tr>
+			<td colspan="6" style=" background-color:#AAAAAA; font-size:20px;  color:#FBF9EE; text-align: center;" >{{page_num}}</td>
+		</tr>
+	{%for item in list_record%}
+		<tr>
+			<td>{{item.serverName}}<span style="color:red; font-size:18px;" >vip{{item.post_user_id}}</span> </td>
+			<td><a href="/question/list?server_id={{item.server_id}}&user_id={{item.post_user}}">{{item.post_user}}</a>
+			<br/>{{item.post_time_str}}</td>
+			<td><div style="margin:0 10px;word-wrap: break-word; word-break: normal; width:300px;">{{item.question}}</div></td>
+			<td><div style="margin:0 10px;word-wrap: break-word; word-break: normal; width:300px;" id="reply_{{item.id}}">{{item.answer}}</div></td>
+			<td>{{item.reply_user}}<br/>{{item.reply_time_str}}</td>
+			<td>{%if item.status == 2%}已查看{% endif %}</td>
+			<td>{%if item.score != None and item.score != 'None' and item.score > -1 %}{{item.score}}{%endif%}</td>
+			<td>
+			<a class="del" href="/question/remove?question_id={{item.id}}">删除</a><br/>　
+			{%ifequal item.status 1%}
+			<a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">修改</a>
+			{%else%}
+			<a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">回复</a>
+			{%endifequal%}
+			</td>
+		</tr>
+	{%endfor%}
+	</table>
+</div>
+{% include "pager.html" %}

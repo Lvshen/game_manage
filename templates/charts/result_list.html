@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>报表汇总管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+报表汇总管理
+<span class="buttons">
+ <a href="/charts/result/edit/0">添加</a>
+ </span>
+</div>
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="200">报表名称</th>
+<th>报表说明内容</th>
+<th width="100">操作</th>
+</tr>
+{%for item in list_model%}
+
+<tr>
+<td>{{item.id}}</td>
+<td><a href="/charts/result/view/{{item.id}}">{{item.name}}</a></td>
+<td>{{item.remark}}</td>
+<td><a href="/charts/result/del/{{item.id}}" class="del">删除</a> <a href="/charts/result/edit/{{item.id}}">编辑</a></td>
+</tr>
+
+{%endfor%}
+</table>
+{% endblock %}

@@ -1,0 +1,19 @@
+import "db_cache.proto";
+
+package MISSION;
+
+message S2C_Query_Mission_Rsp
+{
+	required uint64 mission_data 		= 1;
+}
+
+message C2S_Execute_Mission_Req
+{
+	required uint32 mission_id			= 1;
+}
+
+message S2C_Execute_Mission_Rsp
+{
+	required uint32 mission_id			= 1;
+	required int32 ret_code				= 2;
+}

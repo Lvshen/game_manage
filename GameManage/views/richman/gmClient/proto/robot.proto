@@ -1,0 +1,31 @@
+import "db_cache.proto";
+import "cardsystem.proto";
+import "diesystem.proto";
+
+package robot;
+
+message R2G_LoginReq
+{
+	required int32 server_id = 1;
+}
+
+message G2R_AddRobotReq
+{
+	required int32 room_id = 1; // 房间ID
+	required int32 seat_id = 2; // 座位ID
+}
+
+message R2G_EnterRoomReq
+{
+	required int32 room_id = 1; // 房间ID
+	required int32 seat_id = 2; // 座位ID
+	optional DBCACHE.PlayerBaseInfo baseinfo = 3;	// 个人基本信息
+	optional CARDSYSTEM.PlayerCardInfo player_cards = 4; // 人物卡牌属性
+	optional DIESYSTEM.DieProperty player_dies = 5; // 人物骰子属性
+	optional int32  tickets = 6;
+}
+
+message G2R_NotifyPlayerExit
+{
+	required int32 player_id = 1; // 
+}

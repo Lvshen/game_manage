@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{the_query.name}}</title>
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+<!--<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>  -->
+<script type="text/javascript" >
+	function changeServer(ele){ 
+		var auto_change = {%if allowChannel %}true{%else%}false{%endif%};
+		if(auto_change){
+			//切换服务器，更新渠道
+			$("#search_form").submit();
+		}
+	}
+	var close_export = false;
+	var exp_server_list = [];
+	var exprot_file_key = '';
+	var is_first = false;
+	var clear = 0;
+	var err_count = 0;
+	function gene_file(){
+		close_export = false;
+		exprot_file_key = '';
+		clear = 0;
+		err_count = 0;
+		is_first = false;
+		if ($("#clear_export_old_file:checked").length == 1)
+			clear = 1;
+		exp_server_list = [];	
+		$("input[name='chk_server_id']:checked").each(function(){
+			exp_server_list.push($(this).val());
+		});
+		if(exp_server_list.length == 0){
+			do_gene_file(1);
+		}else{
+			do_gene_file(1, exp_server_list.pop());
+		}
+	}
+	
+	
+	function do_gene_file(page_num, serv_id){
+		is_first = true;
+		$("input").attr('disabled', true);
+		
+		var post_form = $("#search_form");
+
+		var param = GetPostParameter(post_form);
+		
+		if (serv_id){
+			if(-1 == param.indexOf('server_id')){
+				if (param != '')
+					param += '&';
+				else
+					param += '?';
+				param += "server_id=" + serv_id + '&';
+			}else{
+				var r = /server_id=\d+/;
+				param = param.replace(r, "server_id=" + serv_id);
+			}
+		}
+		
+		if (!page_num){
+			page_num = 1;
+		}
+		
+		param += "exprot=" + $("[name='exprot_format']").val() + "&clear_export_old_file=" + clear + "&page_num=" + page_num + "&close_export=" + (close_export? 1:0);
+		
+		if (exprot_file_key != '' && -1 == param.indexOf('exprot_file_key')){
+			param += '&exprot_file_key=' + exprot_file_key;
+		}
+		
+		{% if usm.current_userRole_is_root %}
+		var url = '/query/view?id={{query_id}}';
+		{% else %}
+		var url = '/query/view/{{query_id}}';
+		{% endif %}
+
+		var options = {
+			type : "get",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				err_count = 0;
+				result = eval('(' + result + ')');
+				check_export_file_state(result, serv_id);
+			},
+			cache : false,
+			timeout : 10000,
+			error : function() {
+				if(err_count >= 5){
+					$("#tip_box").html("链接超时！请重试");
+					$("#tip_box").dialog({ modal: true });
+					$("input").attr('disabled', false);
+				}
+				else{
+					err_count ++;
+					do_gene_file(page_num, serv_id);
+				}
+			}
+		}
+		$.ajax(options);
+		return false;
+	}
+	
+	function check_export_file_state(result, serv_id){
+		
+		if (close_export){
+			$("#tip_box").html("已关闭导出"); 
+			$("input").attr('disabled', false);
+			close_export = false;
+			return;
+		}
+		
+		if (result.is_finish){
+			if(exp_server_list.length == 0){
+				var download_url = '<a href="'+result.url+'" style="color:blue;" >下载</a>';
+				$("#tip_box").html("生成完成," + download_url);
+				$("input").attr('disabled', false);
+			}else{
+				exprot_file_key = result.exprot_file_key;
+				var bar_html = get_progress_bar(result.page_num, result.total_page);
+				var tip_str = "服务器ID:" + serv_id  + "已生成第" + result.page_num + "页" + bar_html;
+				$("#tip_box").html(tip_str);
+				do_gene_file(1, exp_server_list.pop());
+			}
+		}else{
+			
+			var bar_html = get_progress_bar(result.page_num, result.total_page);
+			var tip_str = "已生成第" + result.page_num + "页" + bar_html; 
+			
+			$("#tip_box").html(tip_str);
+			
+			{% if usm.current_userRole_is_root %}
+			do_gene_file(result.page_num);
+			{% else  %}
+			setTimeout(function(){do_gene_file(result.page_num);}, 4000);
+			{% endif %}
+		}
+		$("#tip_box").dialog({ modal: true,  
+			close: function(event, ui) {
+				  close_export = true;
+			}
+		});
+	}
+	
+	function get_progress_bar(page_num, total_page){
+		var str = '<div style=" background-color:#E9ECF2; width:100%;" >';
+		
+		var width = page_num / total_page * 100;
+		
+		if (!exp_server_list.length){
+			width /= exp_server_list.length;
+		}
+		
+		str += '<div style=" background-color:blue; width:' + width + '%;" >&nbsp;</div>';
+		
+		str += '</div>';
+		
+		return str;
+	}
+	
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/log/list/">日志类型列表-></a>
+ <a href="/query/list/{{the_query.log_type}}">查询列表-></a>
+查询结果
+<span class="buttons">
+ <a href="/query/list/{{the_query.log_type}}">返回</a>
+ </span>
+</div>
+<!-- 对管理员公开 -->
+{% if usm.current_userRole_is_root %}
+	<div class="sub-menu">
+		{%for item in list_query%}
+			<a href="/query/view/{{item.id}}"{%ifequal item.id query_id%} class="active"{%endifequal%}>{{item.name}}</a>
+		{%endfor%}
+	</div>
+	{%if is_select_server  %}
+	<div class="sub-menu-1">
+		分区:
+		<a href="/query/view/{{the_query.id}}">全部</a>
+		{%for item in list_group%}
+			<a href="/query/view/{{the_query.id}}?group_id={{item.id}}"{%ifequal item.id group_id%} class="active"{%endifequal%}>{{item.name}}</a>
+		{%endfor%}
+	</div>
+	{% endif %}
+{% endif %}
+<!-- 对管理员公开 END-->
+
+<div class="sub-menu-1">
+<form id="search_form"  method="get" >
+<table>
+	<tr {%if not is_select_server  %}style="display:none"{%endif%}>
+		<th width="90">服务器:</th>
+		<td>
+			{% if is_centerQuery %}
+				<label><input id="select_server" type="checkbox" onchange="selectAll(this.id)" />服务器全选</label>
+				<div id="select_server_area" >
+					{%for serverItem in list_server%}
+						<label><input type="checkbox" name="s" value="{{serverItem.id}}" {% if serverItem.id in s_list %}checked='checked'{% endif %} />{{serverItem.name}}</label>
+					{%endfor%}
+				</div>
+			{% else %} 
+				<select class='dbl_server_list' name="server_id" >
+					{%for item in list_server%}
+					<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}  >{{item.name}}</option>
+					{%endfor%}
+				</select>
+				<input type="text" class="s_server" style="width:50px;" onkeyup="javascript:search_dbl_list('dbl_server_list','s_server');" />
+			{% endif %}
+		</td>
+	</tr> 
+	{%if allowChannel  %}
+	<tr>
+		<th width="90"><label><input type="checkbox" id="select_channel" onchange="selectAll(this.id)" />渠道全选</label></th>
+		<td>
+			<a href="#" id="div_expendAll" style="float:right" onclick="expendAll()">展开全部>>></a>
+			<div id="select_channel_area" style="height:1.5em;overflow:hidden;">
+				{%for channelItem in list_channel%}
+					<label><input type="checkbox" name="channel_id" value="{{channelItem.id}}" {%ifequal channelItem.is_show 1 %}checked="checked"{%endifequal%} />{{channelItem.name}}</label>
+				{%endfor%}
+			</div>
+		</td>
+	</tr>
+	{%endif%}
+	<tr >
+		<th>查询:</th>
+		<td>
+			<div {%if not is_search%}style="display:none"{%endif%}>
+				{%if not has_sql %}
+					<select name="field_id">
+						<option value="0">选择字段</option>
+						{%for item in list_field%}
+							<option value="{{item.id}}"{%ifequal item.id field_id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+						{%endfor%}
+					</select>
+					<input type="text" name="field_value" value="{{field_value}}" />
+				{% else %}
+					{% for item in keywords %}
+						{{item.name}}:<input type="text" name="field_value" value="{{item.value}}" />
+					{% endfor %}
+				{% endif %}
+			</div>
+			<input type="hidden" name="id" value="{{the_query.id}}" />
+			<input type="hidden" name="post_back" value="true" /> 
+			<input type="hidden" name="group_id" value="{{group_id}}" />
+			{% if has_sdate %}
+			开始日期:<input type="text" name="sdate" class="Wdate" value="{{sdate}}" />
+			{% endif %}
+			{% if has_edate %}
+			结束日期:<input type="text" name="edate" class="Wdate" value="{{edate}}" />
+			{% endif %}
+			<input type="submit" value="查询"  />
+			<br />
+			执行所需时间:{{exec_time}} 豪秒
+		</td>
+	</tr>
+</table>
+{% include "pager.html" %}
+</form>
+</div>
+
+<table id="list_{{page_num}}" class="list">
+<tr>
+{%for field in fields%}
+<th>{{field}}</th>
+{%endfor%}
+</tr>
+{%for items in list_data%}
+<tr>
+	{%for item in items%}
+	<td>{{item}}</td>
+	{%endfor%}
+</tr>
+{%endfor%}
+</table>
+{% if usm.allow_export %}
+<div class="sub-menu-1" style="text-align: right;">
+	<select name="exprot_format">
+		<option value="1">excel</option>
+		<option value="2">csv</option>
+		<option value="3">txt</option>
+	</select>
+	<input type="checkbox"  id="clear_export_old_file" />清除旧文件
+	<input type="button" class="buttons" value="导出文件" onclick="gene_file()" />
+</div>
+
+	{% if usm.current_userRole_is_root %}
+	<div class="sub-menu-1" >
+		<label><input type="checkbox" name="chk_allserv" data-action="chk-all" data-chk-child="chk_server_id" />全部</label>
+		{%for serverItem in list_server%}
+			<label><input type="checkbox" name="chk_server_id" value="{{serverItem.id}}" />{{serverItem.name}}</label>
+		{% endfor %}
+	</div>
+	{% endif %}
+	
+{% endif %}
+
+<script type="text/javascript"> 
+	function expendAll()
+	{ 
+		if($("#select_channel_area") == null)
+			return;
+		
+		if($("#select_channel_area").css('overflow')=='hidden')
+		{
+			$("#div_expendAll").html("折叠全部<<<");
+			$("#select_channel_area").css({'overflow':'visible','height':'auto'});	
+		}
+		else
+		{
+			$("#div_expendAll").html("展开全部>>>");
+			$("#select_channel_area").css({'overflow':'hidden','height':'1.5em'});
+		}
+	} 
+</script>
+
+
+{% endblock %}
+

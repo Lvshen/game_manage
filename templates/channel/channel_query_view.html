@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>查询结果</title>
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	 
+</div>
+
+<div class="sub-menu-1">
+	<form method="get">
+
+		服务器:
+
+		<select name="server_id">
+			<option value="0">全选</option>
+			{%for item in list_server%}
+			<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</option>
+			{%endfor%}
+		</select>
+
+		查询:
+
+		开始日期:
+		<input type="text" name="sdate" class="Wdate" value="{{sdate}}" />
+		结束日期:
+		<input type="text" name="edate" class="Wdate" value="{{edate}}" />
+		<input type="submit" value="查询" />
+	</form>
+</div>
+
+<table id="list_{{page_num}}" class="list">
+	<tr>
+		<th width="170">时间</th>
+		{%for item in list_statistic_sort%}
+		<th title="{{item.remark}}">{{item.1}}</th>
+		{%endfor%}
+	</tr>
+	{%for items in list_record%}
+	<tr>
+		{%for item in items%}
+		{%if forloop.first%}
+			<td>{{item|date:"Y-m-d H:i:s"}}</td>
+		{%else%}
+			<td>{{item|floatformat:'0'}}</td>
+		{%endif%}
+		{%endfor%} 
+	</tr>
+	{%endfor%}
+</table>
+{% include "pager.html" %}
+{% endblock %}
+

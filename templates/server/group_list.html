@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>分区管理</title>
+<script type="text/javascript"  >
+	$(document).ready(function() {
+		post_tip = $("#post_tip");
+		init();
+	});
+
+	function selectall(ele) {
+		$("[name='group_item_id']").each(function() {
+			$(this).attr("checked", $(ele).attr("checked"));
+		});
+	}
+
+	var count = 0;
+	var counter = 0;
+	var post_tip;
+	var selected_eles;
+
+	function batchSave() {
+		init();
+		listen_post('提交中...');
+		if (count >= 1) {
+			$("input").attr('disabled', false);
+		}
+		$(selected_eles).each(function() {
+			ajaxPostEdit($(this).val());
+		});
+	}
+
+	function init() {
+		count = 0;
+		counter = 0;
+		msg_str = "";
+		post_tip.html();
+		post_tip.hide();
+		selected_eles = $("[name='group_item_id']:checked");
+		count = selected_eles.length;
+	}
+
+	function ajaxPostEdit(id) {
+
+		var value = $("[name='notice_select']").val();
+
+		var param = {
+			notice : true,
+			ajax : true,
+			notice_select : value
+		};
+
+		var url = "/group/save?model_id=" + id;
+
+		var options = {
+			type : "post",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				counter++;
+				listen_post('serverID:' + id + ' 修改成功');
+			},
+			cache : false,
+			timeout : 5000,
+			error : function() {
+				counter++;
+				listen_post('serverID:' + id + '请求超时');
+			}
+		}
+		$.ajax(options);
+		return false;
+	}
+
+	var msg_str = "";
+	function listen_post(result) {
+		msg_str += '<p>' + result + '</p>';
+		if (counter < count)
+			return;
+		msg_str += "操作完成";
+		post_tip.html(msg_str);
+		post_tip.show();
+	}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	分区管理
+	<span class="buttons"> <a href="/server/make" class="ask">生成服务器列表</a> <a href="/group/edit">添加</a> </span>
+</div>
+
+<table class="list">
+	<tr>
+		<th width="60">
+		<input type="checkbox" id="all" onclick="javascript:selectall(this);" >
+		编号 </th>
+		<th width="100">唯一标识</th>
+		<th>分区名</th>
+		<th width="100">操作</th>
+	</tr>
+	{%for item in list_record%}
+	<tr>
+		<td>
+		<input type="checkbox" name="group_item_id" value="{{item.id}}" >
+		{{item.id}}</td>
+		<td><a href="/static/server/{{item.key}}.json" target="_blank">{{item.key}}</a></td>
+		<td><a href="/server/list?group_id={{item.id}}">{{item.name}}</a></td>
+		<td><!--<a href="/group/remove/{{item.id}}" class="del">删除</a>&nbsp;&nbsp;-->
+			<a href="/group/edit?model_id={{item.id}}">编辑</a>
+		</td>
+	</tr>
+	{%endfor%}
+</table>
+
+<select name="notice_select">
+	<option value="0">无公告</option>
+	{%for item in list_notice%}
+	<option value="{{item.id}}" >{{item.title}}</option>
+	{%endfor%}
+</select>
+<input type="submit" value="保存" onclick="javascript:batchSave();" />
+
+<center><div id="post_tip" style="width:120px;" ></div></center>
+
+{% endblock %}

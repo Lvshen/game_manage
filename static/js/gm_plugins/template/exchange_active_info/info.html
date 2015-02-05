@@ -1,0 +1,36 @@
+<div id="exchange_active_list_container" style="height:380px;width:300px; overflow: auto;">
+	<table class="list" >
+		<tr>
+			<th>
+				金币数
+			</th>
+			<th>
+				类型
+			</th>
+			<th>
+				装备ID
+			</th>
+		</tr>
+		{{~ it.list :item:index }}
+		<tr>
+			<td>
+				{{=item.gold}}
+			</td>
+			<td>
+				{{? item.goods_type == 1 }}武将{{?}}
+				{{? item.goods_type == 2 }}装备{{?}}
+				{{? item.goods_type == 3 }}银币{{?}}
+				{{? item.goods_type == 4 }}金币{{?}}
+				{{? item.goods_type == 5 }}军功{{?}}
+				{{? item.goods_type == 6 }}军令{{?}}
+				{{? item.goods_type == 7 }}威望{{?}}
+				{{? item.goods_type == 8 }}魂石{{?}}
+				{{? item.goods_type == 9 }}战魂{{?}}
+			</td>
+			<td>
+				{{=item.id}}
+			</td>
+		</tr>
+		{{~}}
+	</table> 
+</div>

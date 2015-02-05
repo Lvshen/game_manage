@@ -1,0 +1,53 @@
+<table class="list">
+	<tr>
+		<td style="width:50px;">
+			ID
+		</td>
+		<td>
+			说明
+		</td>
+		<td style="width:150px;">
+			服务器列表
+		</td>
+		<td style="width:150px;" >
+			开始时间
+		</td>
+		<td style="width:150px;" >
+			结束时间
+		</td>
+		<td style="width:80px;" >
+			操作
+		</td>
+	</tr>
+	{{~ it.activity_list :item:index }}
+	<tr>
+		<td colspan="6" class="text-warning">{{=item.status}}</td>
+	</tr>
+		{{ for(var key in item.activity_dict){ }}
+		<tr>
+			<td>
+				{{=key}}
+			</td>
+			<td> 
+				{{=item.activity_dict[key].activity.ada}}
+			</td>
+			<td> 
+				[
+				 {{=item.activity_dict[key].server_list}}
+				] 
+			</td>
+			<td>
+				{{= timestamp_to_time_str(item.activity_dict[key].activity.aot) }}
+			</td>
+			<td>
+				{{= timestamp_to_time_str(item.activity_dict[key].activity.act) }}
+			</td>
+			<td>
+				<a href="#" onclick="show_info('{{=key}}')">
+					详细
+				</a>
+			</td>
+		</tr>
+		{{ } }}
+	{{~ }}
+</table>

@@ -1,0 +1,60 @@
+Thu Feb  5 11:38:09 2015 - *** Starting uWSGI 2.0.9 (64bit) on [Thu Feb  5 11:38:08 2015] ***
+Thu Feb  5 11:38:09 2015 - compiled with version: 4.4.7 20120313 (Red Hat 4.4.7-4) on 15 January 2015 16:15:23
+Thu Feb  5 11:38:09 2015 - os: Linux-2.6.32-431.el6.x86_64 #1 SMP Fri Nov 22 03:15:09 UTC 2013
+Thu Feb  5 11:38:09 2015 - nodename: localhost.localdomain
+Thu Feb  5 11:38:09 2015 - machine: x86_64
+Thu Feb  5 11:38:09 2015 - clock source: unix
+Thu Feb  5 11:38:09 2015 - pcre jit disabled
+Thu Feb  5 11:38:09 2015 - detected number of CPU cores: 1
+Thu Feb  5 11:38:09 2015 - current working directory: /home/shenj/data/Web/game_manage
+Thu Feb  5 11:38:09 2015 - detected binary path: /usr/bin/uwsgi
+Thu Feb  5 11:38:09 2015 - uWSGI running as root, you can use --uid/--gid/--chroot options
+Thu Feb  5 11:38:09 2015 - *** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+Thu Feb  5 11:38:09 2015 - your processes number limit is 14825
+Thu Feb  5 11:38:09 2015 - limiting address space of processes...
+Thu Feb  5 11:38:09 2015 - your process address space limit is 6341787648 bytes (6048 MB)
+Thu Feb  5 11:38:09 2015 - your memory page size is 4096 bytes
+Thu Feb  5 11:38:09 2015 - detected max file descriptor number: 10240
+Thu Feb  5 11:38:09 2015 - lock engine: pthread robust mutexes
+Thu Feb  5 11:38:09 2015 - thunder lock: disabled (you can enable it with --thunder-lock)
+Thu Feb  5 11:38:09 2015 - uwsgi socket 0 bound to TCP address 0.0.0.0:8020 fd 3
+Thu Feb  5 11:38:09 2015 - Python version: 2.7.8 (default, Dec 10 2014, 16:13:06)  [GCC 4.4.7 20120313 (Red Hat 4.4.7-4)]
+Thu Feb  5 11:38:09 2015 - Python main interpreter initialized at 0xed66a0
+Thu Feb  5 11:38:09 2015 - python threads support enabled
+Thu Feb  5 11:38:09 2015 - your server socket listen backlog is limited to 20 connections
+Thu Feb  5 11:38:09 2015 - your mercy for graceful operations on workers is 60 seconds
+Thu Feb  5 11:38:09 2015 - mapped 363840 bytes (355 KB) for 4 cores
+Thu Feb  5 11:38:09 2015 - *** Operational MODE: preforking ***
+Thu Feb  5 11:38:09 2015 - added /home/shenj/data/Web/game_manage/ to pythonpath.
+Thu Feb  5 11:38:09 2015 - WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0xed66a0 pid: 2992 (default app)
+Thu Feb  5 11:38:09 2015 - *** uWSGI is running in multiple interpreter mode ***
+Thu Feb  5 11:38:09 2015 - spawned uWSGI master process (pid: 2992)
+Thu Feb  5 11:38:09 2015 - spawned uWSGI worker 1 (pid: 2996, cores: 1)
+Thu Feb  5 11:38:09 2015 - spawned uWSGI worker 2 (pid: 2997, cores: 1)
+Thu Feb  5 11:38:09 2015 - spawned uWSGI worker 3 (pid: 2998, cores: 1)
+Thu Feb  5 11:38:09 2015 - spawned uWSGI worker 4 (pid: 2999, cores: 1)
+{address space usage: 264663040 bytes/252MB} {rss usage: 30924800 bytes/29MB} [pid: 2999|app: 0|req: 1/1] 192.168.1.217 () {44 vars in 882 bytes} [Thu Feb  5 11:38:27 2015] GET /coc/queryplayer/ => generated 1374 bytes in 62 msecs (HTTP/1.1 200) 2 headers in 88 bytes (1 switches on core 0)
+{address space usage: 264663040 bytes/252MB} {rss usage: 30998528 bytes/29MB} [pid: 2999|app: 0|req: 2/2] 192.168.1.217 () {46 vars in 902 bytes} [Thu Feb  5 11:38:27 2015] GET /static/skin/style.css => generated 0 bytes in 30 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 264663040 bytes/252MB} {rss usage: 31002624 bytes/29MB} [pid: 2999|app: 0|req: 3/3] 192.168.1.217 () {46 vars in 904 bytes} [Thu Feb  5 11:38:27 2015] GET /static/skin/dialog.css => generated 0 bytes in 1 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 264663040 bytes/252MB} {rss usage: 31006720 bytes/29MB} [pid: 2999|app: 0|req: 4/4] 192.168.1.217 () {46 vars in 883 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/dialog.js => generated 0 bytes in 0 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 264663040 bytes/252MB} {rss usage: 31014912 bytes/29MB} [pid: 2999|app: 0|req: 5/5] 192.168.1.217 () {46 vars in 879 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/main.js => generated 0 bytes in 0 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 262803456 bytes/250MB} {rss usage: 28987392 bytes/27MB} [pid: 2998|app: 0|req: 1/6] 192.168.1.217 () {46 vars in 901 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/jquery1.8.3.min.js => generated 0 bytes in 232 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 262803456 bytes/250MB} {rss usage: 28987392 bytes/27MB} [pid: 2997|app: 0|req: 1/7] 192.168.1.217 () {46 vars in 923 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/My97DatePicker/WdatePicker.js => generated 0 bytes in 277 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 262803456 bytes/250MB} {rss usage: 28987392 bytes/27MB} [pid: 2996|app: 0|req: 1/8] 192.168.1.217 () {46 vars in 881 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/stran.js => generated 0 bytes in 265 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+{address space usage: 264663040 bytes/252MB} {rss usage: 31014912 bytes/29MB} [pid: 2999|app: 0|req: 6/9] 192.168.1.217 () {46 vars in 950 bytes} [Thu Feb  5 11:38:27 2015] GET /static/js/My97DatePicker/skin/WdatePicker.css => generated 0 bytes in 0 msecs (HTTP/1.1 304) 2 headers in 77 bytes (0 switches on core 0)
+connect success
+Internal Server Error: /coc/queryplayerans/
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/site-packages/Django-1.8.dev20141209161705-py2.7.egg/django/core/handlers/base.py", line 131, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/shenj/data/Web/game_manage/GameManage/views/coc/gm.py", line 24, in queryPlayerDataQeq
+    recv = totalQueryPlayerData(serverip, string.atoi(request.POST["player_id"]));
+  File "/home/shenj/data/Web/game_manage/GameManage/views/coc/gmClient/cocclient.py", line 44, in totalQueryPlayerData
+    ansStr, hCmd = ParseMessage(revBuff);
+  File "/home/shenj/data/Web/game_manage/GameManage/views/coc/gmClient/cocclient.py", line 24, in ParseMessage
+    a, b, c, d, e, f, g, h, ansStr = unpack(mFormat, message)
+error: bad char in struct format
+{address space usage: 266424320 bytes/254MB} {rss usage: 32612352 bytes/31MB} [pid: 2999|app: 0|req: 7/10] 192.168.1.217 () {52 vars in 1077 bytes} [Thu Feb  5 11:38:31 2015] POST /coc/queryplayerans/ => generated 66383 bytes in 685 msecs (HTTP/1.1 500) 2 headers in 92 bytes (1 switches on core 0)
+{address space usage: 266424320 bytes/254MB} {rss usage: 32612352 bytes/31MB} [pid: 2999|app: 0|req: 8/11] 192.168.1.217 () {44 vars in 882 bytes} [Thu Feb  5 13:59:41 2015] GET /coc/queryplayer/ => generated 1374 bytes in 1 msecs (HTTP/1.1 200) 2 headers in 88 bytes (1 switches on core 0)
+{address space usage: 266424320 bytes/254MB} {rss usage: 32612352 bytes/31MB} [pid: 2999|app: 0|req: 9/12] 192.168.1.217 () {44 vars in 878 bytes} [Thu Feb  5 13:59:42 2015] GET /coc/banplayer/ => generated 1609 bytes in 1 msecs (HTTP/1.1 200) 2 headers in 88 bytes (1 switches on core 0)
+{address space usage: 266424320 bytes/254MB} {rss usage: 32612352 bytes/31MB} [pid: 2999|app: 0|req: 10/13] 192.168.1.217 () {44 vars in 882 bytes} [Thu Feb  5 13:59:42 2015] GET /coc/unbanplayer/ => generated 1459 bytes in 2 msecs (HTTP/1.1 200) 2 headers in 88 bytes (1 switches on core 0)

@@ -1,0 +1,25 @@
+.mydialog-overlay {
+	
+	BACKGROUND: gray; FILTER: alpha(opacity:50); opacity: 0.5
+}
+.mydialog {  
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; BACKGROUND: linear-gradient(#4C74A5, #446495); FILTER: alpha(opacity:70); PADDING-BOTTOM: 10px; PADDING-TOP: 10px; opacity: 0.9; border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px
+}
+.mydialog .bar {
+	PADDING-RIGHT: 6px; PADDING-LEFT: 6px; MIN-HEIGHT: 15px; BACKGROUND: #D6DCE8; PADDING-BOTTOM: 6px; CURSOR: move; COLOR: #134079; PADDING-TOP: 6px
+}
+.mydialog .bar .title {
+	FLOAT: left; MARGIN-RIGHT: 10px
+}
+.mydialog .bar .close {
+	FLOAT: right; CURSOR: pointer; TEXT-DECORATION: underline
+}
+.mydialog .content {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; BACKGROUND: #fff; PADDING-BOTTOM: 10px; PADDING-TOP: 10px
+}
+.mydialog IFRAME {
+	WIDTH: 100%; HEIGHT: 100%
+}
+.content IMG {
+	MAX-WIDTH: 700px; OVERFLOW: auto; MAX-HEIGHT: 500px
+}

@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>充值流水</title>
+<script type="text/javascript" >
+	$(document).ready(function(){
+		$("#process_errorOrder").dialog('close');
+		$("#process_errorOrder").hide();
+	});
+
+	function search_list(){
+		url = '/pay/list?pay_type=' + $("[name='pay_type']").val()+"&pay_id=" + $("#input_userId").val()+ "&user_id=" + $("#input_userId").val();
+		document.location.href = url;
+	}
+	
+	/* 处理错误订单 */  
+	
+	function showProceOrderDialog(pay_id){ 
+		$("[name='pay_id']").val(pay_id);
+		$("#process_errorOrder").dialog();
+		return false; 
+	}
+	
+	function proceOrder(){
+		enter = confirm('确认提交');
+		if (enter){
+			ajaxPost();
+		}
+		return false;
+	}
+	
+	function ajaxPost(){
+		$("input").attr('disabled', true);
+  
+		var param = GetPostParameter($("#proceOrderForm"));
+
+		var url = $("#proceOrderForm").attr("action");
+
+		var options = {
+			type : "post",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				if (result == -1 ){
+					alert('失败!');
+				} else {
+					var json_item = eval('('+result+')');
+					if (json_item.pay_status == 2){
+						alert('成功!');
+						var item_id = $("[name='pay_id']").val();
+						var tmp_id = json_item.id;
+						$("#item_"+tmp_id).hide();
+						$("#item_order_id_" + tmp_id).html(json_item.order_id);
+						$("#item_pay_amount_" + tmp_id).html(json_item.pay_amount);
+						$("#item_pay_gold_" + tmp_id).html(json_item.pay_gold);
+						$("#item_pay_status_" + tmp_id).html('已补单');
+					}
+				}
+				$("input").attr('disabled', false);
+			},
+			cache : false,
+			timeout : 5000,
+			error : function() {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog();
+				$("input").attr('disabled', false);
+			}
+		}
+		$.ajax(options);
+		return false;
+	}
+	
+	$(document).ready(function(){
+		$("a.domain").each(function(){
+			var h = $(this).attr('href');
+			$(this).attr('href', 'http://' + document.domain + h);
+		});
+		
+		$('[data-flag="payaction-list"] tr').each(function(){
+			var pay_type_name = $($(this).find('[data-flag="pay_type_name"]'));
+			if(!pay_type_name)
+				return;
+			pay_type_name = pay_type_name.text();
+			if(-1 == pay_type_name.toLowerCase().indexOf('gash'))
+				return;
+			
+			var options_bar = $($(this).find('[data-flag="options"]'));
+			if(!options_bar)
+				return;
+			
+			var data_item_id = options_bar.attr('data-item-id');
+			
+			options_bar.append('<a href="/client/pay/gash/settle?type=1&id='+data_item_id+'" class="dialog domain" >Gash查单</a>');
+			options_bar.append('<a href="/client/pay/gash/settle?type=0&id='+data_item_id+'" class="dialog domain" >Gash请款</a>');
+	 		
+		});
+		
+	});
+	
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+充值日志 {%ifequal table_name "old"%}
+	历史数据(二月前)
+	{%endifequal%} 
+<span class="buttons"> 
+	{%ifequal table_name "old"%}
+	<a href="/pay/list">新数据</a> 
+	{%else%}
+	<a href="/pay/list/old">历史数据(二月前)</a>
+	{%endifequal%} 
+</span>
+</div>
+
+<div class="sub-menu-1">
+<form action="/pay/list" method="get" >
+		<select name="server_id">
+			<option value="0">全部服务器</option>
+			{%for item in list_server%}
+			<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected" {%endifequal%}>{{item.name}}</option>
+			{%endfor%}
+		</select>
+	
+		<select name="status">
+			<option value="0" {% ifequal pay_status  0 %}  selected="selected" {% endifequal %} >全部</option>
+			<option value="3" {% ifequal pay_status  3 %}  selected="selected" {% endifequal %}  >异常订单</option>
+			<option value="-4" {% ifequal pay_status  -4 %}  selected="selected" {% endifequal %} >失败订单</option>
+		</select>
+	
+		<select name="pay_type" >
+			<option value="0" >全部支付通道</option>
+			{% for payChannel  in payChannel_list %}
+				<option value="{{payChannel.id}}" {% ifequal pay_type payChannel.id  %} selected="selected" {% endifequal %} >{{payChannel.name}}-{{payChannel.func_name}}</option>
+			{% endfor %}
+		</select>
+		查询:
+		<select name="key_type" >
+			<option value="0" {% ifequal key_type 0 %} selected="selected" {% endifequal %} >订单号</option>
+			<option value="2" {% ifequal key_type 2 %} selected="selected" {% endifequal %}  >合作方订单号</option>
+			<option value="1" {% ifequal key_type 1 %} selected="selected" {% endifequal %}  >玩家ID</option>
+			<option value="3" {% ifequal key_type 3 %} selected="selected" {% endifequal %}  >卡号</option>
+			<option value="4" {% ifequal key_type 4 %} selected="selected" {% endifequal %}  >备注</option>
+		</select>
+		<input type="text" name="key" value="{{key}}" />
+		
+		<input type="submit" id="btn_search" value="查询" />
+		<a href="/pay/list?status=3">异常等处理的订单</a>
+		<a href="/pay/list?status=-4">失败订单</a>
+	</form>
+</div>
+
+<table class="list" data-flag="payaction-list" >
+	<tr>
+		<th width="80"> 编号 </th>
+		<th width="85">玩家ID</th>
+		<th width="150" align="center">订单号<br/>合作方订单号</th>
+		<th width="55" style="text-indent:0em;">提交金额</th>
+		<th width="55" style="text-indent:0em;">实充金额</th>
+		<th width="55" style="text-indent:0em;">获得金币</th>
+		<th width="55" style="text-indent:0em;">获得返利</th>
+		<th width="85" >充值通道</th>
+		<th width="120"  >服务器</th>
+		<th width="220">充值状态</th>
+		<th >备注</th>
+	</tr>
+	{%for item in list_record%}
+	<tr>
+		<td>{{item.id}}</td>
+		<td><a href="/pay/list?key_type=1&key={{item.pay_user}}" >{{item.playerName}}  {{item.pay_user}} </a>
+		<br/>{{item.post_time_str}}
+		</td>
+		<td align="center">
+			{{item.query_id}}<br/>
+			<a href="#" id="item_order_id_{{item.id}}" title="卡号:{{item.card_no}}">
+				{{item.order_id}}
+			</a>
+		</td>
+		<td>{{item.post_amount}}</td>
+		<td id="item_pay_amount_{{item.id}}">{{item.pay_amount}}</td>
+		<td id="item_pay_gold_{{item.id}}">{{item.pay_gold}}</td>
+		<td >{{item.extra}}</td>
+		<td data-flag="pay_type_name" >{{item.pay_type_name}}</td>
+		<td >{{item.server_name}}</td>
+		<td id="item_pay_status_{{item.id}}" data-flag="options" data-item-id="{{item.id}}">{{item.pay_status_name}}
+			{%ifequal item.pay_status 3%}
+			<a href="/pay/check/{{item.id}}" class="dialog">人工审核</a>
+			{%endifequal%}
+			
+			{%if item.pay_status < 2 %}
+			<a id="item_{{item.id}}" href="go" onclick="return showProceOrderDialog({{item.id}})" >人工补单</a>
+			{%endif%}
+			
+		</td>
+		<td>
+			{{item.remark}}
+		</td>
+	</tr>
+	{%endfor%}
+</table>
+
+<div id="process_errorOrder" >
+	<form id="proceOrderForm"  action="/pay/pay_fix" method="post">
+		合作方订单号:<input type="text" name="order_id" />
+		充值金额:<input type="text" name="pay_amount" />
+		<input type="hidden" name="pay_id" value="" />
+		<input type="submit" value="补单" onclick="return proceOrder();" />
+	</form>
+</div>
+
+<script type='text/javascript'>
+function showDialogByPayId()
+{
+	var payId=$("#input_payId").val();
+	var url="/pay/user/list?payId="+payId;
+	$("#iframe_userPay").attr("src",url);
+	$("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680});
+}
+function showDialogByUserId()
+{
+	var userId=0;
+	if($("#input_userId").val()!="")
+	{
+		userId=$("#input_userId").val();
+	}
+
+	var url="/pay/user/list?userId="+userId;
+	$("#iframe_userPay").attr("src",url);
+	$("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680});
+}
+</script>
+{% include "pager.html" %}
+<div class="sub-menu-1 update_channel" >
+	<label>更新充值渠道ID</label>
+	开始日期：<input type="text" class="Wdate1" name="sdate" />
+	结束日期：<input type="text" class="Wdate1" name="edate" />
+	<input type="button" class="btn_update_channel" value="更新" />
+</div>
+<script type="text/javascript" >
+
+
+	var close_update = false;
+	var max_id = 0, min_id = 0;
+	
+	$(document).ready(function(){
+		$(".btn_update_channel").bind('click', function(){
+			var sdate = $(".update_channel input[name='sdate']").val();
+			var edate = $(".update_channel input[name='edate']").val();
+			close_update = false;
+			max_id = 0;
+			min_id = 0;
+			do_update_channel(0,0, sdate, edate);
+		});
+	});
+	
+	function do_update_channel(sid, eid, sdate, edate){
+		var url = '/pay/update_channel';
+		param = {"sid":sid, "eid":eid, "sdate":sdate, "edate":edate};
+		var options = {
+			type : "get",
+			url : url,
+			contentType : "application/x-www-form-urlencoded; charset=utf-8",
+			data : param,
+			success : function(result) {
+				result = eval('(' + result + ')');
+				check_state(result, sdate, edate);
+			},
+			cache : false,
+			timeout : 10000,
+			error : function() {
+				$("#tip_box").html("链接超时！请重试");
+				$("#tip_box").dialog({ modal: true });
+				$("input").attr('disabled', false);
+			}
+		}
+		$.ajax(options);
+	}
+	
+	function check_state(result, sdate, edate){
+		
+		if (close_update){
+			$("#tip_box").html("已关闭更新"); 
+			$("input").attr('disabled', false);
+			close_update = false;
+			return;
+		}
+		
+		if (max_id + min_id <= 0){
+			max_id = result.max_id;
+			min_id = result.min_id;
+		}
+		
+		if (result.sid > max_id){ 
+			$("#tip_box").html("全部完成");
+			$("input").attr('disabled', false);  
+		}else{
+			 
+			var bar_html = get_progress_bar(result.sid, result.eid);
+			
+			$("#tip_box").html(bar_html);
+			
+			do_update_channel(result.sid, result.eid, sdate, edate);
+		}
+		$("#tip_box").dialog({ modal: true,  
+			close: function(event, ui) {
+				  close_update = true;
+			}
+		});
+	}
+	
+	function get_progress_bar(sid, eid){
+		
+		var width = 0;
+		if (max_id == 0 || min_id == 0){
+			width = 100;
+		}else{
+			
+			var total_record = max_id - min_id;
+			
+			var str = '<div style=" background-color:#F5F5F5; width:100%;" >';
+			
+			width = (total_record - (max_id-sid)) / total_record * 100;
+		}
+		str += '<div style=" background-color:#476B9C; width:' + width + '%;" >&nbsp;</div>';
+		
+		str += '</div>';
+		
+		return str;
+	}
+	
+</script>
+<div id="dialog">
+<iframe id="iframe_userPay" height=400 width="100%" frameborder=0 ></iframe>
+</div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>玩家信息</title>
+{% endblock %}
+
+{% block content %}
+<div class="sub-menu-1">
+	<form action="/game/kingarena" method="get" >
+		<input type="hidden" name="is_search" value="true" />
+		<select name="server_id" >
+			{% for item in list_server %}
+			<option value="{{item.id}}" {% ifequal item.id server_id %} selected="selected" {% endifequal %} >{{item.name}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" value="提交" >
+		顺序'魏'  '蜀'  '吴'
+	</form>
+</div>
+{% for item in list_infos %}
+<table class="list">
+	<tr>
+		<th width="80">国王争霸信息</th>
+	</tr>
+	{% for sub_item in item %}
+		<tr>
+			<td>{{sub_item}}</td>
+		</tr>
+	{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

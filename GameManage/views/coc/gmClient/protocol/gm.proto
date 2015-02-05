@@ -1,0 +1,113 @@
+
+package GM;
+
+
+//建筑信息
+message build_info
+{
+	required int32 id = 1;						//建筑ID				
+	required int32 level = 2;					//建筑等级
+	required int32 index = 3;					//建筑索引
+	required int32 x = 4;						//建筑坐标
+	required int32 y = 5;
+	required int32 finish = 6;					//建筑、造兵完成标志0未完成 1完成
+	optional int32 remain_time = 7;				//finish=0时建造或升级剩余时间
+	optional int32 time_c_type = 8;				//finish=0时判断处于什么状态0建造 1升级 
+	optional int32 collect_time = 9;		
+	optional int32 build_time = 10;				//可选 建造时间
+}
+
+//军队
+message army 
+{
+	required int32 id = 1;						//兵种id
+	required int32 count = 2;					//完成兵数量
+	required int32 counting = 3;					//正在造兵数量
+	required int32 create_time = 4;				//开始造兵时间 
+	required int32 remain_time = 5;				//finish=0 时剩余时间
+}
+
+message army_info 
+{
+	required int32 index = 1;					//建筑索引
+	required int32 id = 2;						//建筑id
+	required int32 sum_count = 3;				// (可选)总兵占用单位= 单兵种单位* 单兵种数量 + ...
+	required int32 finish = 4;					//0未完成 1完成
+	repeated army armys = 5;
+}
+
+message army_lv 
+{
+	required int32 id = 1;
+	required int32 level = 2;
+}
+
+//角色信息
+message role_info 
+{
+	required string name = 1; 					//角色/村庄名字	
+	required int32 level = 2;					//等级
+	required int32 exp = 3;  					//经验
+	required int32 points = 4; 					//积分
+	required int32 gem = 5; 					//宝石
+	required int32 goldcoin = 6;					//拥有的金币
+	required int32 max_goldcoin = 7; 			//最大可拥有金币量
+	required int32 water = 8;					//圣水
+	required int32 max_water = 9;				//最大可拥有圣水量
+	required int32 build_count = 10;				//建筑数目(即为建筑索引计数)
+	repeated build_info builds = 11;				//建筑
+	repeated army_info armys = 12;				//军队
+	repeated army_lv armylvs = 13;			      	//各兵种等级
+}
+
+
+message QueryPlayerDataReq
+{
+	required int32 player_id 					= 1;
+}
+
+message QueryPlayerDataRsp
+{
+	required int32 result 					= 1;
+	required int32 player_id 					= 2;
+	optional role_info player_data 		= 3;	
+}
+
+message ModifyPlayerDataReq
+{
+	required int32 player_id					= 1;
+	required int32 flag 						= 2;
+	optional int32 water_change 				= 3;
+	optional int32 goldcoin_change 				= 4;
+	optional int32 gem_change 					= 5;
+	optional int32 lvl_change                   = 6;
+	optional int32 exp_change                   = 7;
+	optional int32 point_change                 = 8;
+}
+
+message ModifyPlayerDataRsp
+{
+	required int32 ret_code 					= 1;
+	optional role_info new_player_data 	= 2;	
+}
+
+message BanPlayerReq
+{
+	required int32 player_id 					= 1;	//玩家id
+	required int32 last_time					= 2;	//封号持续时间
+}
+
+message BanPlayerRsp
+{
+	required int32 ret_code 							= 1;
+}
+
+message UnBanPlayerReq
+{
+	required int32 player_id 					= 1;	//玩家id
+}
+
+message UnBanPlayerRsp
+{
+	required int32 ret_code 							= 1;
+}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>操作结果</title>
+{% endblock %}
+
+{% block content %}
+
+{% if err_msg %}
+{{err_msg}}
+{% else %}
+操作成功！
+{% endif %}
+
+<script type="text/javascript">
+var refLink=document.referrer;
+if (-1 == document.location.href.indexOf('_t=')){
+	if(refLink.indexOf('?')==-1)
+		refLink += "?_t="+(new Date().getTime());
+	else
+		refLink += "&_t="+(new Date().getTime());
+	
+	var sh = setTimeout(function (){document.location=refLink;},1000); 
+}
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+<systemRule>
+    <rule>
+        <contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]充值了[meta fontColor= "0xff0000"/]%2$s[meta /]，获得了[meta fontColor= "0xff0000"/]%3$s[meta /]金币！</content>
+	        <valueType><type>1</type><type>0</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]购买了[meta fontColor= "0xff0000"/]%2$s[meta /]，获得了[meta fontColor= "0xff0000"/]%3$s[meta /]金豆！</content>
+	        <valueType><type>1</type><type>2</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]购买了[meta fontColor= "0xff0000"/]%2$s[meta /]，成为了[meta fontColor= "0xff0000"/]VIP%3$s[meta /]。</content>
+	        <valueType><type>1</type><type>2</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]购买了[meta fontColor= "0xff0000"/]%2$s[meta /]，更显独特哦。</content>
+	        <valueType><type>1</type><type>2</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]领取了首充大礼包，获得了丰富的奖品[meta fontColor= "0xff0000"/]%2$s[meta /]。</content>
+	        <valueType><type>1</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	
+    		<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]领取了充值大礼包[meta fontColor= "0xff0000"/]%2$s[meta /]。</content>
+	        <valueType><type>1</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    </rule>
+    <rule>
+        <contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]在[meta fontColor= "0xff0000"/]%2$s[meta /]获得了第一名，获得[meta fontColor= "0xff0000"/]%3$s[meta /]。</content>
+	        <valueType><type>1</type><type>3</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]在超级大转盘中摇出大奖[meta fontColor= "0xff0000"/]%2$s[meta /]。</content>
+	        <valueType><type>1</type><type>4</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    </rule>
+    <rule>
+        <contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]在[meta fontColor= "0xff0000"/]%2$s[meta /]单局赢得了[meta fontColor= "0xff0000"/]%3$s[meta /]金豆。</content>
+	        <valueType><type>1</type><type>5</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    	<contentRule>
+	        <content>系统消息：恭喜[meta fontColor= "0xff0000"/]%1$s[meta /]在[meta fontColor= "0xff0000"/]%2$s[meta /]获得了[meta fontColor= "0xff0000"/]%3$s[meta /]连胜。</content>
+	        <valueType><type>1</type><type>5</type><type>0</type></valueType>
+	        <color>0</color>
+    	</contentRule>
+    </rule>
+</systemRule>

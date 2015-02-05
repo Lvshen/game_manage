@@ -1,0 +1,29 @@
+import "db_cache.proto";
+
+package GAMESHOP;
+
+
+message C2S_Buy_Goods_Req
+{
+	required int32 goods_id = 1;
+}
+
+message S2C_Buy_Goods_Rsp
+{
+	required int32 ret					= 1;
+	optional int32 cost_money			= 2;
+	optional int32 cost_marbel			= 3;
+	optional int32 cost_goldcoin		= 4;
+	repeated DBCACHE.Prop gain_prop 	= 5;
+}
+
+message C2S_Present_Goods_Req
+{
+	required int32 goods_id = 1;
+	repeated int32 receiver_id = 2;
+}
+
+message S2C_Present_Goods_Rsp
+{
+	required int32 ret_code = 1;
+}

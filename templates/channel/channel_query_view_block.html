@@ -1,0 +1,22 @@
+<div id="list_{{page_num}}" name="list_{{page_num}}" >
+
+	<table  class="list">
+		<tr>
+			<td colspan="99" style=" background-color:#AAAAAA; font-size:20px;  color:#FBF9EE; text-align: center;" >{{page_num}}</td>
+		</tr>
+		<tr>
+		 <td>日期</td>
+		 <td>充值人数</td>
+		 <td>充值次数</td>
+		 <td>充值金额</td>
+		</tr>
+		{%for item in list_record%}
+		<tr>
+			<td>{{item.0|date:"Y-m-d"}}</td>
+			<td>{{item.1}}</td>
+			<td>{{item.2}}</td>
+			<td>{{item.3}}</td>
+		</tr>
+		{%endfor%}
+	</table>
+</div>

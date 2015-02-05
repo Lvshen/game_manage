@@ -1,0 +1,96 @@
+import "db_cache.proto";
+package CARDSYSTEM;
+
+message CardPackage
+{
+	required uint32 card_num = 1;
+	required uint64 card_probability = 2;						//卡牌生成概率，从C到A+品质
+	optional uint32 expire_time	= 3;
+
+}
+
+message PlayerCardInfo
+{
+	required int32 uuid = 1;					//卡牌唯一标识
+	required int32 type = 2;						//卡牌类型
+	required int32 card_class = 3;			// 卡牌类别 C is 1, B is 2, A is 3, A+ is 4
+	required int32 card_lvl = 4;			// 卡牌级别 
+	required int32 experience = 5;		//卡牌经验
+	required int32 card_icon = 6;			// 卡牌头像
+	required bytes card_name = 7;		// 卡牌名称
+	required int32 esc_island = 8;		// 成功逃出无人岛概率
+	required int32 win_reward = 9;		// 奖金游戏胜利
+	required int32 cost_discount = 10; // 特殊费用折扣
+	required int32 get_goldcard = 11; 	// 黄金卡概率
+	required int32 build_discount = 12;// 建设费用折扣
+	required int32 die_figure = 13; 	// 期望骰子数值概率
+	required int32 cash_discount = 14; // 承兑费用折扣
+}
+
+message C2S_RequestPlayerCards
+{
+}
+message C2S_RequestStrengthenCard
+{
+	required int32 baseCardid = 1;//强化的卡牌1
+	repeated int32 meterialCardid = 2;//强化的卡牌2
+}
+message S2C_ReturnStrengthCard
+{
+	required int32 current_player_goldcoin = 1;
+	required DBCACHE.PlayerCard sthrengthCard = 2;
+}
+message S2C_FailStrengthCard
+{
+	enum REASON
+	{
+		LACK_BASE_CARD = 1;
+		LACK_METERIAL_CARD = 2;
+		NOT_ENOUGH_GOLD = 4;
+		DEC_GOLD_EXCEP = 8;
+		METERIAL_EQUIP = 16;// meterialCardid is equipment card
+		DEL_CARD_EXCEP = 32;// delete cards in player exception
+		SYSTEM_ERROR = 64; //by huchuangda，其他错误
+	}
+	required int32 reason = 1; // 0b1 represent the base card is not existence, ob10 represent the meterial card is not existence, 0b100 represent the goldCoin is not enough, 0b1000 represent the decrease goldCoin exception
+}
+message C2S_requestcomposecard  
+{
+	repeated int32 cardid = 1;
+	required int32 freeOrLuckCompose = 2;//1 is free compose Card, 2 is luck compose card
+}
+message S2C_ReturnComposeCard
+{
+	required  DBCACHE.PlayerCard composeCardAns = 1;
+	required int32 playermarble  = 2;//合成后玩家的金钱
+
+}
+message S2C_failComposeCard
+{
+	enum  REASON
+	{
+		LACK_MARBLE = 1;//0b1
+		NO_CRARDS = 2; //0b10 cars is not existence
+		LOWER_B = 4;//0b100 the cards's class is lower than B
+		DEC_MARBLE_EXCEP = 8;//0b100   decrease marble exception
+		DEC_CARDS_EXCEP = 16;// decrease meterial cards exception
+		CARD_NUMBER_EXCEP = 32;// card number less then 2, or more than 5
+		SERIOUS_EXCEP = 64; // serious exception
+	}
+	required int32 reason = 1;
+}
+message S2C_PlayerCardInfoSet
+{
+	repeated PlayerCardInfo playerCard = 1;
+}
+message C2S_exchangeEquipmentCard
+{
+	required  int32  cardid = 1;
+}
+message S2C_exchangeEquipmentCardRes
+{
+	required int32 cardid = 1;//is fail, carduuid = 0
+	required int32 isSuccess = 2; //1 is success, 2 is fail
+}
+
+

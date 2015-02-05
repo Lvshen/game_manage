@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>日志类型管理</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+日志类型管理
+<span class="buttons">
+	<a href="/log/syncdb/0" >同步中央服表</a>
+ 	<a href="/log/edit">添加</a>
+ </span>
+</div>
+
+
+<table class="list">
+<tr>
+<th width="40">编号</th>
+<th width="200">名称</th>
+<th>标识</th>
+<th width="300">操作</th>
+</tr>
+{%for item in list_record%}
+<tr>
+<td>
+{{item.id}}
+</td>
+<td>
+<a href="/log/server/{{item.id}}">{{item.name}}</a>
+</td>
+<td>{{item.key}}</td>
+<td>
+<a href="/log/remove/{{item.id}}" class="del">删除</a>
+
+<a href="/log/edit?id={{item.id}}">编辑</a>
+<!-- 
+{%ifequal item.status 0%}
+<a href="/log/set/{{item.id}}/1">禁用</a>
+{%else%}
+<a href="/log/set/{{item.id}}/0">启用</a>
+{%endifequal%}
+ -->
+<a href="/field/list?log_type={{item.id}}">字段定义</a>
+
+<a href="/statistic/list/{{item.id}}">管理统计</a>
+
+<a href="/query/list/{{item.id}}">管理查询</a>
+ 
+</td>
+</tr>
+{%endfor%}
+</table>
+{% endblock %}

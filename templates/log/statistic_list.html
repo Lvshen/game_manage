@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计列表</title>
+<script type="text/javascript" src="/static/js/ajaxLoad.js"></script>
+<script type="text/javascript" >
+	function show_batch_dialog(statistic_id){
+		 $.dialog({type:'url', value:'/statistic/execute/batch?statistic_id=' + statistic_id});
+		 return false;
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	{%ifnotequal log_type 0%}
+	<a href="/log/list">日志类型列表-></a>
+	{%endifnotequal%}
+	统计列表
+	<span class="buttons"> <a href="/task/statistic/save" >保存定时自动统计</a> <a href="/statistic/edit/0/{{log_type}}">添加</a> <a href="/log/list">返回</a> </span>
+</div>
+
+<div class="sub-menu-1">
+	<form method="get">
+		服务器:
+		<select name="server_id">
+			<option value="0">全部</option>
+			{%for item in list_server%}
+			<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%}>{{item.name}}</a>
+				{%endfor%}
+		</select>
+
+		统计项:
+		<select name="log_type">
+			<option value="0">全部</option>
+			{%for item in list_log%}
+			<option value="{{item.id}}"{%ifequal item.id log_type%} selected="selected"{%endifequal%}>{{item.name}}</a>
+				{%endfor%}
+		</select>
+
+		<input type="submit" value="切换" />
+	</form>
+</div>
+<table class="list">
+	<tr>
+		<th width="30">编号</th>
+		<th width="160">名称</th>
+		<th width="50">类型</th>
+		<th width="120">统计方式</th>
+		<th>统计条件</th>
+		<th width="30">sql</th>
+		<th width="30">auto</th>
+		<th width="60">执行间隔</th>
+		<th width="140">上次执行时间</th>
+		<th width="250">操作</th>
+	</tr>
+	{%for item in list_model%}
+	<tr>
+		<td>{{item.id}}</td>
+		<td><a href="/result/list?id={{item.id}}">{{item.name}}</a></td>
+		<td>{{item.log_typeName}}</td>
+		<td>{{item.get_count_type_display}}</td>
+		<td>{{item.where}}</td>
+		{%if item.sql%}
+		<td class="red">true</td>
+		{%else%}
+		<td>&nbsp;</td>
+		{%endif%}
+		{%if item.is_auto_execute%}
+		<td class="green">true</td>
+		{%else%}
+		<td>&nbsp;</td>
+		{%endif%}
+		<td>{{item.exec_interval}}</td>
+		<td id="last_time_{{item.id}}">{{item.last_exec_time|date:"Y-m-d H:i:s"}}</td>
+		<td>	
+			<a href="/result/clear?statistic_id={{item.id}}" class="red ajax">清除结果</a>
+			<a href="/statistic/remove?statistic_id={{item.id}}"  class="ajax" tip="确定删除?" >删除</a>
+			<a href="/statistic/edit?statistic_id={{item.id}}&log_type={{item.log_type}}">编辑</a>
+			<a href="/statistic/execute?statistic_id={{item.id}}&server_id={{server_id}}" class="dialog">执行统计</a>
+			{% if not item.is_center_log %}
+			<a href="/statistic/execute/batch?statistic_id={{item.id}}" onclick="return show_batch_dialog({{item.id}});" >批量执行</a>
+			{% endif %}
+		</td>
+	</tr>
+	{%endfor%}
+</table>
+<script type="text/javascript">
+	function executeStatistic(statisticId) {
+		//javascript:executeStatistic({{item.id}})
+		///statistic/execute/{{item.id}}
+		//target="swin"
+		$.get('/statistic/execute/' + statisticId, {}, function(data) {
+			alert(data);
+		});
+	}
+
+</script>
+{% endblock %}

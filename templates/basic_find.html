@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户提问</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/log/list">客服系统</a> -> 问题列表
+</div>
+
+<div class="sub-menu-1">
+
+<span >用户id</span><input type="text" id="input_userId" name="input_userId"  />
+<input type="button" id="btn_userId" name="btn_userId" value="查询" onclick="showDialogByUserId()"/>
+<span >用户Name</span><input type="text" id="input_userName" name="input_userName"  />
+<input type="button" id="btn_userName" name="btn_userName" value="查询" onclick="showDialogByUserName()"/>
+
+<table class="list">
+<tr>
+<th width="120">提问时间</th>
+<th width="160">提问人</th>
+<th>问题</th>
+<th width="250px">回复</th>
+<th width="120">回复人</th>
+<th width="70">操作</th>
+</tr>
+{%for item in list%}
+<tr>
+<td>{{item.post_time_str}}</td>
+<td><a href="javascript:showDialog({{item.id}},{{item.post_user.id}});">{{item.playerName}}</a>({{item.post_user.id}})</td>
+<td>{{item.question}}</td>
+<td>{{item.answer}}</td>
+<td>{{item.reply_user}}@{{item.reply_time_str}}</td>
+<td>
+ <a class="del" href="/question/remove/{{item.id}}">删除</a>
+{%ifequal item.status 1%}
+ <a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">修改</a>
+{%else%}
+ <a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">回复</a>
+{%endifequal%}
+</td>
+</tr>
+{%endfor%}
+</table>
+
+<br />
+<select id="select_server">
+	<option value="-1">--请选择--</option>
+</select>
+<span >玩家id</span><input type="text" id="input_playerId" name="input_playerId"  />
+<input type="button" id="btn_palyerId" name="btn_palyerId" value="查询" onclick="showDialogByPlayerId()"/>
+<span >玩家Name</span><input type="text" id="input_playerName" name="input_playerName"  />
+<input type="button" id="btn_playerName" name="btn_playerName" value="查询" onclick="showDialogByPlayerName()"/>
+</div>
+
+
+
+<div id="dialog">
+<iframe id="iframe_userQuestion" height=450 width=640 frameborder=0 scrolling=auto></iframe>
+</div>
+<script type="text/javascript">
+function showDialog(questionId,userId)
+{
+	var url= "/question/list/user/"+userId+"/-1?question_id="+questionId;
+	$("#iframe_userQuestion").attr("src",url);
+    $("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680 });
+}
+function showDialogByUserId()
+{
+	var userIdStr=$("#input_userId").val();
+	if(userIdStr=="")
+	{
+		return;
+	}
+	
+	var userId=parseInt(userIdStr);
+	if(isNaN(userId))
+	{
+		return;
+	}
+
+	var url= "/question/list/user/"+userId+"/-1?question_id=0";
+	$("#iframe_userQuestion").attr("src",url);
+    $("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680 });
+}
+</script>
+{% include "pager.html" %}
+{% endblock %}
+

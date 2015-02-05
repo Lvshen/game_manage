@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计汇总</title>
+<script type="text/javascript" src="/static/js/highcharts.js" ></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+{%ifnotequal log_type 0%}
+<a href="/result/query/list">统计汇总列表-></a>
+{%endifnotequal%}
+{{the_query.name}} [<a href="/result/query/{{query_id}}">统计结果</a> 统计图表 ]
+<span class="buttons">
+ <a href="/result/query/edit/0">添加</a>
+ <a href="/result/query/list">返回</a>
+ </span>
+</div>
+
+<div class="sub-menu-1">
+<form method="get">
+渠道:<select name="c">
+{%for item in list_channel%}
+<option value="{{item.id}}"{%ifequal item.id channel_id %} selected="selected"{%endifequal%}>{{item.name}}</a>
+{%endfor%}
+</select>
+
+开始时间:<input type="text" name="sdate" class="Wdate1" value="{{sdate}}" />
+
+结束时间:<input type="text" name="edate" class="Wdate1" value="{{edate}}" />
+
+<input type="submit" value="查询" />
+</form>
+</div>
+
+{% if list_record %}
+<script type="text/javascript">
+$(document).ready(function() {
+	var options = {
+		chart : {
+			backgroundColor:'#FFFFFF',
+			borderWidth:0,
+			borderRadius:5,
+			renderTo:'container',
+			defaultSeriesType:'{{charts_type}}',
+			shadow:0,
+			reflow:1,
+			zoomType:'x',
+			events:''
+		} ,
+		title : {
+			text:'',
+			align:'center',
+			verticalAlign:'',
+			margin:50,
+			floating:0,
+			style:{
+				color: '#3E576F',
+				fontSize: '16px'
+			}
+		} ,
+		subtitle : {
+			text:'',
+			align:'center'
+		} ,
+		xAxis : { 
+			type : 'datetime',
+			labels:{
+				formatter:function(){
+					return Highcharts.dateFormat('{% if chart_format == "%Y-%m-%d" %}%m-%d{% else %}{{chart_format}}{% endif %}',this.value);
+				}
+			},
+			tickInterval : 86400000
+		},
+		yAxis : {
+			min:0,
+			title:{
+				text:''
+			},
+			allowDecimals:0
+		} ,
+		series : [] ,
+		legend : {
+			layout:'horizontal',
+			align:'center',
+			backgroundColor:null,
+			borderColor:'#909090',
+			borderRadius:5,
+			enabled:1,
+			floating:0,
+			shadow:0,
+			style:'',borderWidth:1
+		} ,
+		credits : {
+			enabled:0
+		} ,
+		tooltip : { 
+			formatter :  function() {
+				var s = '<b>'+ Highcharts.dateFormat('{{chart_format}}',this.x) +'</b>';
+				$.each(this.points, function(i, point) {
+					s += '<br/>'+ '<b style="color:'+point.series.color+';">'+point.series.name +'</b>'+': '+point.y +'';
+				});
+				return s;
+			} , 
+			crosshairs : '1', 
+			shared : '1'
+		},
+		plotOptions : { 						
+			line: {
+				lineWidth: 2,
+				states: {
+					hover: {
+						lineWidth: 4
+					}
+				},
+				dataLabels : {
+					enabled : 0,
+					align:"right"
+				},
+				marker: {
+					enabled: false,
+					states: {
+						hover: {
+							enabled: true,
+							symbol: 'circle',
+							radius: 5,
+							lineWidth: 3
+						}
+					}
+				}
+			}					 
+		}
+	};
+	Highcharts.setOptions({ 
+		global: {
+			useUTC: 0 
+		} 
+	});   	    	
+	$.each({% autoescape off %}{{list_record_arr}}{% endautoescape %}, function(key, value) {
+		var series = {};
+		series.name = key;
+		series.data = value;
+		options.series.push(series); 
+	});
+	new Highcharts.Chart(options);
+});
+</script>
+<div id="container" style="width:98%;" >
+
+</div>
+{% endif %}
+
+{% include "pager.html" %}
+{% endblock %}

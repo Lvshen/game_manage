@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>登錄接入KEY修改</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+登錄接入KEY修改
+<span class="buttons">
+
+ </span>
+</div>
+
+<form action="/channel/login_key" method="post">
+<table class="form">
+
+<tr>
+<th>旧KEY：</th><td>{{channel.login_key}}</td>
+</tr>
+<tr>
+<th>新KEY：</th><td><input type="text" name="key" /></td>
+</tr>
+<tr>
+<th></th>
+<td><input type="submit" value="确认修改" /></td>
+</tr>
+</table>
+</form>
+{% endblock %}

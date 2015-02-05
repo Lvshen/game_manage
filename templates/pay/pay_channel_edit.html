@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>支付通道编辑</title>
+<script type="text/javascript" src="/static/js/jquery.json.min.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript">
+var editExtra = {
+	data:[],
+	msgbox:null,
+	show:function(){
+		var extra_data = $("textarea[name='pay_config']").val();
+		if($.trim(extra_data)=='')
+			extra_data = '{"extra":[]}';
+		if(extra_data.indexOf('extra_off')!=-1){
+			alert('请先开启充值返利');
+			return;
+		}
+		this.data = $.evalJSON(extra_data).extra;
+		var extra_form = '<div class="extra_form">';
+		for(var i=0;i<this.data.length;i++){
+				var item = this.data[i];
+				extra_form += this.item(i,item);
+		}
+		extra_form += '</div><div style="text-align:right"><input type="button" value="添加规则" onclick="editExtra.add()" /> <input type="button" value="保存规则" onclick="editExtra.save()" /></div>';
+		this.msgbox = $.dialog({title:'充值返利配置',type:'text',value:extra_form,center:true});
+	},
+	add:function(){
+		$(".extra_form").append(this.item(this.data.length));
+		this.msgbox.resetPos();
+	},
+	save:function(){
+		var result = [];
+		for(var i=0;i<$(".extra_form div").length;i++)
+		{
+			var item = {conditions:[],amount:0};
+			if($(".extra_form input[name='extra_begin_"+i+"']").val()=='' || $(".extra_form input[name='extra_end_"+i+"']").val()=='' || $(".extra_form input[name='extra_result_"+i+"']").val()=='')
+				continue;
+			item.conditions[0] = parseInt($(".extra_form input[name='extra_begin_"+i+"']").val());
+			item.conditions[1] = parseInt($(".extra_form input[name='extra_end_"+i+"']").val());
+			item.amount = parseFloat($(".extra_form input[name='extra_result_"+i+"']").val());
+			result[result.length] = item;
+		}
+		var extra_data = $("textarea[name='pay_config']").val();
+		if($.trim(extra_data)=='')
+			extra_data = '{"extra":[]}';
+		extra_data = $.evalJSON(extra_data);
+		extra_data.extra = result;
+		$("textarea[name='pay_config']").val($.toJSON(extra_data));
+		this.msgbox.hide();
+	},
+	item:function(i,item){
+		if(item==null){
+			item = {conditions:[0,0],amount:0};
+			this.data[this.data.length]=item;
+		}
+		return '<div>充值<input type="text" size="5" name="extra_begin_'+i+'" value="'+item.conditions[0]+'" />-<input type="text" size="5" name="extra_end_'+i+'" value="'+item.conditions[1]+'" />返利<input type="text" size="5" name="extra_result_'+i+'" value="'+item.amount+'" /></div>';
+	},
+	init:function(){
+		var extra_data = $("textarea[name='pay_config']").val();
+		if(extra_data.indexOf('extra_off')!=-1){
+			$('.switch_extra').html('开启充值返利');
+		}else{
+			$('.switch_extra').html('关闭充值返利');
+		}
+	},
+	change:function(){
+		var extra_data = $("textarea[name='pay_config']").val();
+		if(extra_data.indexOf('extra_off":')!=-1){
+			extra_data = extra_data.replace('extra_off":','extra":');
+			$("textarea[name='pay_config']").val(extra_data)
+		}else if(extra_data.indexOf('extra":')!=-1){
+			extra_data = extra_data.replace('extra":','extra_off":')
+			$("textarea[name='pay_config']").val(extra_data)
+		}
+		editExtra.init();
+	}
+}
+$(document).ready(function(){
+	editExtra.init();
+	
+	
+	
+	/*排序 chk  channel_list */
+	var checked_list = $("input[name='channel_id']:checked");
+	
+	checked_list.parent().parent().prepend(checked_list.parent());
+	
+});
+</script>
+
+
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/pay/channel/list">支付通道管理</a> -> 支付通道资料编辑
+<span class="buttons">
+ <a href="/pay/channel/list">返回</a>
+ </span>
+</div>
+
+<form action="/pay/channel/save?model_id={{model_id}}" method="post">
+<table class="form">
+
+<tr>
+
+<th>通道状态：</th>
+<td>
+	<select name="status">
+	{%for statusItem in model.STATUS_CHOICES%}
+		<option value="{{statusItem.0}}" {%ifequal model.status statusItem.0%}selected="selected"{%endifequal%}>{{statusItem.1}}</option>
+	{%endfor%}
+	</select>
+</td>
+
+</tr>
+
+<tr>
+<th>充值通道名：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+
+<tr>
+<th>服务器编号：</th><td><input type="text" name="server_id" size="5" value="{{model.server_id}}" /> 0为不限制</td>
+</tr>
+
+<tr>
+<th>
+	渠道限制：<br/>不选为不限制
+	<label>全选:<input type="checkbox" data-action="chk-all" data-chk-child="channel_id" /></label>	
+</th>
+<td>
+
+{%for item in channel_list%}
+<label><input type="checkbox" name="channel_id" value="{{item.key}}"{%ifequal item.is_show 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+{%endfor%}
+
+</td>
+</tr>
+
+<tr>
+<th>关联第三方标识：</th><td><input type="text" name="link_id" size="50" value="{{model.link_id}}" /></td>
+</tr>
+
+<tr>
+<th>充值通道图标：</th><td><input type="text" name="icon" value="{{model.icon}}" /></td>
+</tr>
+
+<tr>
+<th>使用支付函数：</th><td><input type="text" name="func_name" value="{{model.func_name}}" /></td>
+</tr>
+
+<tr>
+<th>支付类型：</th><td><input type="text" name="pay_type" value="{{model.pay_type}}" /></td>
+</tr>
+
+<tr>
+<th>通道描述：</th><td><input type="text" name="remark" size="100" value="{{model.remark}}" /></td>
+</tr>
+
+<tr>
+<th>兑换汇率：</th><td> 1：<input type="text" name="exchange_rate" size="5" value="{{model.exchange_rate}}" /></td>
+</tr>
+
+<tr>
+<th>单位：</th><td><input type="text" name="unit" size="5" value="{{model.unit}}" /></td>
+</tr>
+
+<tr>
+<th>排序：</th><td><input type="text" name="order" size="5" value="{{model.order}}" /></td>
+</tr>
+
+<tr>
+<th>接口的参数配置：<br/>
+<a href="javascript:void(0)" onclick="editExtra.show()">配制充值返利</a><br/>
+<a href="javascript:void(0)" onclick="editExtra.change()" class="switch_extra red">开启</a>
+</th>
+<td>
+	<textarea name="pay_config" cols="10" rows="6"  >{{model.pay_config}}</textarea>
+	<br/><span style=" color:gray;">
+			示例(返利):{"extra":[{"conditions":[100,200],"amount":300}]}
+			<p>说明：支付金额在100到200范围内得到的返利是300，支持数组添加多个。</p>
+		</span>
+</td>
+</tr>
+
+<tr>
+<th>通道请求地址：</th><td><input type="text" name="post_url" size="50" value="{{model.post_url}}" /> <i>已废弃</i></td>
+</tr>
+
+<tr>
+<th>通知我们支付接口成功的地址：</th><td><input type="text" name="notice_url" size="50" value="{{model.notice_url}}" /> <i>已废弃</i></td>
+</tr>
+
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+</form>
+{% endblock %}

@@ -1,0 +1,189 @@
+#!/usr/bin/env python
+#coding=utf-8 
+from base import md5
+import sys
+sys.path.append("/home/xuefeng/chessprj/ddztool/py")
+
+from ddzclient import * 
+from svrclient import * 
+
+def CheckPropList(strlist):
+	strlist = strlist.replace('[', '')
+	strlist = strlist.replace(']', '')
+	proplist = strlist.split(',')
+	count = 0
+	for i in range(0, len(proplist)):
+		if (len(proplist[i].strip()) > 0):
+			count = count + 1
+	return (0 != count and 0 == (count % 2) )
+
+def test_addprop():
+	oDDz  = CDDZClient()
+	oDDz.Init('10.1.1.253', 10000)
+	roleid = '262144331'
+	proplist = '[2,1000000]'
+	retmsg = ""
+	retmsg = oDDz.addprop('1000', '110',roleid, proplist)
+	print "%s|%s|retmsg=%s"%(roleid, proplist, retmsg)
+
+def test_forbidden():
+	oDDz  = CDDZClient()
+	oDDz.Init('10.21.210.250', 10000)
+	tag = '1'
+	endtime='2018-09-13 11:02:40'
+	rolelist = "10020"
+	retmsg = oDDz.forbidden('10', '110', tag, endtime, rolelist)
+	print "%s|%s|%s|retmsg=%s"%(tag, endtime, rolelist, dict(retmsg))
+
+def gen_sign(openid, timestamp, app_key):
+	sign_str = '%s&%s&%s'%(openid,timestamp,app_key)
+	print 'len:', len(sign_str), 'sign:',sign_str
+	sign_str = md5(sign_str)
+	print 'len:', len(sign_str), 'sign:',sign_str
+	return  sign_str
+
+def test_youai():
+	oDDz  = CDDZClient()
+	oDDz.Init('14.17.123.194', 10000)
+	#print "socket name:",oDDz.GetSockname()
+
+	#oDDz.Init('10.21.210.250', 10000)
+
+	app_key = 'bc7c272ca1b91c2d66ad7608819119ed'
+	#app_key = 'cba41c2c0fe093ff4f12fe4f7e3bebee'
+	user_type = 1
+	user_id = "20010"
+	
+	time_stamp  = "%u"%(int(time.time()))
+	channel_key = "00100000"
+	client_ver = "v1.2"
+	terminate_id = "dfdgd123"
+
+	sign = gen_sign(user_id, time_stamp, app_key)
+
+	lgn_youaicmd = "YOUAI_LGN 1 %d %s %s %s %s %s %s"%(user_type, user_id,sign, time_stamp,channel_key, client_ver, terminate_id)
+	cmdlist = lgn_youaicmd.split(' ')
+	print cmdlist
+	recvCmdlist = oDDz.SendAndRecvCmdList(cmdlist)
+	print 'recv:', recvCmdlist
+
+def test_loginyouai():
+
+
+
+	oDDz  = CDDZClient()
+	#oDDz.Init('14.17.123.194', 10000)
+
+	oDDz.Init('10.21.210.250', 10000)
+
+	app_key = 'bc7c272ca1b91c2d66ad7608819119ed'
+	#app_key = 'cba41c2c0fe093ff4f12fe4f7e3bebee'
+	user_type = '1'
+	user_id = "20010"
+	
+	time_stamp  = "%u"%(int(time.time()))
+	channel_key = "00100000"
+	client_ver = "v1.2"
+	terminate_id = "dfdgd123"
+
+	sign = gen_sign(user_id, time_stamp, app_key)
+
+	msg = oDDz.login_youai(user_type, user_id,sign, time_stamp,channel_key, client_ver, terminate_id)
+
+	print 'msg:', msg
+
+
+
+def TestHttpPost():
+	import httplib2
+	from urllib import urlencode    
+
+	#httplib2.debuglevel = 1
+
+	word='美国'
+	urlstr = 'http://fy.webxml.com.cn/webservices/EnglishChinese.asmx/TranslatorString'
+
+	data={'wordKey':word} 
+
+	h = httplib2.Http('.cache')
+	response,content = h.request(urlstr, 'POST', urlencode(data), headers={'Content-Type': 'application/x-www-form-urlencoded'})  
+
+	#for item in response.items(): print(item)
+	print(content.decode('utf-8'))
+
+def test_time():
+	strtime =time.strftime("%Y-%m-%d %X",time.localtime(time.time()))
+	print "%s"%(strtime)
+def test_url():
+	import urllib 
+	print urllib.quote("测试abc")
+	#print urllib.urlencode("服务器维护中。。。。")
+	print urllib.quote("服务器维护中。。。。")
+
+
+def test_getonline():
+	oDDz  = CDDZClient()
+	#oDDz.Init('14.17.123.194', 10000)
+
+	oDDz.Init('10.21.210.250', 10000)
+	list_svrid=['31001', '31301', '1']
+	youai_svrid = 0
+	ret = oDDz.get_onlinenum(youai_svrid,list_svrid)
+	svrid_num = ret['svrid_num']
+		
+	print svrid_num
+
+def test_gm_ctrlconf():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	count = -1
+	serverid = 31001
+	cardvals = "7,8,9,10,j,q,k, 7,8,9,10,j,q,k, d,2,3,4,2,3,4|a,2,3,4,5,6, a,5,6,a, x, k, 5,6,7,8|a,2,3,4,5,6,7,8,9,10,j,q,k, 9,10,j,q"
+	#cardvals = "7,8,9,10,J,Q,9,8,8,7,7,6,5,4,4,4,3|D,2,A,Q,Q,J,10,10,9,8,8,7,6,6,5,5,3|X,2,A,K,K,K,K,Q,Q,10,9,9,7,6,4,3,3|A, 5, 10"
+	ret = oSvr.ctrl_fapai('10', '100',serverid, count,cardvals)
+
+def test_ctrl_ZhaDanRange():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_ZhaDanRange('10', '100',31001, 0, 1)
+
+def ctrl_JiaoFengRuLe():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_JiaoFengRuLe('10', '100',31001, 1)
+
+
+def ctrl_JiaoFenLeastScore():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_JiaoFenLeastScore('10', '100',31001, 2)
+
+def ctrl_FaPaiType():
+	oSvr = CSvrClient()
+	oSvr.Init('10.1.1.253', 10000)
+	ret = oSvr.ctrl_FaPaiType('1000', '100',31005, 5)
+
+def ctrl_ShowOnline():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_ShowOnline('10', '100',31001, '50000', '20.4')
+
+def ctrl_prop_curtime():
+	oSvr = CSvrClient()
+	oSvr.Init('10.1.1.253', 10000)
+	ret = oSvr.ctrl_prop_curtime('10', '100',31002, '2013-11-04 12:12:20')
+
+def ctrl_Dn_FaPaiType():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_Dn_FaPaiType('10', '100',31601, 1)
+
+def ctrl_Lz_Val_Weight():
+	oSvr = CSvrClient()
+	oSvr.Init('10.21.210.250', 10000)
+	ret = oSvr.ctrl_Lz_Val_Weight('10', '100',31301, 1, "10,23,10,1000")
+
+if __name__ == "__main__":   
+	ctrl_Lz_Val_Weight()
+
+

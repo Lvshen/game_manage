@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>执行统计</title>
+{% endblock %}
+
+{% block content %}
+<p>
+{%if is_reload%}
+统计中,请稍候...
+{%else%}
+统计完成!
+{%endif%}
+</p>
+{{count_sql}}
+<script type="text/javascript">
+parent.$("#last_time_{{statistic_id}}").html("{{last_exec_time|date:"Y-m-d H:i:s"}}");
+
+{%if is_reload%}
+document.location = "/statistic/execute?statistic_id={{statistic_id}}&server_id={{server_id}}&rdate={{r_date}}&date={{last_exec_time|date:"Y-m-d H:i:s"}}";
+{%endif%}
+</script>
+
+{{total_record}}
+
+{% endblock %}

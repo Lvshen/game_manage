@@ -1,0 +1,49 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="google-translate-customization" content="4c7f6cb0fee7f952-8842eaefdbe93112-g4297ba3489700b67-15"></meta>
+<script type="text/javascript" src="/static/js/jquery1.8.3.min.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/static/js/stran.js"></script>
+
+<link rel="stylesheet" href="/static/skin/style.css"type="text/css" />
+
+<script type="text/javascript" src="/static/js/dialog.js" ></script>
+<link rel="stylesheet" href="/static/skin/dialog.css" />
+ 
+<script type="text/javascript" src="/static/js/main.js"></script>
+
+<title>查询玩家数据</title>
+</head>
+<body>
+<div id="bar">
+查询玩家数据<span class="buttons"></span>
+</div>
+
+<form action="/coc/queryplayerans/" method="post">
+	<table class="form">
+		<tr>
+			<th>服务器：</th>
+			<td>
+			<select id="Select2" name="serverip">
+				<option selected="selected" value="192.168.1.250">192.168.1.250</option>
+				<option value="192.168.1.251">192.168.1.251</option>
+			</select></td>
+		</tr>
+		<tr>
+			<th>用户ID：</th>
+			<td>
+				<input id="Text1" type="text" name = "player_id"/>
+			</td>
+		</tr>
+		<tr>
+			<th>&nbsp;</th>
+			<td>
+			<input type="submit" value="提交" />
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>统计编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/statistic/list">统计列表</a> -> 统计编辑
+<span class="buttons">
+ <a href="/statistic/list/{{model.log_type}}">返回</a>
+ </span>
+</div>
+
+<form action="/statistic/save?statistic_id={{model.id}}" method="post">
+
+<p>可用字段:
+{%for item_field in list_field%}
+<label>{{item_field.name}}</label>
+{%endfor%}
+</p>
+
+<table class="form">
+<tr>
+<th>统计日志：</th><td>
+<select name="log_type">
+{%for item in logs%}
+<option value="{{item.id}}" {%ifequal item.id model.log_type%}selected="selected"{%endifequal%}>{{item.name}}</option>
+{%endfor%}
+</select>
+</td>
+</tr>
+
+<tr>
+<th>统计说明：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+
+
+<tr>
+<th>统计字段：</th><td><input type="text" name="field_name" size="50" value="{{model.field_name}}" /> 字段定义里面的名称</td>
+</tr>
+
+<tr>
+<th>统计条件：</th><td><input type="text" name="where" size="50" value="{{model.where}}" /> 字段定义对应值定义里的ID，如字段名=值ID</td>
+</tr>
+<tr>
+<th>计算方式：</th><td>
+<select name="count_type">
+	{%for optionItem in model.STATUS_CHOICES%}
+		<option value="{{optionItem.0}}" {%ifequal optionItem.0 model.count_type %}selected='selected'{%endifequal%}>{{optionItem.1}}</option>	
+	{%endfor%}
+</select></td>
+</tr>
+<tr>
+<th>开始时间：</th><td><input type="text" name="last_exec_time" class="Wdate" value="{{model.last_exec_time_str}}" /> 第一次执行时间</td>
+</tr>
+<tr>
+<th>统计时间间隔：</th><td><input type="text" name="exec_interval" maxlength="5" value="{{model.exec_interval}}" /> 秒 如果间隔时间为0，则会统计所有数据
+<br/>
+<a href="javascript:inputText('exec_interval',1800)">30分钟</a>
+<a href="javascript:inputText('exec_interval',3600)">1小时</a>
+<a href="javascript:inputText('exec_interval',21600)">6小时</a>
+<a href="javascript:inputText('exec_interval',43200)">12小时</a>
+<a href="javascript:inputText('exec_interval',86400)">24小时</a>
+<a href="javascript:inputText('exec_interval',604800)">一周</a>
+</td>
+</tr>
+<tr>
+<th>自动统计启用：</th><td><label><input type="checkbox" name="is_auto_execute" value="1"{%ifequal model.is_auto_execute 1 %} checked='checked'{%endifequal%}/></label> 启用自动统计后会在后台自动执行统计,避免太过频繁的统计</td>
+</tr>
+<tr>
+<th>自动统计间隔：</th><td><input type="text" name="auto_exec_interval" maxlength="5" value="{{model.auto_exec_interval}}" /> 秒 如果间隔时间为0，跟据统计时间间隔
+<br/>
+<a href="javascript:inputText('auto_exec_interval',1800)">30分钟</a>
+<a href="javascript:inputText('auto_exec_interval',3600)">1小时</a>
+<a href="javascript:inputText('auto_exec_interval',21600)">6小时</a>
+<a href="javascript:inputText('auto_exec_interval',43200)">12小时</a>
+<a href="javascript:inputText('auto_exec_interval',86400)">24小时</a>
+<a href="javascript:inputText('auto_exec_interval',604800)">一周</a>
+</td>
+</tr>
+<tr>
+<th>备注：</th><td>
+<input type="text" value="{{model.remark}}" size="50" name="remark" />
+</td>
+</tr>
+
+<tr>
+<th>SQL语句：</th><td>
+<textarea name="sql" style="width:800px;height:400px;">{{model.sql}}</textarea>
+</td>
+</tr>
+
+
+
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+
+</form>
+{% endblock %}

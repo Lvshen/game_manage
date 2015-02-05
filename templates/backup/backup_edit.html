@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>备份编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/backup/list">备份列表</a> -> 备份编辑
+<span class="buttons">
+ <a href="/backup/list/">返回</a>
+ </span>
+</div>
+
+<form action="/backup/save/{{model.id}}" method="post">
+
+<table class="form">
+<tr>
+<th>备份类型：</th><td><input type="text" name="type" value="{{model.type}}" /></td>
+</tr>
+<tr>
+<th>备份名称：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+
+<tr>
+<th>备份格式：</th><td><input type="text" name="backup_format" size="100" value="{{model.backup_format}}" /></td>
+</tr>
+
+<tr>
+<th>备份字段：</th><td><input type="text" name="field_name" size="100" value="{{model.field_name}}" /> 字段定义里面的名称</td>
+</tr>
+<tr>
+<th>备份URL：</th><td><input type="text" name="url" size="100" value="{{model.url}}" /></td>
+</tr>
+<tr>
+<th>过滤服务器ID：</th><td>
+<textarea name="server_list" style="width:800px;height:50px;">{{model.server_list}}</textarea><br/>逗号分割
+</td>
+</tr>
+<tr>
+<th>开始时间：</th><td><input type="text" name="start_date" value="{{model.start_date_str}}" id="start_date" class="Wdate1"/></td>
+</tr>
+<tr>
+<tr>
+<th>结束时间：</th><td><input type="text" name="end_date" value="{{model.end_date_str}}" id="end_date" class="Wdate1"/></td>
+</tr>
+<tr>
+<th>自动备份间隔：</th><td><input type="text" name="auto_exec_interval" maxlength="5" value="{{model.auto_exec_interval}}" /> 秒 如果间隔时间为0，跟据备份时间间隔
+<br/>
+<a href="javascript:inputText('auto_exec_interval',1800)">30分钟</a>
+<a href="javascript:inputText('auto_exec_interval',3600)">1小时</a>
+<a href="javascript:inputText('auto_exec_interval',21600)">6小时</a>
+<a href="javascript:inputText('auto_exec_interval',43200)">12小时</a>
+<a href="javascript:inputText('auto_exec_interval',86400)">24小时</a>
+<a href="javascript:inputText('auto_exec_interval',604800)">一周</a>
+</td>
+</tr>
+<tr>
+<th>备注：</th><td>
+<input type="text" value="{{model.remark}}" size="50" name="remark" />
+</td>
+</tr>
+
+<tr>
+<th>SQL语句：</th><td>
+<textarea name="sql" style="width:800px;height:300px;">{{model.sql}}</textarea>
+</td>
+</tr>
+
+
+
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+
+</form>
+{% endblock %}

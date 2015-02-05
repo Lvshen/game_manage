@@ -1,0 +1,16 @@
+<div id="list_{{page_num}}" name="list_{{page_num}}" >
+
+	<table  class="list">
+		<tr>
+			<td colspan="99" style=" background-color:#AAAAAA; font-size:20px;  color:#FBF9EE; text-align: center;" >{{page_num}}</td>
+		</tr>
+		{%for items in list_data%}
+		<tr>
+			{%for item in items%}
+			<td>{{item}}</td>
+			{%endfor%}
+		</tr>
+		{%endfor%}
+	</table>
+</div>
+{% include "pager.html" %}

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="google-translate-customization" content="4c7f6cb0fee7f952-8842eaefdbe93112-g4297ba3489700b67-15"></meta>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/static/js/stran.js"></script>
+
+<link rel="stylesheet" href="/static/skin/style.css"type="text/css" />
+
+<script type="text/javascript" src="/static/js/dialog.js" ></script>
+<link rel="stylesheet" href="/static/skin/dialog.css" />
+ 
+<script type="text/javascript" src="/static/js/main.js"></script>
+<title>玩家数据</title>
+<script language="javascript" type="text/javascript">
+// <![CDATA[
+
+    function Text4_onclick(){
+
+    }
+
+// ]]>
+    function getLocalTime(nS) {       
+        return new Date(parseInt(nS) * 1000).toLocaleString();
+    }
+</script>
+</head>
+<body>
+<div id="bar">
+玩家游戏信息<span class="buttons"></span>
+</div>
+
+<form action="/richman/modified_player/" method="post">
+	<table class="form">
+		<tr>
+			<th>服务器：</th>
+			<td>
+				<input id="Text5" type="text" value="{{serverip}}" name="serverip" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>用户ID：</th>
+			<td>
+				<input id="Text1" type="text" value="{{message.player_id}}" name="player_id" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>昵称：</th>
+			<td>
+				{{message.player_data.base_info.nick_name}}
+			</td>
+		</tr>
+		<tr>
+			<th>头像：</th>
+			<td>
+				{{message.player_data.base_info.head_icon}}
+			</td>
+		</tr>
+		<tr>
+			<th>玩家状态：</th>
+			<td>
+				{{message.player_status}}&nbsp;&nbsp;(0:空,1:验证重复登陆,2:获取在线数据,3:等待其他大区踢出,4:被其他大区踢出,5:接收数据中,6:接收完数据,7:创建角色,8:大区在线,9:游戏中)
+			</td>
+		</tr>
+		<tr>
+			<th>位置信息：</th>
+		    <td>
+				<table>
+					<tr>
+						<td>大区ID：{{message.zone_id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>游戏服ID：{{message.gamesrv_id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>房间号：{{message.room_number}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>座位号：{{message.seat_number}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox100" type="checkbox" name="isLVL"/>等级：</th>
+			<td>
+				<input id="Text100" type="text" value="{{message.player_data.base_info.lvl}}" name="lvl_change">
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox101" type="checkbox" name="isExp"/>经验：</th>
+			<td>
+				<input id="Text101" type="text" value="{{message.player_data.base_info.experience}}" name="exp_change">
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox1" type="checkbox" name="isGoldcoin"/>金币：</th>
+			<td>
+				<input id="Text4" type="text" value="{{message.player_data.base_info.goldCoin}}" name="goldcoin_change"  />
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox2" type="checkbox" name="isMarble"/>砖石：</th>
+			<td>
+				<input id="Text2" type="text" value ="{{message.player_data.base_info.marble}}" name="marble_change"/>
+			</td>
+		</tr>
+		<tr>
+			<th> <input id="Checkbox3" type="checkbox" name = "isEnergy" />体力：</th>
+			<td>
+				<input id="Text3" type="text" value = "{{message.player_data.base_info.energy}} " name="energy_change"/>
+			</td>
+		</tr>
+		<tr>
+			<th> <input id="Checkbox102" type="checkbox" name="ispresentPoint"/>礼物积分：</th>
+			<td>
+				 <input id="Text102" type="text" value="{{message.player_data.base_info.present_points}}" name="present_point_change">
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox100" type="checkbox" name="isPoint"/>游戏积分：</th>
+			<td>
+				<input id="Text102" type="text" value="{{message.player_data.base_info.points}}" name="point_change">
+			</td>
+		</tr>
+		<tr>
+			<th>游戏数据：</th>
+			<td>
+				<table>
+						
+						<tr>
+							<th>ALL：</th>
+							<td>单场最高分数：</td><td>{{gamedata0.game_highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期最高分数：</td><td>{{gamedata0.highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期内积分：</td><td>{{gamedata0.points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏场数：</td><td>{{gamedata0.play_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏胜利场数：</td><td>{{gamedata0.win_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏失败场数：</td><td>{{gamedata0.lose_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						</tr>
+						
+						<tr>
+							<th>今天：</th>
+							<td>单场最高分数：</td><td>{{gamedata1.game_highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期最高分数：</td><td>{{gamedata1.highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期内积分：</td><td>{{gamedata1.points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏场数：</td><td>{{gamedata1.play_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏胜利场数：</td><td>{{gamedata1.win_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏失败场数：</td><td>{{gamedata1.lose_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						</tr>
+						
+						<tr>
+							<th>本周：</th>
+							<td>单场最高分数：</td><td>{{gamedata2.game_highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期最高分数：</td><td>{{gamedata2.highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期内积分：</td><td>{{gamedata2.points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏场数：</td><td>{{gamedata2.play_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏胜利场数：</td><td>{{gamedata2.win_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏失败场数：</td><td>{{gamedata2.lose_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						</tr>
+						
+						<tr>
+							<th>上一周：</th>
+							<td>单场最高分数：</td><td>{{gamedata3.game_highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期最高分数：</td><td>{{gamedata3.highest_points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>周期内积分：</td><td>{{gamedata3.points}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏场数：</td><td>{{gamedata3.play_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏胜利场数：</td><td>{{gamedata3.win_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td>游戏失败场数：</td><td>{{gamedata3.lose_game_count}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th>排名：</th>
+			<td>
+				{{message.player_data.base_info.rank}}
+			</td>
+		</tr>
+		<tr>
+			<th> 登陆地址：</th>
+			<td>
+				 {{message.player_data.extra_info.last_login_addr}}
+			</td>
+		</tr>
+		<tr>
+			<th> 注册时间：</th>
+			<td>
+				 <script>document.write(getLocalTime({{message.player_data.extra_info.register_time}}));</script>
+			</td>
+		</tr>
+		<tr>
+			<th> 登陆时间：</th>
+			<td>
+				 <script>document.write(getLocalTime({{message.player_data.extra_info.last_login_time}}));</script>
+			</td>
+		</tr>
+		<tr>
+			<th> 总登陆次数：</th>
+			<td>
+				 {{message.player_data.extra_info.total_login_times}}
+			</td>
+		</tr>
+		<tr>
+			<th> 领取体力时间：</th>
+			<td>
+				 <script>document.write(getLocalTime({{message.player_data.extra_info.clover_change_time}}));</script>
+			</td>
+		</tr>
+		<tr>
+			<th> 签到时间表：</th>
+			<td>
+				 <script>document.write(getLocalTime({{message.player_data.extra_info.last_daily_signin_time}}))</script>
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox4" type="checkbox" name="isDeleteCard"/>卡牌列表（删除打钩）：</th>
+			<td>
+				 <input id="Text9" type="text" value = "{{message.player_data.extra_info.max_card_id}}" name = "maxCardId" hidden/>
+				 <p>
+				 <table>
+					 <tr>
+						<td width="50"></td>
+						<td width="100" align="center">id</td>
+						<td width="100" align="center">uuid</td>
+						<td width="100" align="center">经验</td>
+						<td width="300" align="center">获取时间</td>
+					</tr>
+					{% for card in message.player_data.hero_card%}
+					<tr>
+						<td width="50">删除<input id="Checkbox5" type="checkbox"  name="isDeleteCardCheck{{card.id}}"/></td>
+						<td align="center">{{card.id}}
+						{%ifequal message.player_data.base_info.equipmentCardid card.id %}
+						(装备卡牌)
+						{%endifequal%}
+						</td> 
+						<td align="center">{{card.uuid}}</td>
+						<td align="center">{{card.experience}}</td>
+						<td align="center"><script>document.write(getLocalTime({{card.getTime}}))</script></td>
+					</tr>
+					{% endfor %}
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th> 筛子列表：</th>
+			<td>
+				{%for die in message.player_data.player_dies  %}
+				{{die.die_id}}
+				{%ifequal message.player_data.base_info.current_die_id die.die_id %}
+				(装备骰子)
+				{%endifequal%}
+				,&nbsp;&nbsp;&nbsp;&nbsp;
+				{% endfor %}
+			</td>
+		</tr>
+		<tr>
+			<th><input id="Checkbox6" type="checkbox" name="isTicket"/>入场券（修改打钩）：</th>
+			<td>
+				<table>
+					<tr>
+						<td width="50">类型</td>
+						<td width="50">数量</td>
+					</tr>
+					{%for ticket in message.player_data.player_tickets %}
+					<tr>
+					    <td><input width=30 id="Text3" type="text" value = "{{ticket.type}} " name="TicketType{{ticket.type}}" readonly /></td>
+						<td><input width=30 id="Text3" type="text" value = "{{ticket.amount}} " name="TicketNum{{ticket.type}}"/></td>
+					</tr>
+					{%endfor%}
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th>&nbsp;</th>
+			<td>
+			<input type="submit" value="提交" />
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

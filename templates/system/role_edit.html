@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>角色资料编辑</title>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/role/list">角色管理</a> -> 角色资料编辑
+<span class="buttons">
+ <a href="/role/list">返回</a>
+ </span>
+</div>
+
+<form action="/role/save?role_id={{model.id}}" method="post">
+<table class="form">
+
+<tr>
+<th>角色名：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+<tr>
+<th></th>
+<td>角色权限管理
+<label><input type="checkbox" id="select_role" onchange="selectAll(this.id)" />全选</label>
+</td>
+</tr>
+<tr>
+<th></th>
+<td id="select_role_area">
+<table>
+{%for menu in menu_list%}
+{%ifequal menu.parent_id 0%}
+<tr>
+<th valign="top">
+<label><input type="checkbox" name="menu_id" value="{{menu.id}}"{%ifequal menu.is_checked 1%} checked="checked"{%endifequal%} /> {{menu.name}}</label>
+</th>
+<td>
+	{%for item in menu_list%}
+	{%ifequal item.parent_id menu.id%}
+	<label><input type="checkbox" name="menu_id" value="{{item.id}}"{%ifequal item.is_checked 1%} checked="checked"{%endifequal%} /> {{item.name}}</label>
+	{%endifequal%}
+	{%endfor%}
+</td>
+{%endifequal%}
+{%endfor%}
+</table>
+</td></tr>
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+</form>
+{% endblock %}

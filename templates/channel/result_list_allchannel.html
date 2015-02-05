@@ -1,0 +1,54 @@
+{% extends "channel/channel_base.html" %}
+
+{% block header%}
+<title>{{channel.name}} 基础数据统计 </title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+{{channel.name}} 基础数据统计
+<span class="buttons">
+{%if is_admin%}
+<a href="/manage/channel/list">返回</a>
+{%endif%}
+
+ </span>
+</div>
+
+<div class="sub-menu-1">
+<form action="" method="get">
+
+<label><input id="select_server" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>服务器全选</label>
+<div id="select_server_area">
+{%for serverItem in list_server%}
+	<label><input type="checkbox" name="s" value="{{serverItem.id}}" {%ifequal serverItem.is_show 1 %}checked='checked'{%endifequal%} />{{serverItem.name}}</label>
+{%endfor%}
+</div>
+
+开始日期:<input type="text" name="sdate" class="Wdate1" value="{{sdate}}" /> 结束日期<input type="text" name="edate" class="Wdate1" value="{{edate}}" /> <input type="submit" value="查询" />
+</form>
+</div>
+
+<p style="width:80%;padding:5px;margin:auto;text-align:left;color:#696">{{the_query.remark}}</p>
+
+<table class="list">
+<tr>
+<th width="170">时间</th>
+{%for item in list_statistic%}
+<th title="{{item.remark}}">{{item.name}}</th>
+{%endfor%}
+</tr>
+{%for items in list_record%}
+<tr>
+{%for item in items%}
+{%if forloop.first%}
+<td>{{item|date:"Y-m-d"}}</td>
+{%else%}
+<td>{{item|floatformat:'0'}}</td>
+{%endif%}
+{%endfor%}
+</tr>
+{%endfor%}
+</table>
+
+{% endblock %}

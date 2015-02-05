@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}领取新手卡号{% endblock %}
+{% block content %}
+<div id="bar">
+<a href="#">新手卡管理</a> ->领取新手卡号
+<span class="buttons">
+ <a href="/card/list">返回</a>
+</span>
+</div>
+<div class="sub-menu-1">
+	{{card}}{{msg}}
+	{% if server %}
+	<form action="/card/get/{{batch}}" method="POST">
+		<p><label>服名：</label>
+		<select name="id" id="id">
+		{% for g in server %}
+			<option value="{{g.server_id}}">{{g.server.name}}</option>
+		{% endfor %}
+		</select>
+		<input type="submit" name="count" id="count" size="11" value="领取新手卡"/>
+		</p>
+	</form>
+	{% else %}
+		<div align="center"><font color="red">操作有误！</font></div>
+	{% endif %}
+</div>
+{% endblock %}

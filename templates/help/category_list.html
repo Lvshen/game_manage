@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block header%}
+<script type="text/javascript">
+	function delCategory(id,ele) {
+		if (confirm("确定删除？删除不可恢复！")) {
+			$.ajax({
+				type : 'GET',
+				url : "/help/category/del?id=" + id,
+				datatype : "html",
+				data : {
+					id : id
+				},
+				cache : false,
+				success : function(data) { 
+					$(ele).parent().parent().hide();
+				},
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	function editCategory(id) {
+		id = $(".id_" + id).val();
+		px = $(".order_" + id).val();
+		name = $(".name_" + id).val();
+		if (confirm("确定修改？")) {
+			$.ajax({
+				type : 'POST',
+				url : "/help/category/save?id=" + id,
+				datatype : "html",
+				data : {
+					id : id,
+					order : px,
+					name : name
+				},
+				cache : false,
+				success : function(data) {
+					$('.order_' + id).after('保存成功');
+				},
+				error : function(data) {
+					$('.order_' + id).after('保存失败');
+				}
+			});
+			return false;
+		} else {
+			return false;
+		}
+	}
+</script>
+<style type="text/css" >
+	.cc{
+		width:100px;
+	}
+</style>
+<title>帮助分类管理</title>
+{% endblock %}
+
+{% block content %}
+<form action="/help/category/save?id=0" name="form" method="post">
+	<div id="bar" >
+		帮助分类管理
+		<span class="buttons" >
+			<a href="/help/list">返回</a>
+		</span>
+	</div>
+	<table class="list" >
+		<tr>
+			<th>排序</th>
+			<th>名称</th>
+			<th>操作</th>
+		</tr>
+		{% for item in cg %}
+		<tr>
+			<td>
+				<input type="text" class="order_{{ item.id }} cc" value="{{ item.order }}" />
+			</td>
+			<td>
+				<input type="text" class="name_{{ item.id }} cc" value="{{ item.name }}" />
+			</td>
+			<td>
+				<input name="id" class="id_{{ item.id }} cc" type="hidden" value="{{ item.id }}" />
+			<a href="#" onclick="editCategory({{ item.id }})">编辑</a>|<a href="#" onclick="delCategory({{ item.id }}, this)">删除</a></td>
+		</tr>
+		{% endfor %} 
+	</table>
+	
+	<div class='sub-menu-1' >
+		排序：
+		<input name="order" type="text">
+		名称：
+		<input name="name" type="text">
+		<input name="addhelp" type="submit" value="点击添加"/>
+	</div>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+package PAY;
+
+message PAY2Z_PlayerPayReq
+{
+	required uint32 user_id				= 1;
+	required bytes pay_id				= 2;
+	required uint32 marble				= 3;
+	required uint32 realcount			= 4;
+	required uint32 rmb					= 5;
+	optional uint32 youai_paysvrid		= 6;
+	optional string extra_data			= 7;
+}
+
+message Z2PAY_PlayerPayRsp
+{
+	required uint32 user_id				= 1;
+	required int32 ret					= 2;		//0--成功; 其它--失败
+	optional bytes errmsg				= 3;		//有可能没有
+	optional uint32 marble				= 4; 		//所获钻石
+	optional bytes pay_id				= 5;		//账单号
+	optional uint32 youai_paysvrid		= 6;
+}
+
+//此条协议返回给客户端
+message Z2C_PayResultRsp
+{
+	required int32 ret					= 1;		//0--成功; 其它--失败
+	optional bytes errmsg				= 2;	//注：有可能没有
+	optional uint32 marble				= 3; //所获钻石
+}

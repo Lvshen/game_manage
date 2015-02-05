@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN" "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>MyCard儲值</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=yes;" />
+<link rel="stylesheet" type="text/css" href="/static/skin/mobile.css" />
+
+<script type="text/javascript" src="/static/js/pay/category.js"></script>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#step2").hide();
+		$("#step3").hide();
+		var checkbox_str = '';
+		var tmpArray = {};
+		var keyArray = new Array();
+		for (var i = 0; i < pay_category.length; i++) {
+			tmpArray[pay_category[i][2]]="<label><input type='radio' name='pay_amount' value='" + pay_category[i][2] + "' />" + pay_category[i][2] + "</label>";
+		}
+		for(var i in tmpArray)
+		{
+			keyArray[keyArray.length]=i;
+		}
+		
+		keyArray = sortPayArray(keyArray);
+		
+		for(var i=0;i<keyArray.length;i++)
+		{
+			checkbox_str += tmpArray[keyArray[i]];
+		}
+		$("#div_silver").html(checkbox_str);
+		$("[name='pay_amount']").first().attr("checked","checked");
+		
+	}); 
+
+	function sortPayArray(array) {
+		for (var i = 0; i < array.length; i++) {
+			for (var k = 0; k < array.length; k++) {
+				var iSource = array[i];
+				var kSource = array[k];
+				var iNum = new Number(array[i]);
+				var kNum = new Number(array[k]);
+				if (iNum < kNum) {
+					var nTemp = iSource;
+					array[i] = kSource;
+					array[k] = nTemp;
+				}
+			}
+		}
+		return array;
+	}
+
+	function checkform() {
+		var server_code = $('[name="server_code"]:checked');
+		var pay_amount = $('[name="pay_amount"]:checked');
+
+		if(server_code.length == 0){
+			alert('請選擇儲值金額');
+			return false;
+		}
+		if(pay_amount.length == 0){
+			alert('請選擇付費方式');
+			return false;
+		}
+		
+		return true;
+	}
+
+	function goback() {
+		$('#step1').show();
+		$('#step2').hide();
+		$("#step3").hide();
+		$('[name="payment"]').each(function() {
+			$(this).unbind();
+		});
+
+		$('#div_payment').html();
+
+	}
+
+	function nextSetup() {
+		var selected_amount = $("[name='pay_amount']:checked"); 
+		if(selected_amount.length == 0){
+			alert('請選擇儲值金額');
+			return;
+		}
+		var amount = selected_amount.val();
+		
+		$("#step1").hide();
+		$("#step3").hide();
+		$("#step2").show();
+		
+		var checkbox_str = '';
+		var tmpArray = {};
+		for (var i = 0; i < pay_category.length; i++) {
+			if(pay_category[i][2]==amount)
+				tmpArray[pay_category[i][0]] = "<label><input type='radio' name='server_code' value='" + pay_category[i][1] + "' />" + pay_category[i][0] + "</label>";
+		}
+		for(var i in tmpArray)
+		{
+			checkbox_str += tmpArray[i];
+		}
+		$("#div_payment").html(checkbox_str);
+		$("[name='server_code']").first().attr("checked","checked");
+	}
+	
+	function doSubmit()
+	{
+		$("#step2").hide();
+		$("#step3").show();
+		return true;
+	}
+</script>
+</head>
+
+<body>
+	<form method="get" action="/client/pay/mycard/go/{{action_id}}" onsubmit="doSubmit()">
+		<div id='step1'>
+			<h4 class="header">請選擇儲值金額</h4>
+			<div id="div_silver" class="body"></div>
+			<div class="footer">
+			<input type="button" class="button" value="下一步" name="下一步" onclick="nextSetup();" />
+			</div>
+		</div>
+		<div id='step2'>
+			<h4 class="header">請選擇付費方式</h4>
+			<div id="div_payment" class="body"></div>
+			<div class="footer">
+			<input type="button" value="后退" class="button" onclick="goback();" /> 
+			<input type="submit" value="提交" class="submit" onclick="return checkform();" />
+			</div>
+		</div>
+		<div id="step3">
+			<h4 class="header">請稍候</h4>
+			<div class="body">正在轉向MyCard進行付款,請稍候...</div>
+		</div>
+	</form>
+</body>
+</html>

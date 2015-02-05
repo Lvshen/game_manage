@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}使用新手卡{% endblock %}
+{% block content %}
+<div id="bar">
+<a href="#">新手卡管理</a> ->使用新手卡
+<span class="buttons">
+ <a href="/card/list">返回</a>
+</span>
+</div>
+<div class="sub-menu-1">
+    <h1>使用新手卡</h1>
+	<div align="center"><font color="red">{{msg}}</font></div>
+    <form action="/card/use" name="frm1" method="POST" onsubmit="return chkForm();">
+		<p><label>卡号：</label><input type="text" name="number" id="number"/></p>
+		<p><label>密码：</label><input type="text" name="password" id="password"/></p>
+        <p><input type="submit" value="提交"></p>
+    </form>
+</div>
+<script>
+function chkForm() {
+	var number = document.getElementById('number').value;
+	var password = document.getElementById('password').value;
+	if (number == '') {
+		alert("卡号不能为空！");
+		return false;
+	}
+}
+</script>
+{% endblock %}

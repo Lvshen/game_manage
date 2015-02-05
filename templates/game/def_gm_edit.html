@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>编辑GM请求协议</title>
+<script type="text/javascript" src="/static/js/jquery.json.min.js" ></script>
+<script type="text/javascript" src="/static/js/gm_editor.js" ></script>
+<link rel="stylesheet" type="text/css" href="/static/skin/gm_editor.css" />
+<script type="text/javascript" >
+
+	var gm_edit = new GMeditor();
+	
+	function get_gm_type(){
+		var value = $("[name='result_type']").val();
+		var gm_type = GMTypeEnum.form;
+		if (value == "form"){
+			gm_type = GMTypeEnum.form;
+		}else if (value == "list"){
+			gm_type = GMTypeEnum.list;
+		}else if (value == "msg"){
+			gm_type = GMTypeEnum.msg;
+		}
+		return gm_type;
+	}
+	
+	function set_result_type() {
+		
+		
+		gm_edit.set_result_define("[name='result_define']", get_gm_type());
+	}
+	
+	function set_params(){
+		gm_edit.set_params("[name='params']", get_gm_type());
+	}
+	
+	function change_type(target){
+		$("[name='result_define']").val('');
+		//target = $(target);
+		// var value = target.val();
+		// if(value == "json_result"){
+			// $(".edit_result").hide();
+		// }else{
+			// $(".edit_result").show();
+		// }
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	编辑GM请求协议
+	<span class="buttons" > <a href="/game/gm/list" >返回</a> </span>
+</div>
+
+<form action="/game/gm/save?id={{model.id}}" method="post" >
+	<table class="form"  >
+		<tr>
+			<th>
+				ID:
+			</th>
+			<td>
+				<input type="text" name="save_id" value="{{model.id}}" style="width:50px;" />
+				标题: <input type="text" name="title" value="{{model.title}}" />
+			</td>
+		</tr>
+		<tr>
+			<th>
+				标记: 
+			</th>
+			<td>
+				<input type="text" name="flag" value="{{model.flag}}" />
+			</td>
+		</tr>
+		<tr>
+			<th> 协议url: </th>
+			<td>
+			<input type="text" name="url" value="{{model.url}}" />
+			</td>
+		</tr>
+		<tr>
+			<th class="conf_params"> 传入参数： <br/>
+				<a href="#conf_params" onclick="set_params();" >配置</a>
+			</th>
+			<td>
+				<textarea name="params">{{model.params}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<th> 返回类型: </th>
+			<td>
+				<select name="result_type" onchange="change_type(this);" >
+					<option value="form" {% if model.result_type == 'form' %} selected="selected" {% endif %} >表单</option>
+					<option value="list" {% if model.result_type == 'list' %} selected="selected" {% endif %} >列表</option>
+					<option value="msg" {% if model.result_type == 'msg' %} selected="selected" {% endif %} >消息</option>
+					<option value="json_result" {% if model.result_type == 'json_result' %} selected="selected" {% endif %} >json</option>
+				</select>
+			</td>
+		</tr>
+		<tr class="edit_result" >
+			<th class="result_define"> 返回参数:
+				<br/>
+				<a href="#result_define" onclick="set_result_type();" >配置</a>
+			</th>
+			<td>			
+				<textarea name="result_define" >{{model.result_define}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<th>描述:</th>
+			<td>
+				<textarea name="description" >{{model.description}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><input type="submit" value="保存" /></td>
+		</tr>
+	</table>
+</form>
+
+{% endblock %}

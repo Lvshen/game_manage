@@ -1,0 +1,48 @@
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		tabs($("[name='query_type']:checked"));
+	});
+	
+	function tabs(radio_btn){
+		$(".server_list").hide();
+		$(".channel_list").hide();
+		if (parseInt($(radio_btn).val()) == 0){
+			$(".server_list").show();
+		}else{
+			$(".channel_list").show();
+		}
+	}
+</script>
+<div class="sub-menu-1">
+	<form action="" method="get" >
+		<input type="hidden" name="d_type" value="{{d_type}}" />
+		<p>
+			<input type="radio" name="query_type"  value="0" {% if query_type == 0 %}checked="checked"{%else%}checked="checked"{% endif %} onclick="tabs(this);" checked="checked"  />服务器
+			<input type="radio" name="query_type"  value="1" {% if query_type == 1 %}checked="checked"{% endif %} onclick="tabs(this);" />渠道
+		</p>
+		<div class="server_list" >
+			服务器:
+			{% for item in server_list %} 
+				<input type="checkbox" name="server_id" value="{{item.id}}" {% if item.selected   %} checked="checked" {% endif %} />{{item.name}}
+			{% endfor %}
+		</div>
+		<div class="channel_list" >
+			渠道:
+			{% for item in channel_list %}
+				<input type="checkbox" name="channel_id" value="{{item.id}}" {% if item.selected %} checked="checked" {% endif %} />{{item.name}}
+			{% endfor %}
+		</div>
+		<br />
+		<p>
+		开始时间:<input type="text" name="sdate" id="sdate" class="Wdate1" value="{{sdate}}" />
+		结束时间:<input type="text" name="edate" id="edate" class="Wdate1" value="{{edate}}" />
+		</p>
+		<p>
+		{% for item in item_results %}
+			<input type="radio" name="query_item" value="{{item.0}}" {% if query_item == item.0 %} checked="checked" {% endif %}  />{{item.1}} &nbsp;&nbsp;
+		{% endfor %}	
+		</p>
+		<input type="submit" name="submit"   value="查询" />
+	</form>
+</div>

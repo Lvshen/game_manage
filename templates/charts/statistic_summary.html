@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>{{item.title}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="box" >
+	<div class="title">
+		<strong  >{{title}}</strong>
+	</div>
+		<table class="list" cellspacing="0" cellpadding="0" border="0" class="table_style2">
+			<tbody>
+				{%for item in statistic_list%}
+				<tr>
+					<td class="left border_none">{{item.name}}</td>
+					<td class="center border_none"><strong >{{item.result}}{{item.unit}}</strong></td>
+				</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	 
+</div>
+{% endblock %}

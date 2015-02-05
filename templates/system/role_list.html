@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>角色管理</title>
+<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<span class="buttons">
+ <a href="/role/edit">添加</a>
+ </span>
+</div>
+
+<table class="list">
+<tr>
+<th>角色名</th>
+<th width="100">操作</th>
+</tr>
+{%for user in list_record%}
+
+<tr>
+<td>{{user.name}}
+</td>
+<td><a href="/role/remove/{{user.id}}" class="del ajax" tip="确认删除？" >删除</a> <a href="/role/edit?role_id={{user.id}}">编辑</a>
+</td>
+</tr>
+
+{%endfor%}
+</table>
+{% endblock %}

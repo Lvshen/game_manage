@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>充值统计</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="#">充值统计</a> -> 充值用户排行
+</div>
+
+<div class="sub-menu-1">
+<form method="post">
+<table>
+<tr>
+	<th style="width:90px;text-align:right;"><label><input id="select_server" type="checkbox" onchange="selectAll(this.id)"  checked="checked"/>服务器全选</label></th>
+		<td>
+			<div id="select_server_area">
+				{%for serverItem in list_server%}
+				<label><input type="checkbox" name="s" value="{{serverItem.id}}" {%ifequal serverItem.is_show 1%}checked='checked'{%endifequal%} />{{serverItem.name}}</label>
+				{%endfor%}
+			</div>
+		</td>
+</tr>
+<tr>
+	<th>
+		充值通道:<br/>
+		<label>全选<input type="checkbox" id="select_paychannel" onchange="selectAll(this.id)" ></label>
+	</th>
+	<td>
+		<div id="select_paychannel_area">
+		{%for pcItem in list_paychannel%}
+			<label><input type="checkbox" name="c" value="{{pcItem.id}}" {%ifequal pcItem.is_show 1 %}checked="checked"{%endifequal%} />{{pcItem.name}}</label>
+		{%endfor%}
+		</div>
+	</td>
+</tr>
+<tr>
+	<th></th>
+	<td>
+		开始日期:<input type="text" id="sdate" name="sdate" class="Wdate" value="{{sdate}}" />
+		结束日期:<input type="text" id="edate" name="edate" class="Wdate" value="{{edate}}" />
+		
+		<a href="javascript:setSelectDate(1);">前天</a>
+		<a href="javascript:setSelectDate(2);">昨天</a>
+		<a href="javascript:setSelectDate(3);">今天</a>
+		<a href="javascript:setSelectDate(4);">近三天</a>
+		
+		<input type="submit" value="查询" />
+	</td>
+</tr>
+</table>
+</form>
+</div>
+
+<table class="list">
+<tr>
+<th width="85">服务器</th>
+<th width="120">充值通道</th>
+<th width="140">日期</th>
+<th width="130px">充值人数</th>
+<th width="130">充值次数</th>
+<th width="90">充值金额</th>
+<th width="90">充值金币</th>
+<th width="90">Arpu值</th>
+</tr>
+{%for item in list_pay%}
+<tr>
+<td>{{item.0}}</td>
+<td>{{item.1}}</td>
+<td>{{item.2|date:"Y-m-d"}}</td>
+<td>{{item.3}}</td>
+<td>{{item.4}}</td>
+<td>{{item.5}}</td>
+<td>{{item.6}}</td>
+<td>{{item.7}}</td>
+</tr>
+{%endfor%}
+</table>
+
+<script type="text/javascript">
+function setSelectDate(type)
+{
+	if(type==1)
+	{
+		$('#sdate').attr('value',GetDateStr(-2));
+		$('#edate').attr('value',GetDateStr(-1));
+	}
+	else if(type==2)
+	{
+		$('#sdate').attr('value',GetDateStr(-1));
+		$('#edate').attr('value',GetDateStr(0));
+	}
+	else if(type==3)
+	{
+		$('#sdate').attr('value',GetDateStr(0));
+		$('#edate').attr('value',GetDateStr(1));
+	}
+	else if(type==4)
+	{
+		$('#sdate').attr('value',GetDateStr(-2));
+		$('#edate').attr('value',GetDateStr(1));
+	}
+}
+function GetDateStr(AddDayCount) {
+    var dd = new Date();
+    dd.setDate(dd.getDate()+AddDayCount);//获取AddDayCount天后的日期
+    var y = dd.getFullYear();
+    var m = dd.getMonth()+1;//获取当前月份的日期
+    var d = dd.getDate();
+    return y+"-"+m+"-"+d +" 00:00:00";
+}
+
+</script>
+{% include "page_post.html" %}
+{% endblock %}

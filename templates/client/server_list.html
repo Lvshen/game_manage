@@ -1,0 +1,3 @@
+[{%for item in list_server%}
+{"server_id":{{item.id}},"server_name":"{{item.name}}","state":{{item.status}},"commend":{{item.commend}}}{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}
+{%endfor%}]

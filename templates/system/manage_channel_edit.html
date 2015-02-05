@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>渠道编辑</title>
+<script type="text/javascript" src="/static/js/ajaxForm.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="/manage/channel/list">渠道管理</a> -> 渠道资料编辑
+<span class="buttons">
+ <a href="/manage/channel/list">返回</a>
+ </span>
+</div>
+
+<form action="/manage/channel/save?channel_id={{model.id}}" method="post" class="ajax">
+	<input type="hidden" name='ajax' value="true" >
+<table class="form">
+<tr>
+<th>KEY：</th><td><input type="text" name="key" value="{{model.key}}" /> 重要:不能修改</td>
+</tr>
+
+<tr>
+<th>渠道名：</th><td><input type="text" name="name" value="{{model.name}}" /></td>
+</tr>
+
+<tr>
+<th>登录名：</th><td><input type="text" name="username" value="{{model.username}}" /></td>
+</tr>
+
+<tr>
+<th>密 码：</th><td><input type="text" name="password" value="{{model.password}}" /></td>
+</tr>
+
+<tr>
+<th></th>
+<td><input type="submit" value="保存" /></td>
+</tr>
+</table>
+</form>
+{% endblock %}

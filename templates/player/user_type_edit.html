@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户类型编辑</title>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+	<a href="/player/type">用户类型列表</a> -> 用户类型编辑 <span class="buttons"> <a href="/player/type">返回</a> </span>
+</div>
+
+<form action="/player/type/save/{{model.id}}" method="post" >
+	<table class="form">
+		<tr>
+			<th>类型名称：</th>
+			<td>
+				<input type="text" name="name" value="{{model.name}}" />
+		 	</td>
+		</tr>
+		<tr>
+			<th>玩家类型：</th>
+			<td>
+				<input type="text" name="type_id" style="width:30px;" value="{{model.type_id}}" />(int 类型)
+		 	</td>
+		</tr>
+
+		<tr>
+			<th>登录方法：</th>
+			<td>
+				<input type="text" name="func_name"  value="{{model.func_name}}" />
+		 	</td>
+		</tr>
+ 		
+ 		
+		<tr>
+			<th>登录设置：<br/>JSON</th>
+			<td>
+				<textarea name="login_config">{{model.login_config}}</textarea>
+			</td>
+		</tr>
+ 		
+		<tr>
+			<th>登录方法版本：</th><td>
+				<input type="text" name="func_ver" style="width:50px;" value="{{model.func_ver}}" />(int 类型)
+			</td>
+		</tr>
+
+		<tr>
+			<th>备注：</th>
+			<td>
+				<textarea name="remark" >{{model.remark}}</textarea>
+			</td>
+		</tr>
+
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="保存" />
+			</td>
+		</tr>
+	</table>
+	{% csrf_token %}
+</form>
+{% endblock %}

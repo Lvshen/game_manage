@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+#coding=utf-8 
+import os, sys,string
+import MySQLdb
+
+
+
+
+
+
+def get_propdb_conf(conf_host, conf_user, conf_passwd, roleid=0):
+	db_charset='utf8'
+	db_port=3306
+	db_name = "chess_config"
+	sql = ""
+	chess_game = []	
+	try:
+		conn = MySQLdb.connect(conf_host,conf_user,conf_passwd,db_name, charset=db_charset, port = db_port)
+		print "get_propdb_conf connect| %s@%s:%d/%s charset=%s, passwd=%s"%(conf_user,conf_host, db_port, db_name, db_charset, conf_passwd)
+		
+		cur = conn.cursor()
+		sql = "SELECT DBServerAddr, DBUser, DBPassWord, DBName FROM property_server"
+
+		count = cur.execute(sql)
+		print "count=%d|sql=%s"%(count, sql)
+		cds=cur.fetchall() 
+		for record in cds:
+			print record[0],record[1],record[2], record[3]
+			recordInfo = {'name': record[3], 'host': record[0], 'user': record[1], 'passwd': record[2]}
+			
+			chess_game.append(recordInfo) 
+
+			print chess_game
+
+		print cds
+		
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except MySQLdb.Error,e:
+		print "sql=%s"%(sql)
+		print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+	
+	return chess_game
+
+
+
+def execute_sql(conf_host, conf_user, conf_passwd, tb_name, sql):
+	chess_game = get_propdb_conf(conf_host, conf_user, conf_passwd)
+
+	for db in chess_game:
+		db_name = db['name']
+		db_host = db['host']
+		db_user = db['user']
+		db_passwd = db['passwd']
+
+		db_charset='utf8'
+		db_port=3306
+		try:
+			print "1  %s@%s:%d/%s charset=%s, passwd=%s"%(db_user,db_host, db_port, db_name, db_charset, db_passwd)
+			conn = MySQLdb.connect(db_host,db_user,db_passwd,db_name, charset=db_charset, port = db_port)
+			cur = conn.cursor()
+			count = cur.execute("SHOW TABLES")
+			cds = cur.fetchall()
+			tb_list = []
+			print tb_name
+			for record in cds:
+				 #print record[0], tb_name
+				 dbtb_name = record[0].lower()
+				 if -1 == dbtb_name.find(tb_name.lower()):
+				 	continue
+				 #print "in %s"%(record[0])
+				 tb_list.append(record[0])
+
+			print tb_list
+
+			tmp_sql = sql
+			tmp_sql = tmp_sql.replace('[db_name]', db_name)
+			print "len=%d"%(len(tb_list))
+			for tb in tb_list:
+				real_sql = tmp_sql.replace('[tb_name]', tb) 
+				
+				try:
+					count=cur.execute(real_sql)
+					print "count=%d|sql=%s"%(count,real_sql)
+					conn.commit()
+				except MySQLdb.Error,e:
+					print "sql=%s"%(real_sql)
+					print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+					continue
+			
+			cur.close()
+			conn.close()
+		except MySQLdb.Error,e:
+			print "sql=%s"%(sql)
+			print "Mysql Error %d: %s" % (e.args[0], e.args[1])
+
+
+#ALTER TABLE `chess_game0`.`UserInfo_0` ADD COLUMN `award_lasttime` INT(11) NULL AFTER `award`; 
+# ALTER TABLE `chess_game0`.`UserInfo_0` CHANGE `award_lasttime` `award_lasttime` INT(11) NULL COMMENT '每天奖励,上次奖励时间'; 
+#ALTER TABLE `chess_game0`.`GameInfo_0` ADD COLUMN `setdailyplaycountlasttime` INT(11) NULL COMMENT '上次设置每日玩的局数的时间' AFTER `cardtype`;	
+#ALTER TABLE `chess_game0`.`UserInfo_0` ADD COLUMN `reg_gamgtype` INT NULL COMMENT '注册时的游戏类型' AFTER `maxcardval`; 		
+def bat_modify(): 
+	conf_host = '10.1.1.250'
+	#conf_host = '10.1.1.253'
+	conf_user = 'root'
+	conf_passwd = '2u3oijflas2398j9lkjssaf'
+	#conf_passwd = '123456'
+	tb_name = 'UserInfo'
+	#sql = "ALTER TABLE [db_name].[tb_name] ADD COLUMN `maxcardval` VARCHAR(32) NULL AFTER `physical_value`;"
+	sql = "UPDATE [db_name].[tb_name] SET gamemoney=10000000 WHERE userid < 69057"
+	#sql = "ALTER TABLE [db_name].[tb_name]  CHANGE `award_lasttime` `award_lasttime` INT(11) NULL ;"
+	#sql = "ALTER TABLE [db_name].[tb_name] ADD COLUMN `reg_gametype` INT NULL AFTER `maxcardval`;"
+	execute_sql(conf_host, conf_user, conf_passwd, tb_name, sql)
+
+if __name__ == "__main__":  
+	bat_modify()
+
+

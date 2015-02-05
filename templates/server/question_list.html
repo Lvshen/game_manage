@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>用户提问</title>
+<script type="text/javascript" src="/static/js/jquery.scrollTo-min.js" ></script>
+<script type="text/javascript" src="/static/js/messenger.min.js" ></script>
+{% if usm.current_userRole_is_root %}
+<script type="text/javascript" src="/static/js/question_grumble.js" ></script>
+{% endif %}
+<link type="text/css" rel="stylesheet" href="/static/skin/messenger.css"  />
+<link type="text/css" rel="stylesheet" href="/static/skin/messenger-theme-future.css" />
+<script type="text/javascript" src="/static/js/ajaxForm.js?v=20131019" ></script>
+<!--<script type="text/javascript" src="/static/js/ajaxLoad.js" ></script>-->
+<style >
+	.gmb{
+		position: absolute;
+		top: -6px;
+		font-size: 10px;
+		color: white;
+		right: -7px;
+		background: red;
+		text-align: center;
+		border-radius: 10px;
+		width: 15px;
+		height: 15px;
+		text-indent: 0px;
+		line-height: 15px;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="bar">
+<a href="#">客服系统</a> -> 问题列表
+</div>
+{% if usm.current_userRole_is_root %}
+<div class="sub-menu-1">
+	分区:
+	<a href="./">全部</a>
+	{%for item in list_group%}
+	<a href="?group_id={{item.id}}" data-flag="{{item.id}}" {%ifequal item.id group_id%} class="active"{%endifequal%}  style="position: relative;" >{{item.name}}</a>
+	{%endfor%}
+</div>
+{%endif%}
+<!-- <div style="position: absolute; top: -15px;font-size: 4px;color: red;right: -1px;">1</div> -->
+<div class="sub-menu-1">
+<form method="get">
+	<input type="hidden" name="group_id" value="{{group_id}}" />
+服务器:<select class="dbl_server_list" name="server_id" id="server_id" >
+		<option value="0">全部</option>
+		{%for item in list_server%}
+		{%ifequal item.is_show 1%}
+		<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%} style="color:red;">{{item.name}}</option>
+		{%else%}
+		<option value="{{item.id}}"{%ifequal item.id server_id%} selected="selected"{%endifequal%} style="color:black;">{{item.name}}</option>
+		{%endifequal%}
+		{%endfor%}
+	</select>
+	
+	<input type="text" class="s_server" style="width:50px;" onkeyup="javascript:search_dbl_list('dbl_server_list','s_server');" />
+			
+状态:<select name="status" >
+	<option value='-1' {% if status == -1 %} selected="selected" {%endif%} >全部</option>
+	<option value='0' {% if status == 0 %}  selected="selected" {%endif%} >未回复</option>
+	<option value="1" {% if status >= 1 %}  selected="selected" {%endif%} >已回复</option>
+	<option value="2" {% if status == 2 %} selected="selected" {%endif%} >已查看</option> 
+</select>
+VIP:<input type="text" name="vip" style="width:30px;" />
+类别:<select name="question_type" >
+	<option value='-1' {% if question_type == -1 %} selected="selected" {%endif%} >全部</option>
+	<option value='0' {% if question_type == 0 %} selected="selected" {%endif%} >BUG</option>
+	<option value='1' {% if question_type == 1 %} selected="selected" {%endif%} >投诉</option>
+	<option value='2' {% if question_type == 2 %} selected="selected" {%endif%} >建议</option>
+	<option value='3' {% if question_type == 3 %} selected="selected" {%endif%} >其他</option>
+</select>
+<select name="question_category">
+	<option value="" {%if question_category == "" %} selected="selected" {% endif %} >全部</option>
+	<option value="账号问题" {%if question_category == "账号问题" %} selected="selected" {% endif %} >账号问题</option>
+	<option value="充值问题" {%if question_category == "充值问题" %} selected="selected" {% endif %} >充值问题</option>
+	<option value="秀女问题"  {%if question_category == "秀女问题" %} selected="selected" {% endif %} >秀女问题</option>
+	<option value="合服开服问题" {%if question_category == "合服开服问题" %} selected="selected" {% endif %} >合服开服问题</option>
+	<option value="建议" {%if question_category == "建议" %} selected="selected" {% endif %} >建议</option>
+	<option value="bug问题" {%if question_category == "bug问题" %} selected="selected" {% endif %} >bug问题</option>
+	<option value="几率问题" {%if question_category == "几率问题" %} selected="selected" {% endif %} >几率问题</option>
+	<option value="活动问题" {%if question_category == "活动问题" %} selected="selected" {% endif %} >活动问题</option>
+	<option value="其他问题" {%if question_category == "其他问题" %} selected="selected" {% endif %} >其他问题</option>
+</select>
+<select name="search_type" >
+	<option value='1' {% if search_type  == 1 %} selected="selected" {%endif%}  >用户id</option>
+	<option value='3' {% if search_type  == 3 %} selected="selected" {%endif%} >评分</option>
+	<option value='2' {% if search_type  == 2 %} selected="selected" {%endif%} >内容</option>
+</select>
+<input type="text" name="user_id" value='{{user_id}}' />
+<input type="submit" value="查询" />
+
+{% if usm.current_userRole_is_root %}
+	{%for item in kefu_list%}
+	{%ifequal kefu_name kefuItem.username%}
+	<a  style="color:red;" href="?server_id={{server_id}}&kefu_name={{item.username}}" >{{item.username}}</a>
+	{%else%}
+	<a  style="cursor:pointer" href="?server_id={{server_id}}&kefu_name={{item.username}}">{{item.username}}</a>
+	{%endifequal%}
+	{%endfor%}
+{% endif %}
+
+</form>
+</div>
+
+<div id="list_{{page_num}}" name="list_{{page_num}}">
+	<table class="list">
+		<tr>
+			<th width="120">服务器</th>
+			<th width="150">角色ID</th>
+			<th>问题</th>
+			<th width="350">回复</th>
+			<th width="100">回复人</th>
+			<th width="80" >状态</th>
+			<th width="80" >评分</th>
+			<th width="40">操作</th>
+		</tr>
+		{%for item in list_record%}
+		<tr>
+			<td>
+				<input type="checkbox" name="question_id" value="{{item.id}}" />
+				{{item.serverName}}<span style="color:red; font-size:18px;" >vip{{item.post_user_id}}</span>
+			</td>
+			<td><a  href="/question/list?server_id={{item.server_id}}&user_id={{item.post_user}}">{{item.post_user}} </a>
+				{{item.channel}}
+			<br/>{{item.post_time_str}}</td>
+			<td><div style="margin:0 10px;word-wrap: break-word; word-break: normal; width:300px;">{{item.question}}</div></td>
+			<td><div style="margin:0 10px;word-wrap: break-word; word-break: normal; width:300px;" id="reply_{{item.id}}">{{item.answer}}</div></td>
+			<td>{{item.reply_time_str}}</td>
+			<td>{%if item.status == 2%}已查看{% endif %}</td>
+			<td>{%if item.score != None and item.score != 'None' and item.score > -1 %}{{item.score}}{%endif%}</td>
+			<td align="right">
+				<a class="ajax ask" tip="确定删除？" href="/question/remove?question_id={{item.id}}&ajax=true">删除</a><br/>　
+				{%if item.status >= 1%}
+				<a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">修改</a>
+				{%else%}
+				<a href="#/question/edit/{{item.id}}" onclick="replyQuestion({{item.id}})">回复</a>
+				{%endif%}
+			</td>
+		</tr>
+		{% if usm.current_userRole_is_root %}
+		<tr>
+			<td colspan="8" >
+				<form action="/question/category?id={{item.id}}" class="ajax" todo="finish_modify_category" >
+					<label><input type="radio" name="category" value="账号问题" {%if item.category == "账号问题" %} checked="checked" {% endif %} />账号问题</label>
+					<label><input type="radio" name="category" value="充值问题" {%if item.category == "充值问题" %} checked="checked" {% endif %} />充值问题</label>
+					<label><input type="radio" name="category" value="秀女问题" {%if item.category == "秀女问题" %} checked="checked" {% endif %} />秀女问题</label>
+					<label><input type="radio" name="category" value="合服开服问题" {%if item.category == "合服开服问题" %} checked="checked" {% endif %} />合服开服问题</label>
+					<label><input type="radio" name="category" value="建议" {%if item.category == "建议" %} checked="checked" {% endif %} />建议</label>
+					<label><input type="radio" name="category" value="bug问题" {%if item.category == "bug问题" %} checked="checked" {% endif %} />bug问题</label>
+					<label><input type="radio" name="category" value="几率问题" {%if item.category == "几率问题" %} checked="checked" {% endif %} />几率问题</label>
+					<label><input type="radio" name="category" value="活动问题" {%if item.category == "活动问题" %} checked="checked" {% endif %} />活动问题</label>
+					<label><input type="radio" name="category" value="其他问题" {%if item.category == "其他问题" %} checked="checked" {% endif %} />其他问题</label>
+					<input type="submit" />
+				</form>
+			</td>
+		</tr>
+		{% endif %}
+		{%endfor%}
+	</table>
+</div>
+
+<form class="msgbox hide" action="/question/answer" method="post" >
+	<input type="hidden" name="question_id" value="0" />
+	<input type="hidden" name="is_admin" value="true" />
+	{% csrf_token %}
+	<table> 
+	<tr>
+		<th width="80px">回复内容:</th><td><textarea name="answer"></textarea></td>
+	</tr>
+	<tr>
+		<td>
+			<!--<input type="checkbox" name="cover" />覆盖回复-->
+		</td>
+		<td>
+			<input type="submit" value="立即回复" />  or <a href="javascript:void(0)" onclick="$('.msgbox').hide()">关闭</a>
+		</td>
+	</tr>
+	</table>
+</form>
+<div id="dialog" style="display: none;">
+<iframe id="iframe_userQuestion" height=450 width=640 frameborder=0 scrolling=auto></iframe>
+</div>
+<script type="text/javascript">
+
+var server_group_dict = {};
+{% for item in list_group %}
+{% for server in item.server.all %}
+server_group_dict[{{server.id}}] = {{item.id}};
+{% endfor %}
+{% endfor %}
+
+function finish_modify_category(result, target){
+	var msg = '';
+	try{
+		result = eavl(result);
+		if (result.code == 0){
+			msg = '操作成功';	
+		}else{
+			msg = result.msg;
+		}
+	}catch(ex){
+		if (result == ''){
+			msg = '操作完成';
+		}else{
+			msg = result;
+		}
+	}
+	target.append(msg);
+}
+
+function showDialog(questionId,userId)
+{
+	//var url= "/question/list/"+userId+"/-1?question_id"+questionId;
+	var url= "/question/list/user/-1?userId="+userId+"&=question_id"+questionId;
+	$("#iframe_userQuestion").attr("src",url);
+    $("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680 });
+}
+function showDialogByUserId()
+{
+	var userIdStr=$("#input_userId").val();
+	if(userIdStr=="")
+	{
+		return;
+	}
+	
+	var userId=parseInt(userIdStr);
+	if(isNaN(userId))
+	{
+		return;
+	}
+
+	var url= "/question/list/user/"+userId+"/-1?question_id=0";
+	$("#iframe_userQuestion").attr("src",url);
+    $("#dialog").dialog({ maxHeight:400,maxWidth:700,minHeight:300,minWidth:680 });
+}
+function changeKefu(kefuId,kefuServerList)
+{
+	 
+	$("#a_kefuName_"+$("#selectKefuId").val()).css("color","black");
+	$("#selectKefuId").attr("value",kefuId);
+	$("#a_kefuName_"+kefuId).css("color","red");
+	 
+	
+	$("#server_id option[value='0']").attr("selected", true);
+	
+	$("#server_id option[value]").css("color","black");
+	
+	var jsonObj=eval('(' + kefuServerList + ')');
+	for(var i=0;i<jsonObj.server.length;i++)
+	{
+		$("#server_id option[value='"+jsonObj.server[i].serverId+"']").css("color","red");
+		 
+	}
+	 
+}
+</script>
+{% include "pager.html" %}
+{% endblock %}
+

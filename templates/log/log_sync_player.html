@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block header%}
+<title>执行统计</title>
+{% endblock %}
+
+{% block content %}
+
+在{{pos}}位置处:{{sync_list}}
+
+<script type="text/javascript">
+
+{%if is_reload%}
+document.location = "/log/syncdb/player/{{server_id}}?pos={{pos}}";
+{%endif%}
+</script>
+
+{{total_record}}
+
+{% endblock %}

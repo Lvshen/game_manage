@@ -1,0 +1,7 @@
+{% if err_msg == '' %}
+	{% autoescape off %}
+	{{result.content_json}}
+	{% endautoescape %}
+{% else %}
+	{"err_msg":"{{err_msg}}"}
+{% endif %}

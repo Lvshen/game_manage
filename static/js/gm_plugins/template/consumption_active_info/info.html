@@ -1,0 +1,66 @@
+<div id="consumption_active_list_container" style="height:380px;width:300px; overflow: auto; display:none;">
+	<table class="list" >
+		<tr>
+			<th>
+				礼包名称
+			</th>
+			<th>
+				图片ID
+			</th>
+			<th>
+				可领取数量
+			</th>
+			<th>
+				金币
+			</th>
+		</tr>
+		{{~ it.list :item:index }}
+		<tr style="background-color:#DDDDDD;">
+			<td>
+				{{=item.title}}
+			</td>
+			<td>
+				{{=item.pid}}
+			</td>
+			<td>
+				{{=item.amount}}
+			</td>
+			<td>
+				{{=item.gold}}
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4" >
+				<table style="width:250px;">
+					<tr>
+						<th>
+							奖励类型
+						</th>
+						<th>
+							奖励ID
+						</th>
+					</tr>
+					{{~ item.goods :item2:index2}}
+					<tr>
+						<td>
+							{{? item2.goods_type == 1 }}武将{{?}}
+							{{? item2.goods_type == 2 }}装备{{?}}
+							{{? item2.goods_type == 3 }}银币{{?}}
+							{{? item2.goods_type == 4 }}金币{{?}}
+							{{? item2.goods_type == 5 }}军功{{?}}
+							{{? item2.goods_type == 6 }}军令{{?}}
+							{{? item2.goods_type == 7 }}威望{{?}}
+							{{? item2.goods_type == 8 }}魂石{{?}}
+							{{? item2.goods_type == 9 }}战魂{{?}}
+						</td>
+						<td>
+							{{=item2.id}}
+						</td>
+					</tr>
+					{{~}}
+				</table>
+			</td>
+		</tr>
+		{{~}}
+	</table> 
+</div>

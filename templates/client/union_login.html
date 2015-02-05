@@ -1,0 +1,35 @@
+{
+"result":{{result_code}},
+"msg":"{{msg}}",
+"userid":{{user_id}},
+"username":"{{username}}",
+"password":"{{password}}",
+"guest":"{{is_guest}}",
+"key":"{{user_key}}",
+"lastServer":[{{last_server}}],
+"serverList":[
+{%for item in serverList%}
+{"id":"{{item.id}}","name":"{{item.name}}","address":"{{item.game_addr}}","port":{{item.game_port}},"state":{{item.status}},"csUrl":"{{item.custom_url}}","brUrl":"{{item.report_url}}","payUrl":"{{item.pay_url}}","rqVer":{{item.require_ver}},"commend":{{item.commend}}}{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}
+{%endfor%}
+],
+{%if upgradeInfo%}
+"newVerCode":{{upgradeInfo.ver_num}},
+"newVerName":"{{upgradeInfo.ver_name}}",
+"apkSize":"{{upgradeInfo.filesize}}",
+"apkDlLink":"{{upgradeInfo.download_url}}",
+"verMsg":"{{upgradeInfo.remark}}",
+"updateLink":"{{upgradeInfo.page_url}}",
+{%endif%}
+
+"scollMsgs":[
+	{%for item in noticeList%}
+		"{{item.content}}"{%ifnotequal forloop.revcounter 1%},{%endifnotequal%}
+	{%endfor%}
+	],
+	
+"scollMsgLinks":[
+	{%for item in noticeList%}
+		"{{item.link_url}}"{%ifnotequal forloop.revcounter 1%},{%endifnotequal%} 
+	{%endfor%}
+	]
+}
